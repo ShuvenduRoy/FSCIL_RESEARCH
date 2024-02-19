@@ -11,6 +11,34 @@ from matplotlib import pyplot as plt
 from sklearn.metrics.pairwise import cosine_similarity
 
 
+def override_training_configs(args: argparse.Namespace) -> argparse.Namespace:
+    """Override the training configurations.
+
+    Parameters
+    ----------
+    args : argparse.Namespace
+        The command-line arguments.
+
+    Returns
+    -------
+    argparse.Namespace: The command-line arguments
+    with the overridden training configurations.
+    """
+    args.exp_name = args.dataset + "_" + args.exp_name
+    if args.pre_trained_url == "None":
+        args.pre_trained_url = None
+    if args.adapt_blocks < 0:
+        args.adapt_blocks *= -1
+        args.adapt_blocks = list(range(args.adapt_blocks, 12))
+    else:
+        args.adapt_blocks = list(range(args.adapt_blocks))
+
+    if args.encoder == "vit-16":
+        args.size_crops = [224, 224]
+    if os.path.exists("/home/sneha/"):
+        args.num_workers = 4
+
+
 def get_dataset_configs(args: argparse.Namespace) -> argparse.Namespace:
     """Set up the datasets.
 
@@ -32,7 +60,6 @@ def get_dataset_configs(args: argparse.Namespace) -> argparse.Namespace:
         args.way = 5
         args.shot = 5
         args.sessions = 9
-        args.Dataset = Cifar100Dataset
 
     elif args.dataset == "cub200":
         from datasets.cub200 import Cub200Dataset
@@ -42,6 +69,12 @@ def get_dataset_configs(args: argparse.Namespace) -> argparse.Namespace:
         args.way = 10
         args.shot = 5
         args.sessions = 11
+        args.size_crops = [224, 96]
+        args.min_scale_crops = [0.2, 0.05]
+        args.max_scale_crops = [1, 0.14]
+        args.milestones = [60, 80, 100]
+        args.Dataset = Cifar100Dataset
+
         args.Dataset = Cub200Dataset
 
     elif args.dataset == "mini_imagenet":
@@ -52,6 +85,10 @@ def get_dataset_configs(args: argparse.Namespace) -> argparse.Namespace:
         args.way = 5
         args.shot = 5
         args.sessions = 9
+        args.size_crops = [84, 50]
+        args.min_scale_crops = [0.2, 0.05]
+        args.max_scale_crops = [1, 0.14]
+        args.milestones = [40, 70, 100]
 
         args.Dataset = MiniImagenetDataset
     return args

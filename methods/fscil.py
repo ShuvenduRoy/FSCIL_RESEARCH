@@ -1,15 +1,12 @@
 """FSCIL training module."""
 
-
-
 import argparse
 
 
 class FSCILTrainer:
     """FSCIL Trainer class."""
 
-    def __init__(self,
-                  args: argparse.Namespace) -> None:
+    def __init__(self, args: argparse.Namespace) -> None:
         """Initialize FSCIL Trainer.
 
         Parameters
@@ -37,8 +34,6 @@ class FSCILTrainer:
             "max_base_acc": [0.0] * args.sessions,
         }
 
-
     def train(self) -> None:
         """Train the model."""
         pass
-
