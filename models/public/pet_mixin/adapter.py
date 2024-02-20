@@ -3,9 +3,10 @@
 from typing import Dict, List
 
 import torch
-import torch.nn as nn
+from torch import nn
 
-from .pet import Adapter, Conv2dAdapter, LinearLoRA, KVLoRA, Conv2dLoRA
+from .pet import Adapter, Conv2dAdapter
+
 
 NAME_SEP = "/"
 

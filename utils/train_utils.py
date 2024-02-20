@@ -334,7 +334,11 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
     parser.add_argument("--pre_trained_url", type=str, default=None)
     parser.add_argument("--freeze_vit", type=str2bool, default=False)
     parser.add_argument("--freeze_layer_after", type=int, default=-1)
-    parser.add_argument("--pet_cls", type=str, default=None)
+    parser.add_argument(
+        "--pet_cls",
+        type=str,
+        default=None,
+    )  # MUST BE NONE BY DEFAULT TO AVOID PRE-COMMIT ISSUES WITH PUBLIC CODES
     parser.add_argument("--adapt_blocks", type=int, default=0)
     parser.add_argument("--tune_encoder_epoch", type=int, default=0)
     parser.add_argument("--encoder_lr_factor", type=float, default=1)

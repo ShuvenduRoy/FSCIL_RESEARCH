@@ -3,8 +3,7 @@
 import math
 from typing import Optional, Type, Union
 
-import torch
-import torch.nn as nn
+from torch import nn
 
 from ..misc.scaler import Scaler
 

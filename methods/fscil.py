@@ -2,6 +2,10 @@
 
 import argparse
 
+from models.encoder import FSCILencoder
+from utils.dist_utils import is_main_process
+from utils.train_utils import ensure_path
+
 
 class FSCILTrainer:
     """FSCIL Trainer class."""
@@ -33,6 +37,17 @@ class FSCILTrainer:
             "max_acc": [0.0] * args.sessions,
             "max_base_acc": [0.0] * args.sessions,
         }
+        if is_main_process():
+            ensure_path(args.save_path)
+
+        # initialize model
+        self.model = FSCILencoder(args)
+
+        # initialize dataset
+
+        # distributed sampler
+
+        # dataloaders
 
     def train(self) -> None:
         """Train the model."""

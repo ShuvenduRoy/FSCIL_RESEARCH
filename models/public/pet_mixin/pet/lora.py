@@ -10,8 +10,8 @@ import math
 from typing import Optional, Tuple, Union
 
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
+from torch import nn
 
 from ..misc.scaler import Scaler
 
@@ -57,10 +57,10 @@ class KVLoRA(nn.Module):
         assert rank > 0
 
         self.lora_A = nn.ParameterList(
-            [nn.Parameter(torch.zeros((rank, in_features))) for _ in range(2)]
+            [nn.Parameter(torch.zeros((rank, in_features))) for _ in range(2)],
         )
         self.lora_B = nn.ParameterList(
-            [nn.Parameter(torch.zeros((out_features, rank))) for _ in range(2)]
+            [nn.Parameter(torch.zeros((out_features, rank))) for _ in range(2)],
         )
 
         if not isinstance(scale, tuple):
@@ -96,10 +96,10 @@ class Conv2dLoRA(nn.Module):
         super().__init__()
 
         self.lora_A = nn.Parameter(
-            torch.zeros((rank * kernel_size, in_channels * kernel_size))
+            torch.zeros((rank * kernel_size, in_channels * kernel_size)),
         )
         self.lora_B = nn.Parameter(
-            torch.zeros((out_channels * kernel_size, rank * kernel_size))
+            torch.zeros((out_channels * kernel_size, rank * kernel_size)),
         )
         self.scale = Scaler(scale)
 
