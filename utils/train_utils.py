@@ -33,10 +33,13 @@ def override_training_configs(args: argparse.Namespace) -> argparse.Namespace:
     else:
         args.adapt_blocks = list(range(args.adapt_blocks))
 
+    args.save_path = os.path.join("checkpoint", args.exp_name)
+
     if args.encoder == "vit-16":
         args.size_crops = [224, 224]
     if os.path.exists("/home/sneha/"):
         args.num_workers = 4
+    return args
 
 
 def get_dataset_configs(args: argparse.Namespace) -> argparse.Namespace:
@@ -60,6 +63,7 @@ def get_dataset_configs(args: argparse.Namespace) -> argparse.Namespace:
         args.way = 5
         args.shot = 5
         args.sessions = 9
+        args.Dataset = Cifar100Dataset
 
     elif args.dataset == "cub200":
         from datasets.cub200 import Cub200Dataset
@@ -73,7 +77,6 @@ def get_dataset_configs(args: argparse.Namespace) -> argparse.Namespace:
         args.min_scale_crops = [0.2, 0.05]
         args.max_scale_crops = [1, 0.14]
         args.milestones = [60, 80, 100]
-        args.Dataset = Cifar100Dataset
 
         args.Dataset = Cub200Dataset
 
@@ -306,6 +309,26 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
     parser.add_argument("--num_mlp", type=int, default=2)
     parser.add_argument("--pre_train_epochs", type=int, default=0)
     parser.add_argument("--pre_train_lr", type=float, default=0.001)
+
+    # distributed training
+    parser.add_argument(
+        "--distributed",
+        type=str2bool,
+        default=False,
+        help="distributed training",
+    )
+    parser.add_argument(
+        "--distributed_launcher",
+        type=str,
+        default="pytorch",
+        choices=["pytorch", "slurm"],
+    )
+    parser.add_argument(
+        "--distributed_backend",
+        type=str,
+        default="nccl",
+        choices=["nccl", "gloo", "mpi"],
+    )
 
     # FSCIT configs
     parser.add_argument("--pre_trained_url", type=str, default=None)
