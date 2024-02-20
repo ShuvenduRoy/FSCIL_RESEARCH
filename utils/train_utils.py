@@ -56,44 +56,33 @@ def get_dataset_configs(args: argparse.Namespace) -> argparse.Namespace:
     with the datasets configs.
     """
     if args.dataset == "cifar100":
-        from datasets.cifar100 import Cifar100Dataset
-
         args.base_class = 60
         args.num_classes = 100
-        args.way = 5
-        args.shot = 5
-        args.sessions = 9
-        args.Dataset = Cifar100Dataset
+        args.way = 5 if args.way == -1 else args.way
+        args.shot = 5 if args.shot == -1 else args.shot
+        args.sessions = 9 if args.session == -1 else args.session
 
     elif args.dataset == "cub200":
-        from datasets.cub200 import Cub200Dataset
-
         args.base_class = 100
         args.num_classes = 200
-        args.way = 10
-        args.shot = 5
-        args.sessions = 11
+        args.way = 10 if args.way == -1 else args.way
+        args.shot = 5   if args.shot == -1 else args.shot
+        args.sessions = 11 if args.session == -1 else args.session
         args.size_crops = [224, 96]
         args.min_scale_crops = [0.2, 0.05]
         args.max_scale_crops = [1, 0.14]
         args.milestones = [60, 80, 100]
 
-        args.Dataset = Cub200Dataset
-
     elif args.dataset == "mini_imagenet":
-        from datasets.miniimagenet import MiniImagenetDataset
-
         args.base_class = 60
         args.num_classes = 100
-        args.way = 5
-        args.shot = 5
-        args.sessions = 9
+        args.way = 5 if args.way == -1 else args.way
+        args.shot = 5 if args.shot == -1 else args.shot
+        args.sessions = 9 if args.session == -1 else args.session
         args.size_crops = [84, 50]
         args.min_scale_crops = [0.2, 0.05]
         args.max_scale_crops = [1, 0.14]
         args.milestones = [40, 70, 100]
-
-        args.Dataset = MiniImagenetDataset
     return args
 
 
@@ -131,7 +120,7 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
     parser.add_argument(
         "--dataset",
         type=str,
-        default="cub200",
+        default="cifar100",
         choices=["mini_imagenet", "cub200", "cifar100"],
     )
     parser.add_argument("--dataroot", type=str, default="./data")
@@ -291,19 +280,19 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
 
     # few-shot configs
     parser.add_argument(
-        "--shots",
+        "--shot",
         type=int,
         default=-1,
         help="number of shots; -1 means shots taken as the defaults for the dataset",
     )
     parser.add_argument(
-        "--ways",
+        "--way",
         type=int,
         default=-1,
         help="number of ways; -1 means ways taken as the defaults for the dataset",
     )
     parser.add_argument(
-        "--sessions",
+        "--session",
         type=int,
         default=-1,
         help="number of sessions; -1 means sessions taken as the defaults for the dataset",

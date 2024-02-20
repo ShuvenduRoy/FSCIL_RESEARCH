@@ -4,6 +4,7 @@ import argparse
 
 import torch
 
+from dataloaders.helpter import get_dataloader
 from models.encoder import FSCILencoder
 from utils import dist_utils
 from utils.dist_utils import is_main_process
@@ -58,12 +59,23 @@ class FSCILTrainer:
         elif torch.cuda.is_available():
             self.model = self.model.cuda()
 
-        # initialize dataset
-
-        # distributed sampler
-
-        # dataloaders
-
     def train(self) -> None:
         """Train the model."""
-        pass
+        for session in range(self.args.sessions):
+            # train session
+            print(f"Training session {session + 1}...")
+
+            # initialize dataset
+            train_set, trainloader, testloader = get_dataloader(self.args, session)
+
+
+            # distributed sampler
+
+            # dataloaders
+
+
+            # validate session
+
+            # test session
+
+            # save model
