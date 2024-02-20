@@ -97,6 +97,27 @@ def get_dataset_configs(args: argparse.Namespace) -> argparse.Namespace:
     return args
 
 
+def str2bool(v: str) -> bool:
+    """Convert a string to a boolean value.
+
+    Parameters
+    ----------
+    v : str
+        The string to convert.
+
+    Returns
+    -------
+    bool: The boolean value.
+    """
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ("yes", "true", "t", "y", "1"):
+        return True
+    if v.lower() in ("no", "false", "f", "n", "0"):
+        return False
+    raise argparse.ArgumentTypeError("Boolean value expected.")
+
+
 def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
     """Get the command line parser for the script.
 
@@ -264,7 +285,7 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
     parser.add_argument(
         "--encoder",
         type=str,
-        default="resnet18",
+        default="vit-16",
         help="encoder architecture",
     )
 
@@ -338,38 +359,32 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
         "--pet_cls",
         type=str,
         default=None,
+        choices=[None, "Prefix", "Adapter", "LoRA"],
     )  # MUST BE NONE BY DEFAULT TO AVOID PRE-COMMIT ISSUES WITH PUBLIC CODES
     parser.add_argument("--adapt_blocks", type=int, default=0)
     parser.add_argument("--tune_encoder_epoch", type=int, default=0)
     parser.add_argument("--encoder_lr_factor", type=float, default=1)
     parser.add_argument("--rank", type=int, default=5)
 
-    # FSCIT ablation configs
+    # FSCIT configs
     parser.add_argument("--limited_base_class", type=int, default=-1)
     parser.add_argument("--limited_base_samples", type=float, default=1)
-
+    parser.add_argument(
+        "--pet_on_teacher",
+        type=str2bool,
+        default=False,
+        help="Flag to set whether of not use PET on the teacher model. If not, "
+        "teacher will be different from student, and will only be updated for "
+        "the pre-trained parameters that are opt for fine-tuning. If no pre-trained"
+        " parameters are tuned, EMA will enb up remaining the same as the pre-trained model.",
+    )
+    parser.add_argument(
+        "--add_bias_in_classifier",
+        type=str2bool,
+        default=False,
+        help="Flag to set whether of not add bias in the classifier layer",
+    )
     return parser
-
-
-def str2bool(v: str) -> bool:
-    """Convert a string to a boolean value.
-
-    Parameters
-    ----------
-    v : str
-        The string to convert.
-
-    Returns
-    -------
-    bool: The boolean value.
-    """
-    if isinstance(v, bool):
-        return v
-    if v.lower() in ("yes", "true", "t", "y", "1"):
-        return True
-    if v.lower() in ("no", "false", "f", "n", "0"):
-        return False
-    raise argparse.ArgumentTypeError("Boolean value expected.")
 
 
 def calculate_cdf(prototypes: List[np.ndarray]) -> None:
