@@ -582,6 +582,4 @@ def count_acc(logits: torch.Tensor, label: torch.Tensor) -> float:
     float: The accuracy of the model.
     """
     pred = torch.argmax(logits, dim=1)
-    if torch.cuda.is_available():
-        return (pred == label).type(torch.cuda.FloatTensor).mean().item()
-    return (pred == label).type(torch.FloatTensor).mean().item()
+    return (pred == label).float().mean().item()

@@ -31,26 +31,35 @@ class EncoderWrapper(nn.Module):
         if self.args.encoder == "vit-16":
             print("Loading ViT-16")
             net_module = importlib.import_module("models.public.backbones.vit")
-            self.model = net_module.vit_b16_in21k(True, pre_trained_url=args.pre_trained_url)
+            self.model = net_module.vit_b16_in21k(
+                True,
+                pre_trained_url=args.pre_trained_url,
+            )
             self.num_features = 768
         if self.args.mlp:
             if args.num_mlp == 2:
-                self.fc = nn.Sequential(nn.Linear(self.num_features, self.num_features),
-                                        nn.ReLU(),
-                                        nn.Linear(self.num_features, self.args.moco_dim))
+                self.fc = nn.Sequential(
+                    nn.Linear(self.num_features, self.num_features),
+                    nn.ReLU(),
+                    nn.Linear(self.num_features, self.args.moco_dim),
+                )
 
             elif args.num_mlp == 3:
-                self.fc = nn.Sequential(nn.Linear(self.num_features, self.num_features),
-                                        nn.ReLU(),
-                                        nn.Linear(self.num_features, self.num_features),
-                                        nn.ReLU(),
-                                        nn.Linear(self.num_features, self.args.moco_dim))
+                self.fc = nn.Sequential(
+                    nn.Linear(self.num_features, self.num_features),
+                    nn.ReLU(),
+                    nn.Linear(self.num_features, self.num_features),
+                    nn.ReLU(),
+                    nn.Linear(self.num_features, self.args.moco_dim),
+                )
         else:
             self.fc = nn.Sequential(nn.Linear(self.num_features, self.args.moco_dim))
 
-        self.classifier = nn.Linear(self.num_features,
-                                    self.args.num_classes,
-                                    bias=self.args.add_bias_in_classifier)
+        self.classifier = nn.Linear(
+            self.num_features,
+            self.args.num_classes,
+            bias=self.args.add_bias_in_classifier,
+        )
 
     def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
         """Forward pass of the model.
@@ -97,7 +106,10 @@ class FSCILencoder(nn.Module):
                 param.requires_grad = True
         elif args.freeze_layer_after != -1:
             for name, param in self.encoder_q.named_parameters():
-                status = name.startswith("model.blocks") and int(name.split(".")[2]) == args.freeze_layer_after
+                status = (
+                    name.startswith("model.blocks")
+                    and int(name.split(".")[2]) == args.freeze_layer_after
+                )
                 param.requires_grad = status
 
         self.encoder_k = EncoderWrapper(args)
@@ -129,26 +141,54 @@ class FSCILencoder(nn.Module):
             print(name, param.requires_grad)
 
         self.params_with_lr = [
-            {"params": [p for n, p in self.encoder_q.named_parameters() if self.args.pet_cls.lower() in n or n.startswith("fc") ],
-             "lr": args.lr_base},
-            {"params": [p for n, p in self.encoder_q.named_parameters() if self.args.pet_cls.lower() not in n and not n.startswith("fc") ],
-             "lr": args.lr_base * args.encoder_lr_factor},
+            {
+                "params": [
+                    p
+                    for n, p in self.encoder_q.named_parameters()
+                    if self.args.pet_cls.lower() in n or n.startswith("fc")
+                ],
+                "lr": args.lr_base,
+            },
+            {
+                "params": [
+                    p
+                    for n, p in self.encoder_q.named_parameters()
+                    if self.args.pet_cls.lower() not in n and not n.startswith("fc")
+                ],
+                "lr": args.lr_base * args.encoder_lr_factor,
+            },
         ]
 
-        print([
-            {"params": [n for n, p in self.encoder_q.named_parameters() if self.args.pet_cls.lower() in n or n.startswith("fc")],
-             "lr": args.lr_base},
-            {"params": [n for n, p in self.encoder_q.named_parameters() if self.args.pet_cls.lower() not in n and not n.startswith("fc")],
-             "lr": args.lr_base * args.encoder_lr_factor},
-        ])
+        print(
+            [
+                {
+                    "params": [
+                        n
+                        for n, p in self.encoder_q.named_parameters()
+                        if self.args.pet_cls.lower() in n or n.startswith("fc")
+                    ],
+                    "lr": args.lr_base,
+                },
+                {
+                    "params": [
+                        n
+                        for n, p in self.encoder_q.named_parameters()
+                        if self.args.pet_cls.lower() not in n and not n.startswith("fc")
+                    ],
+                    "lr": args.lr_base * args.encoder_lr_factor,
+                },
+            ],
+        )
 
         # create the queue
-        self.register_buffer("queue", torch.randn(self.args.moco_dim, self.args.moco_k, dtype=torch.float32))
+        self.register_buffer(
+            "queue",
+            torch.randn(self.args.moco_dim, self.args.moco_k, dtype=torch.float32),
+        )
         self.queue: torch.Tensor = nn.functional.normalize(self.queue, dim=0)
 
         self.register_buffer("queue_ptr", torch.zeros(1, dtype=torch.long))
         self.register_buffer("label_queue", torch.zeros(int(args.moco_k)).long() - 1)
-
 
     def create_pets(self) -> nn.ModuleList:
         """Create PETs."""
@@ -179,7 +219,6 @@ class FSCILencoder(nn.Module):
 
         kwargs["dim"] = embed_dim
         return nn.ModuleList([pet_module.Prefix(**kwargs) for i in range(n)])
-
 
     def attach_pets_vit(self, pets: nn.ModuleList, encoder: Any) -> None:
         """Attach PETs for ViT.
@@ -223,17 +262,29 @@ class FSCILencoder(nn.Module):
         -------
         None
         """
-        if base_sess:  # TODO this is horrible hard coded logic. also need to handle EMA with diff params
-            for param_q, param_k in zip(self.encoder_q.parameters(), self.encoder_k.parameters()):
-                param_k.data = param_k.data * self.args.moco_m + param_q.data * (1. - self.args.moco_m)
+        if (
+            base_sess
+        ):  # TODO this is horrible hard coded logic. also need to handle EMA with diff params
+            for param_q, param_k in zip(
+                self.encoder_q.parameters(),
+                self.encoder_k.parameters(),
+            ):
+                param_k.data = param_k.data * self.args.moco_m + param_q.data * (
+                    1.0 - self.args.moco_m
+                )
         else:
             for k, v in self.encoder_q.named_parameters():
-                if k.startswith("fc") or k.startswith("layer4") or k.startswith("layer3"):
-                    self.encoder_k.state_dict()[k].data = self.encoder_k.state_dict()[k].data * self.args.moco_m + v.data * (
-                            1. - self.args.moco_m)
+                if (
+                    k.startswith("fc")
+                    or k.startswith("layer4")
+                    or k.startswith("layer3")
+                ):
+                    self.encoder_k.state_dict()[k].data = self.encoder_k.state_dict()[
+                        k
+                    ].data * self.args.moco_m + v.data * (1.0 - self.args.moco_m)
 
     @torch.no_grad()
-    def _dequeue_and_enqueue(self, keys:torch.Tensor, labels: torch.Tensor) -> None:
+    def _dequeue_and_enqueue(self, keys: torch.Tensor, labels: torch.Tensor) -> None:
         """Update the queue.
 
         Parameters
@@ -253,23 +304,27 @@ class FSCILencoder(nn.Module):
         # replace the keys and labels at ptr (dequeue and enqueue)
         if ptr + batch_size > self.K:
             remains = ptr + batch_size - self.K
-            self.queue[:, ptr:] = keys.T[:, :batch_size - remains]
-            self.queue[:, :remains] = keys.T[:, batch_size - remains:]
-            self.label_queue[ptr:] = labels[:batch_size - remains]
-            self.label_queue[:remains] = labels[batch_size - remains:]
+            self.queue[:, ptr:] = keys.T[:, : batch_size - remains]
+            self.queue[:, :remains] = keys.T[:, batch_size - remains :]
+            self.label_queue[ptr:] = labels[: batch_size - remains]
+            self.label_queue[:remains] = labels[batch_size - remains :]
         else:
-            self.queue[:, ptr:ptr + batch_size] = keys.T  # this queue is feature queue
-            self.label_queue[ptr:ptr + batch_size] = labels
+            self.queue[:, ptr : ptr + batch_size] = (
+                keys.T
+            )  # this queue is feature queue
+            self.label_queue[ptr : ptr + batch_size] = labels
         ptr = (ptr + batch_size) % self.K  # move pointer
         self.queue_ptr[0] = ptr
 
-    def forward(self,
-                im_cla: torch.Tensor,
-                im_q: Optional[torch.Tensor] = None,
-                im_k: Optional[torch.Tensor] = None,
-                labels: Optional[torch.Tensor] = None,
-                base_sess: bool = True,
-                last_epochs_new: bool = False) -> Any:
+    def forward(
+        self,
+        im_cla: torch.Tensor,
+        im_q: Optional[torch.Tensor] = None,
+        im_k: Optional[torch.Tensor] = None,
+        labels: Optional[torch.Tensor] = None,
+        base_sess: bool = True,
+        last_epochs_new: bool = False,
+    ) -> Any:
         """Forward pass of the model.
 
         Parameters
@@ -298,7 +353,7 @@ class FSCILencoder(nn.Module):
         assert embedding.shape[1] == self.args.moco_dim
 
         if im_q is None or labels is None:  # during evaluation
-            return logits # [b, n_classes]
+            return logits  # [b, n_classes]
         embedding = nn.functional.normalize(embedding, dim=1)
 
         # forward query
@@ -319,7 +374,10 @@ class FSCILencoder(nn.Module):
         l_pos = (embedding_q * embedding_k.unsqueeze(1)).sum(2).view(-1, 1)
 
         # negative logits: NxK
-        l_neg = torch.einsum("nc,ck->nk", [embedding_q.view(-1, self.args.moco_dim), self.queue.clone().detach()])
+        l_neg = torch.einsum(
+            "nc,ck->nk",
+            [embedding_q.view(-1, self.args.moco_dim), self.queue.clone().detach()],
+        )
 
         # logits with shape Nx(1+K)``
         logits_global = torch.cat([l_pos, l_neg], dim=1)
@@ -332,7 +390,11 @@ class FSCILencoder(nn.Module):
 
         # find same label images from label queue
         # for the query with -1, all
-        targets = ((labels[:, None] == self.label_queue[None, :]) & (labels[:, None] != -1)).float().to(logits_global.device)
+        targets = (
+            ((labels[:, None] == self.label_queue[None, :]) & (labels[:, None] != -1))
+            .float()
+            .to(logits_global.device)
+        )
 
         targets_global = torch.cat([positive_target, targets], dim=1)
 
@@ -341,7 +403,6 @@ class FSCILencoder(nn.Module):
             self._dequeue_and_enqueue(embedding_k, labels)
 
         return [embedding, embedding_q], logits, logits_global, targets_global
-
 
     def update_fc(self, dataloader: Any, class_list: List, transform: Any) -> None:
         """Update the fully connected layer.
@@ -382,7 +443,8 @@ class FSCILencoder(nn.Module):
         if self.args.not_data_init:
             new_fc = nn.Parameter(
                 torch.rand(len(class_list), self.num_features, device=device),
-                requires_grad=True)
+                requires_grad=True,
+            )
             nn.init.kaiming_uniform_(new_fc, a=math.sqrt(5))
         else:
             new_fc = self.update_fc_avg(data, labels, class_list)
@@ -404,12 +466,11 @@ class FSCILencoder(nn.Module):
         torch.Tensor
             The new fully connected layer weight.
         """
-        new_fc = []
+        new_fc = []  # TODO need to fix this. This should be the classifier weight
         for index in class_list:
             data_index = (labels == index).nonzero().squeeze(-1)
             embedding = data[data_index]
             proto = embedding.mean(0)
             new_fc.append(proto)
             self.fc.weight.data[index] = proto
-        new_fc = torch.stack(new_fc, dim=0)
-        return new_fc
+        return torch.stack(new_fc, dim=0)

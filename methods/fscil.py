@@ -2,7 +2,10 @@
 
 import argparse
 
+import torch
+
 from models.encoder import FSCILencoder
+from utils import dist_utils
 from utils.dist_utils import is_main_process
 from utils.train_utils import ensure_path
 
@@ -42,6 +45,18 @@ class FSCILTrainer:
 
         # initialize model
         self.model = FSCILencoder(args)
+
+        # distributed training setup
+        if args.distributed and dist_utils.is_dist_avail_and_initialized():
+            device_id = torch.cuda.current_device()
+            torch.cuda.set_device(device_id)
+            self.model = self.model.cuda(device_id)
+            self.model = torch.nn.parallel.DistributedDataParallel(
+                self.model,
+                device_ids=[device_id],
+            )
+        elif torch.cuda.is_available():
+            self.model = self.model.cuda()
 
         # initialize dataset
 
