@@ -66,7 +66,7 @@ def get_dataset_configs(args: argparse.Namespace) -> argparse.Namespace:
         args.base_class = 100
         args.num_classes = 200
         args.way = 10 if args.way == -1 else args.way
-        args.shot = 5   if args.shot == -1 else args.shot
+        args.shot = 5 if args.shot == -1 else args.shot
         args.sessions = 11 if args.session == -1 else args.session
         args.size_crops = [224, 96]
         args.min_scale_crops = [0.2, 0.05]

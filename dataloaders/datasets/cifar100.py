@@ -1,4 +1,5 @@
 """Dataset class for CIFAR-100 dataset."""
+
 import argparse
 import os
 import os.path
@@ -25,7 +26,7 @@ class Cifar100Dataset(VisionDataset):
     target_transform : callable, optional
         A function/transform that takes in the target and transforms it.
     download : bool, optional
-        If true, downloads the dataset from the internet and puts it in root directory. 
+        If true, downloads the dataset from the internet and puts it in root directory.
         If dataset is already downloaded, it is not downloaded again.
     session : int, optional
         Current session.
@@ -56,13 +57,15 @@ class Cifar100Dataset(VisionDataset):
         "md5": "7973b15100ade9c7d40fb424638fde48",
     }
 
-
-    def __init__(self, root: str,
-                train: bool = True,
-                download: bool = False,
-                session: int=0,
-                transformations:Any=None,
-                args:argparse.Namespace=None):
+    def __init__(
+        self,
+        root: str,
+        args: argparse.Namespace,
+        train: bool = True,
+        download: bool = False,
+        session: int = 0,
+        transformations: Any = None,
+    ):
 
         super(Cifar100Dataset, self).__init__(root)
         self.root = os.path.expanduser(root)
@@ -71,18 +74,27 @@ class Cifar100Dataset(VisionDataset):
         self.args = args
 
         # select the class index for base classes; first 60 classes for cifar100
-        class_index = np.arange(args.base_class) if session == 0 else np.arange(args.base_class + (session - 1) * args.way, args.base_class + session * args.way)
+        class_index = (
+            np.arange(args.base_class)
+            if session == 0
+            else np.arange(
+                args.base_class + (session - 1) * args.way,
+                args.base_class + session * args.way,
+            )
+        )
 
         # ABLATION SETTING: reduce the number of base classes
         if args.limited_base_class > 0:
-            class_index = class_index[:args.limited_base_class]
+            class_index = class_index[: args.limited_base_class]
 
         if download:
             self.download()
 
         if not self._check_integrity():
-            raise RuntimeError("Dataset not found or corrupted." +
-                               " You can use download=True to download it")
+            raise RuntimeError(
+                "Dataset not found or corrupted."
+                + " You can use download=True to download it",
+            )
 
         downloaded_list = self.train_list if self.train else self.test_list
         self.data = []
@@ -99,29 +111,47 @@ class Cifar100Dataset(VisionDataset):
                 else:
                     self.targets.extend(entry["fine_labels"])
 
-        self.data = np.vstack(self.data).reshape(-1, 3, 32, 32)
-        self.data = self.data.transpose((0, 2, 3, 1))  # convert to HWC
-
+        self.data = np.vstack(self.data).reshape(-1, 3, 32, 32).transpose((0, 2, 3, 1))
         self.targets = np.asarray(self.targets)
 
         if session > 0:
-            txt_path = "data/index_list/".format() + args.dataset + "/session_" + str(session + 1) + ".txt"
+            txt_path = (
+                "data/index_list/".format()
+                + args.dataset
+                + "/session_"
+                + str(session + 1)
+                + ".txt"
+            )
             with open(txt_path) as f:
                 sample_index = f.read().splitlines()
 
-        if session == 0: # base session
-            self.data, self.targets = self.select_by_class_index(self.data, self.targets, class_index)
+        if session == 0:  # base session
+            self.data, self.targets = self.select_by_class_index(
+                self.data,
+                self.targets,
+                class_index,
+            )
         elif train:
-            self.data, self.targets = self.select_by_sample_index(self.data, self.targets, sample_index)
+            self.data, self.targets = self.select_by_sample_index(
+                self.data,
+                self.targets,
+                sample_index,
+            )
         else:
-            self.data, self.targets = self.select_by_class_index(self.data, self.targets, class_index)
+            self.data, self.targets = self.select_by_class_index(
+                self.data,
+                self.targets,
+                class_index,
+            )
 
         self._load_meta()
 
-    def select_by_class_index(self,
-                            data: np.ndarray,
-                            targets: np.ndarray,
-                            index: np.ndarray) -> Any:
+    def select_by_class_index(
+        self,
+        data: np.ndarray,
+        targets: np.ndarray,
+        index: np.ndarray,
+    ) -> Any:
         """Select all sample of the given classes.
 
         Unless specified by args.limited_base_samples,
@@ -160,10 +190,12 @@ class Cifar100Dataset(VisionDataset):
 
         return data_tmp, targets_tmp
 
-    def select_by_sample_index(self,
-                            data: np.ndarray,
-                            targets: np.ndarray,
-                            index: np.ndarray) -> Any:
+    def select_by_sample_index(
+        self,
+        data: np.ndarray,
+        targets: np.ndarray,
+        index: np.ndarray,
+    ) -> Any:
         """Select all by given index.
 
         Parameters
@@ -187,8 +219,10 @@ class Cifar100Dataset(VisionDataset):
     def _load_meta(self) -> None:
         path = os.path.join(self.root, self.base_folder, self.meta["filename"])
         if not check_integrity(path, self.meta["md5"]):
-            raise RuntimeError("Dataset metadata file not found or corrupted." +
-                               " You can use download=True to download it")
+            raise RuntimeError(
+                "Dataset metadata file not found or corrupted."
+                + " You can use download=True to download it",
+            )
         with open(path, "rb") as infile:
             data = pickle.load(infile, encoding="latin1")
             self.classes = data[self.meta["key"]]
@@ -211,7 +245,9 @@ class Cifar100Dataset(VisionDataset):
         # Converting to PIL Image so that it is consistent with
         # all other datasets which return a PIL Image
         img = Image.fromarray(img)
-        images: List[torch.Tensor] = [self.transform(img) for i in range(self.args.num_crops[0])]
+        images: List[torch.Tensor] = [
+            self.transform(img) for i in range(self.args.num_crops[0])
+        ]
 
         return images, target
 
@@ -222,7 +258,7 @@ class Cifar100Dataset(VisionDataset):
     def _check_integrity(self) -> bool:
         """Check integrity of files."""
         root = self.root
-        for fentry in (self.train_list + self.test_list):
+        for fentry in self.train_list + self.test_list:
             filename, md5 = fentry[0], fentry[1]
             fpath = os.path.join(root, self.base_folder, filename)
             if not check_integrity(fpath, md5):
@@ -234,7 +270,12 @@ class Cifar100Dataset(VisionDataset):
         if self._check_integrity():
             print("Files already downloaded and verified")
             return
-        download_and_extract_archive(self.url, self.root, filename=self.filename, md5=self.tgz_md5)
+        download_and_extract_archive(
+            self.url,
+            self.root,
+            filename=self.filename,
+            md5=self.tgz_md5,
+        )
 
     def extra_repr(self) -> str:
         """Extra repr."""

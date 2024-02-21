@@ -69,11 +69,9 @@ class FSCILTrainer:
             # initialize dataset
             train_set, trainloader, testloader = get_dataloader(self.args, session)
 
-
             # distributed sampler
 
             # dataloaders
-
 
             # validate session
 
