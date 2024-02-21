@@ -7,6 +7,35 @@ import torch
 from torch import nn
 
 
+class Averager:
+    """Average meter."""
+
+    def __init__(self) -> None:
+        """Init function."""
+        self.n = 0
+        self.v = 0
+
+    def add(self, x: Any) -> None:
+        """Add value.
+
+        Parameters
+        ----------
+        x: Any
+            Value to add
+        """
+        self.v = (self.v * self.n + x) / (self.n + 1)
+        self.n += 1
+
+    def item(self) -> float:
+        """Return the average.
+
+        Returns
+        -------
+        average
+        """
+        return self.v
+
+
 def get_optimizer_base(model: nn.Module, args: argparse.Namespace) -> tuple[Any, Any]:
     """Return the optimizer for FSCIL training.
 
@@ -47,3 +76,32 @@ def get_optimizer_base(model: nn.Module, args: argparse.Namespace) -> tuple[Any,
         )
 
     return optimizer, scheduler
+
+
+def train_one_epoch(
+    model: nn.Module,
+    trainloader: Any,
+    criterion: nn.Module,
+    optimizer: Any,
+    scheduler: Any,
+    epoch: int,
+    args: argparse.Namespace,
+) -> Any:
+    """One epoch of training of the model.
+
+    Parameters
+    ----------
+    model: nn.Module
+        The model to train
+    trainloader: Any
+        Dataloader for training
+    criterion: nn.Module
+        Loss function
+    optimizer: Any
+        Model optimizer
+    scheduler: Any
+        LR scheduler
+    epoch: int
+        Current training epoch
+    """
+    pass

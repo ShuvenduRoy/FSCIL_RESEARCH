@@ -292,8 +292,7 @@ class FSCILencoder(nn.Module):
 
     def forward(
         self,
-        im_cla: torch.Tensor,
-        im_q: Optional[torch.Tensor] = None,
+        im_q: torch.Tensor,
         im_k: Optional[torch.Tensor] = None,
         labels: Optional[torch.Tensor] = None,
         base_sess: bool = True,
@@ -303,10 +302,8 @@ class FSCILencoder(nn.Module):
 
         Parameters
         ----------
-        im_cla : torch.Tensor
-            The input image.
         im_q : torch.Tensor, optional
-            The query image, by default None.
+            The query image, or Input image at test time
         im_k : torch.Tensor, optional
             The key image, by default None.
         labels : torch.Tensor, optional
@@ -321,22 +318,18 @@ class FSCILencoder(nn.Module):
         Any
             The output tensor.
         """
-        embedding, logits = self.encoder_q(im_cla)
+        embedding_q, logits = self.encoder_q(im_q)  # [b, embed_dim] [b, n_classes]
         assert len(logits.shape) == 2
         assert logits.shape[1] == self.args.num_classes
-        assert embedding.shape[1] == self.args.moco_dim
+        assert embedding_q.shape[1] == self.args.moco_dim
 
-        if im_q is None or labels is None:  # during evaluation
+        if labels is None:  # during evaluation
             return logits  # [b, n_classes]
-        embedding = nn.functional.normalize(embedding, dim=1)
-
-        # forward query
-        b = im_q.shape[0]
-        embedding_q, _ = self.encoder_q(im_q)  # [b, embed_dim] [b, n_classes]
         embedding_q = nn.functional.normalize(embedding_q, dim=1)
         embedding_q = embedding_q.unsqueeze(1)  # [b, 1, embed_dim]
 
         # foward key
+        b = im_q.shape[0]
         with torch.no_grad():  # no gradient to keys
             self._momentum_update_key_encoder(base_sess)  # update the key encoder
             embedding_k, _ = self.encoder_k(im_k)  # keys: bs x dim
@@ -376,7 +369,7 @@ class FSCILencoder(nn.Module):
         if base_sess or (not base_sess and last_epochs_new):
             self._dequeue_and_enqueue(embedding_k, labels)
 
-        return [embedding, embedding_q], logits, logits_global, targets_global
+        return logits, embedding_q, logits_global, targets_global
 
     def update_fc(self, dataloader: Any, class_list: List, transform: Any) -> None:
         """Update the fully connected layer.
