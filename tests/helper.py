@@ -57,7 +57,7 @@ def get_default_args() -> argparse.Namespace:
     "num_classes": 200,
     "num_crops": [2, 1],
     "num_mlp": 2,
-    "num_workers": 8,
+    "num_workers": 0,
     "pet_cls": "LoRA",
     "pre_train_epochs": 0,
     "pre_train_lr": 0.001,
@@ -69,16 +69,14 @@ def get_default_args() -> argparse.Namespace:
     "seed": 1,
     "sessions": 11,
     "shot": 5,
-    "shots": -1,
     "size_crops": [224, 96],
     "start_session": 0,
     "step": 40,
     "temperature": 16,
     "test_batch_size": 100,
     "tune_encoder_epoch": 0,
-    "way": 10,
+    "way": 5,
     "add_bias_in_classifier": False,
-    "pet_on_teacher": False,
-    "ways": -1}
+    "pet_on_teacher": False,}
 
     return argparse.Namespace(**args)

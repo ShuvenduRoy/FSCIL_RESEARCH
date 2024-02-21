@@ -3,6 +3,7 @@
 import argparse
 
 import torch
+from torch.nn.parallel import DistributedDataParallel
 
 from dataloaders.helpter import get_dataloader
 from models.encoder import FSCILencoder
@@ -45,14 +46,14 @@ class FSCILTrainer:
             ensure_path(args.save_path)
 
         # initialize model
-        self.model = FSCILencoder(args)
+        self.model: torch.nn.Module = FSCILencoder(args)
 
         # distributed training setup
         if args.distributed and dist_utils.is_dist_avail_and_initialized():
             device_id = torch.cuda.current_device()
             torch.cuda.set_device(device_id)
             self.model = self.model.cuda(device_id)
-            self.model = torch.nn.parallel.DistributedDataParallel(
+            self.model = DistributedDataParallel(
                 self.model,
                 device_ids=[device_id],
             )
