@@ -36,22 +36,21 @@ class EncoderWrapper(nn.Module):
                 pre_trained_url=args.pre_trained_url,
             )
             self.num_features = 768
-        if self.args.mlp:
-            if args.num_mlp == 2:
-                self.fc = nn.Sequential(
-                    nn.Linear(self.num_features, self.num_features),
-                    nn.ReLU(),
-                    nn.Linear(self.num_features, self.args.moco_dim),
-                )
+        if args.num_mlp == 2:
+            self.fc = nn.Sequential(
+                nn.Linear(self.num_features, self.num_features),
+                nn.ReLU(),
+                nn.Linear(self.num_features, self.args.moco_dim),
+            )
 
-            elif args.num_mlp == 3:
-                self.fc = nn.Sequential(
-                    nn.Linear(self.num_features, self.num_features),
-                    nn.ReLU(),
-                    nn.Linear(self.num_features, self.num_features),
-                    nn.ReLU(),
-                    nn.Linear(self.num_features, self.args.moco_dim),
-                )
+        elif args.num_mlp == 3:
+            self.fc = nn.Sequential(
+                nn.Linear(self.num_features, self.num_features),
+                nn.ReLU(),
+                nn.Linear(self.num_features, self.num_features),
+                nn.ReLU(),
+                nn.Linear(self.num_features, self.args.moco_dim),
+            )
         else:
             self.fc = nn.Sequential(nn.Linear(self.num_features, self.args.moco_dim))
 
@@ -99,18 +98,11 @@ class FSCILencoder(nn.Module):
         self.encoder_q = EncoderWrapper(args)
         self.num_features = 768
 
-        if args.freeze_vit or args.tune_encoder_epoch != 0:
-            for param in self.encoder_q.parameters():
-                param.requires_grad = False
-            for param in self.encoder_q.fc.parameters():
-                param.requires_grad = True
-        elif args.freeze_layer_after != -1:
-            for name, param in self.encoder_q.named_parameters():
-                status = (
-                    name.startswith("model.blocks")
-                    and int(name.split(".")[2]) == args.freeze_layer_after
-                )
-                param.requires_grad = status
+        # By default all pre-trained parameters are frozen
+        for param in self.encoder_q.parameters():
+            param.requires_grad = False
+        for param in self.encoder_q.fc.parameters():
+            param.requires_grad = True
 
         self.encoder_k = EncoderWrapper(args)
 
@@ -140,45 +132,27 @@ class FSCILencoder(nn.Module):
         for name, param in self.encoder_k.named_parameters():
             print(name, param.requires_grad)
 
+        pet_name = "none" if self.args.pet_cls is None else self.args.pet_cls.lower()
         self.params_with_lr = [
+            # Higher LR for newly initalized parameters
             {
                 "params": [
                     p
                     for n, p in self.encoder_q.named_parameters()
-                    if self.args.pet_cls.lower() in n or n.startswith("fc")
+                    if pet_name in n or n.startswith("fc")
                 ],
                 "lr": args.lr_base,
             },
+            # (Optional) reduced LR for pre-trained model parameters
             {
                 "params": [
                     p
                     for n, p in self.encoder_q.named_parameters()
-                    if self.args.pet_cls.lower() not in n and not n.startswith("fc")
+                    if pet_name not in n and not n.startswith("fc")
                 ],
                 "lr": args.lr_base * args.encoder_lr_factor,
             },
         ]
-
-        print(
-            [
-                {
-                    "params": [
-                        n
-                        for n, p in self.encoder_q.named_parameters()
-                        if self.args.pet_cls.lower() in n or n.startswith("fc")
-                    ],
-                    "lr": args.lr_base,
-                },
-                {
-                    "params": [
-                        n
-                        for n, p in self.encoder_q.named_parameters()
-                        if self.args.pet_cls.lower() not in n and not n.startswith("fc")
-                    ],
-                    "lr": args.lr_base * args.encoder_lr_factor,
-                },
-            ],
-        )
 
         # create the queue
         self.register_buffer(

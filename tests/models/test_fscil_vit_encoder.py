@@ -5,7 +5,7 @@ import torch
 from torch import nn
 
 from models.encoder import FSCILencoder
-from tests.helper import get_default_args
+from tests.helper import get_default_args, get_lora_args
 
 
 torch.manual_seed(42)
@@ -14,9 +14,8 @@ torch.manual_seed(42)
 @pytest.mark.parametrize(
     "args",
     [
-        (
-            get_default_args()
-        ),
+        (get_default_args()),
+        (get_lora_args()),
     ],
 )
 def test_facil_encoder(args: Any) -> None:
@@ -57,3 +56,15 @@ def test_facil_encoder(args: Any) -> None:
     assert len(logits.shape) == 2
     assert logits.shape[1] == model.args.num_classes
     assert embedding.shape[1] == model.args.moco_dim
+
+    # Test number of fc layer
+    assert len(model.encoder_q.fc) == 2 * args.num_mlp -1
+    assert model.encoder_q.fc[0].weight.requires_grad
+    assert model.encoder_q.fc[-1].weight.requires_grad
+
+    # Test right lr for parameter
+    assert model.params_with_lr[0]["lr"] == args.lr_base
+    assert model.params_with_lr[1]["lr"] == args.lr_base * args.encoder_lr_factor
+
+
+test_facil_encoder(get_default_args())

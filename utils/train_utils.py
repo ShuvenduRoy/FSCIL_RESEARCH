@@ -189,7 +189,6 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
         type=float,
         help="softmax temperature (default: 0.07)",
     )
-    parser.add_argument("--mlp", type=str2bool, default=False, help="use mlp head")
     parser.add_argument(
         "--num_crops",
         type=int,
@@ -316,7 +315,7 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
         default=15,
         help="evaluation frequency",
     )
-    parser.add_argument("--num_mlp", type=int, default=2)
+    parser.add_argument("--num_mlp", type=int, default=1)
     parser.add_argument("--pre_train_epochs", type=int, default=0)
     parser.add_argument("--pre_train_lr", type=float, default=0.001)
 
@@ -343,7 +342,7 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
     # FSCIT configs
     parser.add_argument("--pre_trained_url", type=str, default=None)
     parser.add_argument("--freeze_vit", type=str2bool, default=False)
-    parser.add_argument("--freeze_layer_after", type=int, default=-1)
+    parser.add_argument("--fine_tune_layer_after", type=int, default=-1)
     parser.add_argument(
         "--pet_cls",
         type=str,
@@ -351,7 +350,7 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
         choices=[None, "Prefix", "Adapter", "LoRA"],
     )  # MUST BE NONE BY DEFAULT TO AVOID PRE-COMMIT ISSUES WITH PUBLIC CODES
     parser.add_argument("--adapt_blocks", type=int, default=0)
-    parser.add_argument("--tune_encoder_epoch", type=int, default=0)
+    parser.add_argument("--encoder_fine_tuning_start_epoch", type=int, default=0)
     parser.add_argument("--encoder_lr_factor", type=float, default=1)
     parser.add_argument("--rank", type=int, default=5)
 
