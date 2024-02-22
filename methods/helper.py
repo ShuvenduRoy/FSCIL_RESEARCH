@@ -5,6 +5,8 @@ from typing import Any
 
 import torch
 from torch import nn
+from torch.nn import functional as F  # noqa
+from tqdm import tqdm
 
 
 class Averager:
@@ -36,12 +38,12 @@ class Averager:
         return self.v
 
 
-def get_optimizer_base(model: nn.Module, args: argparse.Namespace) -> tuple[Any, Any]:
+def get_optimizer_base(model: Any, args: argparse.Namespace) -> tuple[Any, Any]:
     """Return the optimizer for FSCIL training.
 
     Parameters
     ----------
-    mdoel: nn.Module
+    mdoel: Any (nn.Module)
         The trainable model
     args: argparse.Namespace
         arguments
@@ -78,15 +80,36 @@ def get_optimizer_base(model: nn.Module, args: argparse.Namespace) -> tuple[Any,
     return optimizer, scheduler
 
 
+def count_acc(logits: torch.tensor, label: torch.tensor) -> float:
+    """Count the accuracy of the model.
+
+    Parameters
+    ----------
+    logits: torch.tensor
+        The model logits
+    label: torch.tensor
+        The actual labels
+
+    Returns
+    -------
+    accuracy
+    """
+    pred = torch.argmax(logits, dim=1)
+    if torch.cuda.is_available():
+        return (pred == label).mean().item()
+    return (pred == label).mean().item()
+
+
 def train_one_epoch(
-    model: nn.Module,
+    model: Any,
     trainloader: Any,
     criterion: nn.Module,
     optimizer: Any,
     scheduler: Any,
     epoch: int,
     args: argparse.Namespace,
-) -> Any:
+    device_id: Any,
+) -> None:
     """One epoch of training of the model.
 
     Parameters
@@ -103,5 +126,64 @@ def train_one_epoch(
         LR scheduler
     epoch: int
         Current training epoch
+    args: argparse.Namespace
+        Training arguments
+    device_id: Any
+        Device id
+
+    Returns
+    -------
+    None
     """
-    pass
+    tl = Averager()
+    tl_ce = Averager()
+    tl_moco = Averager()
+    ta = Averager()
+
+    model = model.train()
+    tqdm_gen = tqdm(trainloader)
+
+    for _, batch in enumerate(tqdm_gen, 1):
+        data, labels = batch
+        labels = labels.long()
+        if device_id is not None:
+            for i in range(len(data)):
+                data[i] = data[i].cuda(device_id, non_blocking=True)
+            labels = labels.cuda(device_id, non_blocking=True)
+        elif torch.cuda.is_available():
+            for i in range(len(data)):
+                data[i] = data[i].cuda(non_blocking=True)
+            labels = labels.cuda(non_blocking=True)
+
+        # model foward pass
+        logits, _, logits_global, targets_global = model(data[0], data[1], labels)
+
+        # calculate the loss
+        moco_loss = criterion(logits_global, targets_global)
+        ce_loss = F.cross_entropy(logits, labels)
+        loss = args.ce_loss_factor * ce_loss + args.moco_loss_factor * moco_loss
+        if torch.isnan(loss):
+            raise Exception("Loss is NaN")
+
+        # update the model
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+        # print the loss and accuracy
+        acc = count_acc(logits.detach(), labels)
+        lrc = scheduler.get_last_lr()[0]
+        tqdm_gen.set_description(
+            "Session 0, epo {}, lrc={:.4f}, total loss={:.4f} moco loss={:.4f} ce loss={:.4f} acc={:.4f}".format(
+                epoch,
+                lrc,
+                loss.item(),
+                moco_loss.item(),
+                ce_loss.item(),
+                acc,
+            ),
+        )
+        tl.add(loss.item())
+        tl_moco.add(moco_loss.item())
+        tl_ce.add(ce_loss.item())
+        ta.add(acc)

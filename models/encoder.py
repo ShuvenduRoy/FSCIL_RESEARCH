@@ -276,8 +276,8 @@ class FSCILencoder(nn.Module):
         ptr = int(self.queue_ptr.item())
 
         # replace the keys and labels at ptr (dequeue and enqueue)
-        if ptr + batch_size > self.K:
-            remains = ptr + batch_size - self.K
+        if ptr + batch_size > self.args.moco_k:
+            remains = ptr + batch_size - self.args.moco_k
             self.queue[:, ptr:] = keys.T[:, : batch_size - remains]
             self.queue[:, :remains] = keys.T[:, batch_size - remains :]
             self.label_queue[ptr:] = labels[: batch_size - remains]
@@ -287,7 +287,7 @@ class FSCILencoder(nn.Module):
                 keys.T
             )  # this queue is feature queue
             self.label_queue[ptr : ptr + batch_size] = labels
-        ptr = (ptr + batch_size) % self.K  # move pointer
+        ptr = (ptr + batch_size) % self.args.moco_k  # move pointer
         self.queue_ptr[0] = ptr
 
     def forward(

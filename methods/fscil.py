@@ -130,6 +130,8 @@ class FSCILTrainer:
                         scheduler=self.scheduler,
                         epoch=epoch,
                         args=self.args,
+                        device_id=self.device_id,
                     )
+                    self.scheduler.step()
 
             # save model # TODO
