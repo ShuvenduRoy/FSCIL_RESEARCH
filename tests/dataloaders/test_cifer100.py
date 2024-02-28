@@ -40,7 +40,9 @@ def test_facil_encoder(args: Any) -> None:
     train_set, trainloader, testloader = get_dataloader(args, 1)
     assert len(train_set) == 25
     assert len(trainloader) == np.ceil(25 / args.batch_size_base)
-    assert len(testloader) == np.ceil(500 / args.test_batch_size)
+    assert len(testloader) == np.ceil(100 * (args.base_class + args.shot)  / args.test_batch_size)
+
+    # TODO FSCIT data setting testing
 
 
 test_facil_encoder(get_default_args())

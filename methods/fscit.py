@@ -72,47 +72,62 @@ class FSCITTrainer:
             self.model = self.model.cuda()
             self.criterion = self.criterion.cuda()
 
-    def adjust_learnable_parameters(self, session: int) -> None:
+    def adjust_learnable_parameters(self, session: int, epoch: int = 0) -> None:
         """Adjust the learnable parameters base of config and current step.
 
         Parameters
         ----------
         session: int
             Current session
+        epoch: int
+            Current epoch
         """
         # handle trainable parameters in the base session
         # at certain epochs
         if session == 0:
-            for epoch in range(self.args.epochs_base):
-                # Unfreeze some encoder parameter at encoder_ft_start_epoch
-                # defined by args.encoder_ft_start_layer
-                if (
-                    epoch == self.args.encoder_ft_start_epoch
-                    and self.args.encoder_ft_start_layer != -1
-                ):
-                    status = False
-                    for (
+            # Unfreeze some encoder parameter at encoder_ft_start_epoch
+            # defined by args.encoder_ft_start_layer
+            if (
+                epoch == self.args.encoder_ft_start_epoch
+                and self.args.encoder_ft_start_layer != -1
+            ):
+                status = False
+                for (
+                    name,
+                    param,
+                ) in self.model_without_ddp.encoder_q.named_parameters():
+                    if (
+                        name.startswith("model.blocks")
+                        and int(name.split(".")[2]) == self.args.encoder_ft_start_layer
+                    ):
+                        status = True
+                    param.requires_grad = status
+                for (
+                    name,
+                    param,
+                ) in self.model_without_ddp.encoder_q.named_parameters():
+                    print(
+                        "ecnoder_q @session {} @epoch {},".format(session, epoch),
                         name,
-                        param,
-                    ) in self.model_without_ddp.encoder_q.named_parameters():
-                        if (
-                            name.startswith("model.blocks")  # TODO Handle DDP
-                            and int(name.split(".")[2])
-                            == self.args.encoder_ft_start_layer
-                        ):
-                            status = True
-                        param.requires_grad = status
-                    for (
-                        name,
-                        param,
-                    ) in self.model_without_ddp.encoder_q.named_parameters():
-                        print("ecnoder_q @epoch, ", epoch, name, param.requires_grad)
+                        param.requires_grad,
+                    )
+
         # handle trainable parameters for incremental sessions
         else:
             # Freeze the encoder
             for _, param in self.model_without_ddp.encoder_q.named_parameters():
                 param.requires_grad = False
             # Tune params as defined in config # TODO handle what to tune in the inc
+
+            for (
+                name,
+                param,
+            ) in self.model_without_ddp.encoder_q.named_parameters():
+                print(
+                    "ecnoder_q @session {} @epoch {},".format(session, epoch),
+                    name,
+                    param.requires_grad,
+                )
 
     def train(self) -> None:
         """Train the model."""
@@ -122,14 +137,13 @@ class FSCITTrainer:
             "all": [0] * self.args.sessions,
         }
         for session in range(self.args.sessions):
-            # train session
-            print(f"Training session {session + 1}...")
-
             # initialize dataset
             train_set, trainloader, testloader = get_dataloader(self.args, session)
 
-            # adjust learnable params
-            self.adjust_learnable_parameters(session)
+            # train session
+            print(f"Training session {session + 1}...")
+            print(f"Train set size: {len(train_set)}")
+            print(f"Test set size: {len(testloader.dataset)}")
 
             if session == 0:  # base session
                 # Attempt auto resume # TODO
@@ -137,6 +151,11 @@ class FSCITTrainer:
                     if dist_utils.is_dist_avail_and_initialized():
                         trainloader.sampler.set_epoch(epoch)
                         testloader.sampler.set_epoch(epoch)
+
+                    # adjust learnable params
+                    self.adjust_learnable_parameters(session)
+
+                    # train and test
                     train_one_epoch(
                         model=self.model,
                         trainloader=trainloader,
@@ -174,8 +193,24 @@ class FSCITTrainer:
             if self.args.update_base_classifier_with_prototypes:
                 # replace base classifier weight with prototypes
                 replace_base_fc(train_set, self.model, self.args, self.device_id)
+                test(
+                    model=self.model,
+                    testloader=testloader,
+                    epoch=epoch,
+                    args=self.args,
+                    session=session,
+                    device_id=self.device_id,
+                )
 
-            else:  # incremental session
-                pass
+            else:
+                replace_base_fc(train_set, self.model, self.args, self.device_id)
+                test(
+                    model=self.model,
+                    testloader=testloader,
+                    epoch=epoch,
+                    args=self.args,
+                    session=session,
+                    device_id=self.device_id,
+                )
 
             # save model # TODO
