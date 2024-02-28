@@ -1,1 +1,11 @@
+black
+mypy
+pre-commit
+pytest
+pytest-cov
+ruff
+toml
+types-PyYAML
+types-requests
 timm==0.5.4
+
