@@ -84,9 +84,9 @@ class FSCILTrainer:
         # at certain epochs
         if session == 0:
             for epoch in range(self.args.epochs_base):
-                # Unfreeze some encoder parameter at encoder_fine_tuning_start_epoch
-                # defined by args.fine_tune_layer_after
-                if epoch == self.args.encoder_fine_tuning_start_epoch:
+                # Unfreeze some encoder parameter at encoder_ft_start_epoch
+                # defined by args.encoder_ft_start_layer
+                if epoch == self.args.encoder_ft_start_epoch:
                     status = False
                     for (
                         name,
@@ -95,7 +95,7 @@ class FSCILTrainer:
                         if (
                             name.startswith("model.blocks")  # TODO Handle DDP
                             and int(name.split(".")[2])
-                            == self.args.fine_tune_layer_after
+                            == self.args.encoder_ft_start_layer
                         ):
                             status = True
                         param.requires_grad = status

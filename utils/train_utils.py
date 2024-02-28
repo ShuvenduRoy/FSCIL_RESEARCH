@@ -68,7 +68,6 @@ def get_dataset_configs(args: argparse.Namespace) -> argparse.Namespace:
         args.way = 10 if args.way == -1 else args.way
         args.shot = 5 if args.shot == -1 else args.shot
         args.sessions = 11 if args.session == -1 else args.session
-        args.size_crops = [224, 96]
         args.min_scale_crops = [0.2, 0.05]
         args.max_scale_crops = [1, 0.14]
         args.milestones = [60, 80, 100]
@@ -79,7 +78,6 @@ def get_dataset_configs(args: argparse.Namespace) -> argparse.Namespace:
         args.way = 5 if args.way == -1 else args.way
         args.shot = 5 if args.shot == -1 else args.shot
         args.sessions = 9 if args.session == -1 else args.session
-        args.size_crops = [84, 50]
         args.min_scale_crops = [0.2, 0.05]
         args.max_scale_crops = [1, 0.14]
         args.milestones = [40, 70, 100]
@@ -116,7 +114,13 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
     """
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--exp_name", type=str, default="baseline")
+    # about experiment and dataset
+    parser.add_argument(
+        "--exp_name",
+        type=str,
+        default="baseline",
+        help="experiment name used for saving and logging",
+    )
     parser.add_argument(
         "--dataset",
         type=str,
@@ -126,50 +130,69 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
     parser.add_argument("--dataroot", type=str, default="./data")
 
     # about pre-training
-    parser.add_argument("--epochs_base", type=int, default=100)
-    parser.add_argument("--epochs_new", type=int, default=10)
-    parser.add_argument("--lr_base", type=float, default=0.1)
-    parser.add_argument("--lr_new", type=float, default=0.1)
-    parser.add_argument("--lrw", type=float, default=0.1)
-    parser.add_argument("--lrb", type=float, default=0.1)
+    parser.add_argument(
+        "--batch_size_base",
+        type=int,
+        default=64,
+        help="batch size for base training session",
+    )
+    parser.add_argument(
+        "--epochs_base",
+        type=int,
+        default=100,
+        help="number of epochs for base training session",
+    )
+    parser.add_argument(
+        "--lr_base",
+        type=float,
+        default=0.1,
+        help="learning rate for base training session",
+    )
     parser.add_argument(
         "--schedule",
         type=str,
-        default="Step",
+        default="Cosine",
         choices=["Step", "Milestone", "Cosine"],
+        help="learning rate schedule for base training session",
     )
-    parser.add_argument("--milestones", nargs="+", type=int, default=[60, 70])
-    parser.add_argument("--step", type=int, default=40)
-    parser.add_argument("--decay", type=float, default=0.0005)
-    parser.add_argument("--momentum", type=float, default=0.9)
-    parser.add_argument("--gamma", type=float, default=0.1)
-    parser.add_argument("--temperature", type=int, default=16)
-    parser.add_argument("--not_data_init", type=str2bool, default=False)
-    parser.add_argument("--batch_size_base", type=int, default=64)
     parser.add_argument(
-        "--batch_size_new",
+        "--milestones",
+        nargs="+",
         type=int,
-        default=0,
-        help="set 0 will use all the available training image for new",
-    )
-    parser.add_argument("--test_batch_size", type=int, default=100)
-    parser.add_argument(
-        "--base_mode",
-        type=str,
-        default="ft_cos",
+        default=[60, 70],
+        help="milestone epochs for learning rate schedule",
     )
     parser.add_argument(
-        "--new_mode",
-        type=str,
-        default="avg_cos",
+        "--step",
+        type=int,
+        default=40,
+        help="step size for learning rate schedule",
+    )
+    parser.add_argument(
+        "--decay",
+        type=float,
+        default=0.0005,
+        help="weight decay for base training session",
+    )
+    parser.add_argument(
+        "--momentum",
+        type=float,
+        default=0.9,
+        help="momentum for base training session",
+    )
+    parser.add_argument(
+        "--ce_loss_factor",
+        type=float,
+        default=1.0,
+        help="coefficient of the cross-entropy loss",
     )
 
-    # for SAVC
+    # for contrastive learning
     parser.add_argument(
         "--moco_dim",
         default=128,
         type=int,
-        help="feature dimension (default: 128)",
+        help="feature dimension of the model output (default: 128)",
     )
     parser.add_argument(
         "--moco_k",
@@ -190,91 +213,38 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
         help="softmax temperature (default: 0.07)",
     )
     parser.add_argument(
-        "--num_crops",
-        type=int,
-        default=[2, 1],
-        nargs="+",
-        help="amount of crops",
-    )
-    parser.add_argument(
-        "--size_crops",
-        type=int,
-        default=[32, 18],
-        nargs="+",
-        help="resolution of inputs",
-    )
-    parser.add_argument(
-        "--min_scale_crops",
-        type=float,
-        default=[0.9, 0.2],
-        nargs="+",
-        help="min area of crops",
-    )
-    parser.add_argument(
-        "--max_scale_crops",
-        type=float,
-        default=[1, 0.7],
-        nargs="+",
-        help="max area of crops",
-    )
-    parser.add_argument(
-        "--constrained_cropping",
-        type=str2bool,
-        default=False,
-        help="condition small crops on key crop",
-    )
-    parser.add_argument(
-        "--auto_augment",
-        type=int,
-        default=[],
-        nargs="+",
-        help="Apply auto-augment 50 % of times to the selected crops",
-    )
-    parser.add_argument(
-        "--alpha",
-        type=float,
-        default=0.5,
-        help="coefficient of the global contrastive loss",
-    )
-    parser.add_argument(
-        "--beta",
-        type=float,
-        default=0.5,
-        help="coefficient of the local contrastive loss",
-    )
-
-    parser.add_argument("--start_session", type=int, default=0)
-    parser.add_argument(
-        "--model_dir",
-        type=str,
-        default=None,
-        help="loading model parameter from a specific dir",
-    )
-    parser.add_argument(
-        "--pre_trained_encoder_path",
-        type=str,
-        default="checkpoint/moco_v2_800ep_pretrain.pth.tar",
-        help="loading model parameter from a specific dir",
-    )
-
-    # ABLATION AND FURTHER RESEARCH
-    parser.add_argument(
-        "--ce_loss_factor",
-        type=float,
-        default=1.0,
-        help="coefficient of the cross-entropy loss",
-    )
-    parser.add_argument(
         "--moco_loss_factor",
         type=float,
         default=1.0,
         help="coefficient of the moco loss",
     )
     parser.add_argument(
+        "--num_views",
+        type=int,
+        default=2,
+        help="number of views for contrastive learning",
+    )
+
+    # model config
+    parser.add_argument(
+        "--pre_trained_url",
+        type=str,
+        default=None,
+        help="loading model parameter from a specific dir",
+    )
+
+    parser.add_argument(
         "--encoder",
         type=str,
         default="vit-16",
         help="encoder architecture",
+    )
+
+    parser.add_argument(
+        "--num_mlp",
+        type=int,
+        default=1,
+        help="number of mlp layers in projection head",
     )
 
     # few-shot configs
@@ -297,11 +267,7 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
         help="number of sessions; -1 means sessions taken as the defaults for the dataset",
     )
 
-    # about training
-    parser.add_argument("--gpu", default="0")
-    parser.add_argument("--num_workers", type=int, default=8)
-    parser.add_argument("--seed", type=int, default=1)
-    parser.add_argument("--debug", action="store_true")
+    # incremental few-shot configs
     parser.add_argument(
         "--incft",
         type=str2bool,
@@ -309,17 +275,21 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
         help="incrmental finetuning",
     )
 
+    # test configs
+    parser.add_argument("--test_batch_size", type=int, default=100)
     parser.add_argument(
         "--eval_freq",
         type=int,
         default=15,
         help="evaluation frequency",
     )
-    parser.add_argument("--num_mlp", type=int, default=1)
-    parser.add_argument("--pre_train_epochs", type=int, default=0)
-    parser.add_argument("--pre_train_lr", type=float, default=0.001)
+
+    # about training
+    parser.add_argument("--num_workers", type=int, default=8)
+    parser.add_argument("--seed", type=int, default=1)
 
     # distributed training
+    parser.add_argument("--gpu", default="0")
     parser.add_argument(
         "--distributed",
         type=str2bool,
@@ -339,20 +309,20 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
         choices=["nccl", "gloo", "mpi"],
     )
 
-    # FSCIT configs
-    parser.add_argument("--pre_trained_url", type=str, default=None)
-    parser.add_argument("--freeze_vit", type=str2bool, default=False)
-    parser.add_argument("--fine_tune_layer_after", type=int, default=-1)
+    # PET specific configs
     parser.add_argument(
         "--pet_cls",
         type=str,
         default=None,
         choices=[None, "Prefix", "Adapter", "LoRA"],
-    )  # MUST BE NONE BY DEFAULT TO AVOID PRE-COMMIT ISSUES WITH PUBLIC CODES
-    parser.add_argument("--adapt_blocks", type=int, default=0)
-    parser.add_argument("--encoder_fine_tuning_start_epoch", type=int, default=0)
-    parser.add_argument("--encoder_lr_factor", type=float, default=1)
+    )
     parser.add_argument("--rank", type=int, default=5)
+
+    # FSCIT configs
+    parser.add_argument("--encoder_ft_start_layer", type=int, default=-1)
+    parser.add_argument("--adapt_blocks", type=int, default=0)
+    parser.add_argument("--encoder_ft_start_epoch", type=int, default=0)
+    parser.add_argument("--encoder_lr_factor", type=float, default=1)
 
     # FSCIT configs
     parser.add_argument("--limited_base_class", type=int, default=-1)

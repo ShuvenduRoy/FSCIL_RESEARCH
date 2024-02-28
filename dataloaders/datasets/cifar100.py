@@ -246,7 +246,7 @@ class Cifar100Dataset(VisionDataset):
         # all other datasets which return a PIL Image
         img = Image.fromarray(img)
         images: List[torch.Tensor] = [
-            self.transform(img) for i in range(self.args.num_crops[0])
+            self.transform(img) for i in range(self.args.num_views)
         ]
 
         return images, target

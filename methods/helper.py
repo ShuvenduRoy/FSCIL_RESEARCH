@@ -1,7 +1,7 @@
 """Traing helper module."""
 
 import argparse
-from typing import Any
+from typing import Any, Tuple
 
 import torch
 from torch import nn
@@ -38,7 +38,7 @@ class Averager:
         return self.v
 
 
-def get_optimizer_base(model: Any, args: argparse.Namespace) -> tuple[Any, Any]:
+def get_optimizer_base(model: Any, args: argparse.Namespace) -> Tuple[Any, Any]:
     """Return the optimizer for FSCIL training.
 
     Parameters
@@ -60,10 +60,12 @@ def get_optimizer_base(model: Any, args: argparse.Namespace) -> tuple[Any, Any]:
         weight_decay=args.decay,
     )
     if args.schedule == "Step":
-        scheduler = torch.optim.lr_scheduler.StepLR(
-            optimizer,
-            step_size=args.step,
-            gamma=args.gamma,
+        scheduler: torch.optim.lr_scheduler._LRScheduler = (
+            torch.optim.lr_scheduler.StepLR(
+                optimizer,
+                step_size=args.step,
+                gamma=args.gamma,
+            )
         )
     elif args.schedule == "Milestone":
         scheduler = torch.optim.lr_scheduler.MultiStepLR(
@@ -230,7 +232,7 @@ def test(  # noqa: PLR0915
         ]
         session_acc[session_index] = count_acc(session_preds, session_labels)
         print(f"Session {session_index}: Accuracy={session_acc[session_index]:.4f}")
-    return base_acc, new_acc, va.item()
+    return base_acc, new_acc, va.item()  # TODO add all reduce for distributed training
 
 
 def train_one_epoch(
