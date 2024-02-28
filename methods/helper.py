@@ -224,9 +224,11 @@ def test(  # noqa: PLR0915
     # clculate per-session accuracy
     session_acc = {}
     for session_index in range(session + 1):
-        session_start_class = (
-            args.base_class * (session > 0) + (session_index) * args.way
-        )
+        session_start_class, session_end_class = 0, args.base_class
+        if session_index > 0:
+            session_start_class = args.base_class + (session_index - 1) * args.way
+            session_end_class = session_start_class + args.way
+
         session_end_class = session_start_class + args.way
         session_labels = all_labels[
             (all_labels >= session_start_class) & (all_labels < session_end_class)
