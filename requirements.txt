@@ -3,10 +3,10 @@ mypy
 pre-commit
 pytest
 pytest-cov
-pytorch
 ruff
 timm==0.5.4
 toml
+torch
 torchvision
 types-PyYAML
 types-requests
