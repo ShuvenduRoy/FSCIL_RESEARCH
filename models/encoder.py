@@ -99,9 +99,12 @@ class FSCILencoder(nn.Module):
         self.num_features = 768
 
         # By default all pre-trained parameters are frozen
+        # except the MLP and the classifier layers
         for param in self.encoder_q.parameters():
             param.requires_grad = False
         for param in self.encoder_q.fc.parameters():
+            param.requires_grad = True
+        for param in self.encoder_q.classifier.parameters():
             param.requires_grad = True
 
         self.encoder_k = EncoderWrapper(args)
@@ -127,10 +130,13 @@ class FSCILencoder(nn.Module):
                 param.data.copy_(encoder_q_params[name])
 
         # print param name and status
+        print("\nencoder_q parameters:")
         for name, param in self.encoder_q.named_parameters():
-            print(name, param.requires_grad)
+            print("model.encoder_q", name, param.requires_grad)
+
+        print("\nencoder_q parameters:")
         for name, param in self.encoder_k.named_parameters():
-            print(name, param.requires_grad)
+            print("model.encoder_k", name, param.requires_grad)
 
         pet_name = "none" if self.args.pet_cls is None else self.args.pet_cls.lower()
         self.params_with_lr = [

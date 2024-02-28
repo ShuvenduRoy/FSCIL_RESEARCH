@@ -86,7 +86,10 @@ class FSCITTrainer:
             for epoch in range(self.args.epochs_base):
                 # Unfreeze some encoder parameter at encoder_ft_start_epoch
                 # defined by args.encoder_ft_start_layer
-                if epoch == self.args.encoder_ft_start_epoch:
+                if (
+                    epoch == self.args.encoder_ft_start_epoch
+                    and self.args.encoder_ft_start_layer != -1
+                ):
                     status = False
                     for (
                         name,
@@ -103,7 +106,7 @@ class FSCITTrainer:
                         name,
                         param,
                     ) in self.model_without_ddp.encoder_q.named_parameters():
-                        print(name, param.requires_grad)
+                        print("ecnoder_q @epoch, ", epoch, name, param.requires_grad)
         # handle trainable parameters for incremental sessions
         else:
             # Freeze the encoder

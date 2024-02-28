@@ -37,8 +37,6 @@ def override_training_configs(args: argparse.Namespace) -> argparse.Namespace:
 
     if args.encoder == "vit-16":
         args.size_crops = [224, 224]
-    if os.path.exists("/home/sneha/"):
-        args.num_workers = 4
     return args
 
 

@@ -98,8 +98,8 @@ def count_acc(logits: torch.tensor, label: torch.tensor) -> float:
     """
     pred = torch.argmax(logits, dim=1)
     if torch.cuda.is_available():
-        return (pred == label).mean().item()
-    return (pred == label).mean().item()
+        return (pred == label).type(torch.cuda.FloatTensor).mean().item()
+    return (pred == label).type(torch.FloatTensor).mean().item()
 
 
 def test(  # noqa: PLR0915
