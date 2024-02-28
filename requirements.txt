@@ -4,8 +4,9 @@ pre-commit
 pytest
 pytest-cov
 ruff
+timm==0.5.4
 toml
 types-PyYAML
 types-requests
-timm==0.5.4
-
+pytorch
+torchvision
