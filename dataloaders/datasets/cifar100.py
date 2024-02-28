@@ -116,7 +116,7 @@ class Cifar100Dataset(VisionDataset):
 
         if session > 0:
             txt_path = (
-                "data/index_list/".format()
+                "dataloaders/index_list/".format()
                 + args.dataset
                 + "/session_"
                 + str(session + 1)
