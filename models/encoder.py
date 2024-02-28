@@ -60,7 +60,10 @@ class EncoderWrapper(nn.Module):
             bias=self.args.add_bias_in_classifier,
         )
 
-    def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+    def forward(
+        self,
+        x: torch.Tensor,
+    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """Forward pass of the model.
 
         Parameters
@@ -70,11 +73,13 @@ class EncoderWrapper(nn.Module):
 
         Returns
         -------
-        Tuple[torch.Tensor, torch.Tensor]
-            Output tensor.
+        Tuple[torch.Tensor, torch.Tensor, torch.Tensor]
+            patch embeddings, [b, embed_dim]
+            projecting embedding, [b, moco_dim]
+            output logits, [b, n_classes]
         """
-        x = self.model(x).mean(1)
-        return self.fc(x), self.classifier(x)
+        x = self.model(x).mean(1)  # [b, n_tokens, embed_dim] -> [b, embed_dim]
+        return x, self.fc(x), self.classifier(x)
 
 
 class FSCILencoder(nn.Module):
@@ -324,13 +329,15 @@ class FSCILencoder(nn.Module):
         Any
             The output tensor.
         """
-        embedding_q, logits = self.encoder_q(im_q)  # [b, embed_dim] [b, n_classes]
+        token_embeding, embedding_q, logits = self.encoder_q(
+            im_q,
+        )  # [b, embed_dim] [b, n_classes]
         assert len(logits.shape) == 2
         assert logits.shape[1] == self.args.num_classes
         assert embedding_q.shape[1] == self.args.moco_dim
 
         if labels is None:  # during evaluation
-            return logits  # [b, n_classes]
+            return token_embeding, logits  # [b, n_classes]
         embedding_q = nn.functional.normalize(embedding_q, dim=1)
         embedding_q = embedding_q.unsqueeze(1)  # [b, 1, embed_dim]
 
@@ -338,7 +345,7 @@ class FSCILencoder(nn.Module):
         b = im_q.shape[0]
         with torch.no_grad():  # no gradient to keys
             self._momentum_update_key_encoder(base_sess)  # update the key encoder
-            embedding_k, _ = self.encoder_k(im_k)  # keys: bs x dim
+            _, embedding_k, _ = self.encoder_k(im_k)  # keys: bs x dim
             embedding_k = nn.functional.normalize(embedding_k, dim=1)
 
         # compute logits

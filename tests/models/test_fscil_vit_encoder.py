@@ -29,17 +29,18 @@ def test_facil_encoder(args: Any) -> None:
     im_k = torch.randn(2, 3, 224, 224)
     labels = torch.randint(0, 100, (2,))
 
-    embedding, logits = model.encoder_q(im_cla)
+    patch_embed, embedding, logits = model.encoder_q(im_cla)
+    assert len(patch_embed.shape) == 2
     embedding = nn.functional.normalize(embedding, dim=1)
 
-    embedding_q, _ = model.encoder_q(im_q)  # [b, embed_dim] [b, n_classes]
+    _, embedding_q, _ = model.encoder_q(im_q)  # [b, embed_dim] [b, n_classes]
     embedding_q = nn.functional.normalize(embedding_q, dim=1)
     embedding_q = embedding_q.unsqueeze(1)  # [b, 1, embed_dim]
 
     # foward key
     with torch.no_grad():  # no gradient to keys
         model._momentum_update_key_encoder(True)  # update the key encoder
-        embedding_k, _ = model.encoder_k(im_k)  # keys: bs x dim
+        _, embedding_k, _ = model.encoder_k(im_k)  # keys: bs x dim
         embedding_k = nn.functional.normalize(embedding_k, dim=1)
 
     # compute logits

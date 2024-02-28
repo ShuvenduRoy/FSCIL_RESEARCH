@@ -321,8 +321,6 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
     parser.add_argument("--adapt_blocks", type=int, default=0)
     parser.add_argument("--encoder_ft_start_epoch", type=int, default=0)
     parser.add_argument("--encoder_lr_factor", type=float, default=1)
-
-    # FSCIT configs
     parser.add_argument("--limited_base_class", type=int, default=-1)
     parser.add_argument("--limited_base_samples", type=float, default=1)
     parser.add_argument(
@@ -333,6 +331,12 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
         "teacher will be different from student, and will only be updated for "
         "the pre-trained parameters that are opt for fine-tuning. If no pre-trained"
         " parameters are tuned, EMA will enb up remaining the same as the pre-trained model.",
+    )
+    parser.add_argument(
+        "--update_base_classifier_with_prototypes",
+        type=str2bool,
+        default=False,
+        help="Flag to set whether of not update the base classifier with the prototypes",
     )
     parser.add_argument(
         "--add_bias_in_classifier",

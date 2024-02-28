@@ -7,7 +7,7 @@ from torch.nn.parallel import DistributedDataParallel
 
 from dataloaders.helpter import get_dataloader
 from losses.contrastive import SupContrastive
-from methods.helper import get_optimizer_base, test, train_one_epoch
+from methods.helper import get_optimizer_base, replace_base_fc, test, train_one_epoch
 from models.encoder import FSCILencoder
 from utils import dist_utils
 from utils.dist_utils import is_main_process
@@ -156,6 +156,9 @@ class FSCITTrainer:
                         session=session,
                         device_id=self.device_id,
                     )
+                    # TODO hold the bast model in a variable
+
+                    # TODO save everything for auto resume capability
                     session_accuracies["base"][session] = max(
                         base_acc,
                         session_accuracies["base"][session],
@@ -168,6 +171,9 @@ class FSCITTrainer:
                         all_acc,
                         session_accuracies["all"][session],
                     )
+            if self.args.update_base_classifier_with_prototypes:
+                # replace base classifier weight with prototypes
+                replace_base_fc(train_set, self.model, self.args, self.device_id)
 
             else:  # incremental session
                 pass

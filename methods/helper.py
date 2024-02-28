@@ -8,6 +8,8 @@ from torch import nn
 from torch.nn import functional as F  # noqa
 from tqdm import tqdm
 
+from dataloaders.helpter import get_transform
+
 
 class Averager:
     """Average meter."""
@@ -158,7 +160,7 @@ def test(  # noqa: PLR0915
                 labels = labels.cuda(non_blocking=True)
 
             # model foward pass
-            logits = model(data[0])
+            _, logits = model(data[0])
 
             # calculate the loss
             loss = F.cross_entropy(logits, labels)
@@ -322,3 +324,73 @@ def train_one_epoch(
         tl_moco.add(moco_loss.item())
         tl_ce.add(ce_loss.item())
         ta.add(acc)
+
+
+def replace_base_fc(
+    trainset: Any,
+    model: Any,
+    args: argparse.Namespace,
+    device_id: Any,
+) -> None:
+    """Replace fc.weight with the embedding average of train data.
+
+    Parameters
+    ----------
+    trainset: Any
+        The training dataset
+    model: Any
+        The model to train
+    args: argparse.Namespace
+        Training arguments
+    device_id: Any
+        Device id
+
+    Returns
+    -------
+    None
+    """
+    model = model.eval()
+    _, val_transforms = get_transform(args)
+    trainset.transform = val_transforms
+
+    trainloader = torch.utils.data.DataLoader(
+        dataset=trainset,
+        batch_size=args.batch_size_base,
+        num_workers=args.num_workers,
+        pin_memory=False,
+        shuffle=False,
+    )
+
+    embedding_list = []
+    label_list = []
+
+    with torch.no_grad():
+        for batch in trainloader:
+            data, labels = batch
+            labels = labels.long()
+            if device_id is not None:
+                for i in range(len(data)):
+                    data[i] = data[i].cuda(device_id, non_blocking=True)
+            elif torch.cuda.is_available():
+                for i in range(len(data)):
+                    data[i] = data[i].cuda(non_blocking=True)
+            embedding, _ = model(data[0])
+            embedding_list.append(embedding.cpu())
+            label_list.append(labels.cpu())
+
+    embedding_list = torch.cat(embedding_list, dim=0)
+    label_list = torch.cat(label_list, dim=0)
+
+    for class_index in torch.unique(label_list):
+        data_index = (label_list == class_index).nonzero()
+        embedding_this = embedding_list[data_index.squeeze(-1)]
+        embedding_this = embedding_this.mean(0)
+        if device_id is not None:
+            model.encoder_q.classifier.weight.data[class_index] = embedding_this.cuda(
+                device_id,
+                non_blocking=True,
+            )
+        elif torch.cuda.is_available():
+            model.encoder_q.classifier.weight.data[class_index] = embedding_this.cuda()
+        else:
+            model.encoder_q.classifier.weight.data[class_index] = embedding_this
