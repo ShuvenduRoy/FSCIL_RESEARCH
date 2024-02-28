@@ -74,12 +74,10 @@ class Cifar100Dataset(VisionDataset):
         self.args = args
 
         # select the class index for base classes; first 60 classes for cifar100
-        class_index = (
-            np.arange(args.base_class + args.way * session)
-        )
+        class_index = np.arange(args.base_class + args.way * session)
 
         # ABLATION SETTING: reduce the number of base classes
-        if session ==0 and args.limited_base_class > 0:
+        if session == 0 and args.limited_base_class > 0:
             class_index = class_index[: args.limited_base_class]
 
         if download:
@@ -126,7 +124,7 @@ class Cifar100Dataset(VisionDataset):
                 self.targets,
                 class_index,
             )
-        elif train: # incremental session, train; select by sample index
+        elif train:  # incremental session, train; select by sample index
             self.data, self.targets = self.select_by_sample_index(
                 self.data,
                 self.targets,
