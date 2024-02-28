@@ -14,7 +14,7 @@ from utils.dist_utils import is_main_process
 from utils.train_utils import ensure_path
 
 
-class FSCILTrainer:
+class FSCITTrainer:
     """FSCIL Trainer class."""
 
     def __init__(self, args: argparse.Namespace) -> None:
@@ -48,7 +48,7 @@ class FSCILTrainer:
             ensure_path(args.save_path)
 
         # initialize model
-        self.model: FSCILencoder = FSCILencoder(args)
+        self.model = FSCILencoder(args)
         self.criterion = SupContrastive()
         self.optimizer, self.scheduler = get_optimizer_base(self.model, self.args)
         self.device_id = None
@@ -66,7 +66,7 @@ class FSCILTrainer:
                 self.model,
                 device_ids=[self.device_id],
             )
-            self.model_without_ddp = self.model.module
+            self.model_without_ddp: FSCILencoder = self.model.module
 
         elif torch.cuda.is_available():
             self.model = self.model.cuda()

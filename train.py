@@ -4,7 +4,7 @@ import argparse
 import os
 from pprint import pprint
 
-from methods.fscil import FSCILTrainer
+from methods.fscit import FSCITTrainer
 from utils import dist_utils
 from utils.train_utils import (
     get_command_line_parser,
@@ -34,7 +34,7 @@ def main(args: argparse.Namespace) -> None:
             backend=args.distributed_backend,
         )
 
-    trainer = FSCILTrainer(args)
+    trainer = FSCITTrainer(args)
 
     trainer.train()
 
@@ -45,6 +45,5 @@ if __name__ == "__main__":
     args = get_dataset_configs(args)
     args = override_training_configs(args)
 
-    # set the seed
     pprint(vars(args))
     main(args)

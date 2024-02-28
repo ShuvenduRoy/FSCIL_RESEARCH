@@ -3,4 +3,5 @@ data/
 dev/
 
 *.pyc
+.dmypy.json
 .vscode
