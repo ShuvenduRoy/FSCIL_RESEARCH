@@ -1,6 +1,7 @@
 """FSCIL training module."""
 
 import argparse
+from typing import Tuple
 
 import torch
 from torch.nn.parallel import DistributedDataParallel
@@ -129,9 +130,34 @@ class FSCITTrainer:
                     param.requires_grad,
                 )
 
+    def update_matrix(self, accuracies: Tuple, session: int) -> None:
+        """Update the accuracy matrix.
+
+        Parameters
+        ----------
+        accuracies: Tuple
+            Tuple of accuracies for base, incremental and all classes.
+        session: int
+            Current session
+        """
+        base_acc, inc_acc, all_acc = accuracies
+
+        self.session_accuracies["base"][session] = max(
+            base_acc,
+            self.session_accuracies["base"][session],
+        )
+        self.session_accuracies["incremental"][session] = max(
+            inc_acc,
+            self.session_accuracies["incremental"][session],
+        )
+        self.session_accuracies["all"][session] = max(
+            all_acc,
+            self.session_accuracies["all"][session],
+        )
+
     def train(self) -> None:
         """Train the model."""
-        session_accuracies = {
+        self.session_accuracies = {  # TODO save in the checkpoint for resuming
             "base": [0] * self.args.sessions,
             "incremental": [0] * self.args.sessions,
             "all": [0] * self.args.sessions,
@@ -175,36 +201,31 @@ class FSCITTrainer:
                         session=session,
                         device_id=self.device_id,
                     )
+
+                    self.update_matrix((base_acc, inc_acc, all_acc), session)
+
                     # TODO hold the bast model in a variable
 
                     # TODO save everything for auto resume capability
-                    session_accuracies["base"][session] = max(
-                        base_acc,
-                        session_accuracies["base"][session],
+
+                if self.args.update_base_classifier_with_prototypes:
+                    # replace base classifier weight with prototypes
+                    print("Replacing base classifier weight with prototypes...")
+                    replace_base_fc(train_set, self.model, self.args, self.device_id)
+                    base_acc, inc_acc, all_acc = test(
+                        model=self.model,
+                        testloader=testloader,
+                        epoch=self.args.epochs_base,
+                        args=self.args,
+                        session=session,
+                        device_id=self.device_id,
                     )
-                    session_accuracies["incremental"][session] = max(
-                        inc_acc,
-                        session_accuracies["incremental"][session],
-                    )
-                    session_accuracies["all"][session] = max(
-                        all_acc,
-                        session_accuracies["all"][session],
-                    )
-            if self.args.update_base_classifier_with_prototypes:
-                # replace base classifier weight with prototypes
-                replace_base_fc(train_set, self.model, self.args, self.device_id)
-                test(
-                    model=self.model,
-                    testloader=testloader,
-                    epoch=epoch,
-                    args=self.args,
-                    session=session,
-                    device_id=self.device_id,
-                )
+
+                self.update_matrix((base_acc, inc_acc, all_acc), session)
 
             else:
                 replace_base_fc(train_set, self.model, self.args, self.device_id)
-                test(
+                base_acc, inc_acc, all_acc = test(
                     model=self.model,
                     testloader=testloader,
                     epoch=epoch,
@@ -212,5 +233,8 @@ class FSCITTrainer:
                     session=session,
                     device_id=self.device_id,
                 )
+                self.update_matrix((base_acc, inc_acc, all_acc), session)
+            print(f"Session {session + 1} completed.")
+            print(self.session_accuracies)
 
             # save model # TODO
