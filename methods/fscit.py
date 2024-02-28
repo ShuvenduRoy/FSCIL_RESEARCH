@@ -228,13 +228,15 @@ class FSCITTrainer:
                 base_acc, inc_acc, all_acc = test(
                     model=self.model,
                     testloader=testloader,
-                    epoch=epoch,
+                    epoch=0,
                     args=self.args,
                     session=session,
                     device_id=self.device_id,
                 )
                 self.update_matrix((base_acc, inc_acc, all_acc), session)
             print(f"Session {session + 1} completed.")
-            print(self.session_accuracies)
+            print("Base acc: ", self.session_accuracies["base"])
+            print("Inc. acc: ", self.session_accuracies["incremental"])
+            print("Overall : ", self.session_accuracies["all"])
 
             # save model # TODO
