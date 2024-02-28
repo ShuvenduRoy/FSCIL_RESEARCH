@@ -16,9 +16,7 @@ torch.manual_seed(42)
 @pytest.mark.parametrize(
     "args",
     [
-        (
-            get_default_args()
-        ),
+        (get_default_args()),
     ],
 )
 def test_facil_encoder(args: Any) -> None:
@@ -31,12 +29,18 @@ def test_facil_encoder(args: Any) -> None:
 
     data = next(iter(trainloader))
     images, labels = data
-    assert images[0].shape == (args.batch_size_base, 3, args.size_crops[0], args.size_crops[0])
+    assert images[0].shape == (
+        args.batch_size_base,
+        3,
+        args.size_crops[0],
+        args.size_crops[0],
+    )
     assert labels.shape == (args.batch_size_base,)
 
     train_set, trainloader, testloader = get_dataloader(args, 1)
     assert len(train_set) == 25
     assert len(trainloader) == np.ceil(25 / args.batch_size_base)
     assert len(testloader) == np.ceil(500 / args.test_batch_size)
+
 
 test_facil_encoder(get_default_args())

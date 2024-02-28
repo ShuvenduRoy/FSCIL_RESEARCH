@@ -1,3 +1,5 @@
+"""Test the FSCIL encoder."""
+
 from typing import Any
 
 import pytest
@@ -30,7 +32,6 @@ def test_facil_encoder(args: Any) -> None:
     embedding, logits = model.encoder_q(im_cla)
     embedding = nn.functional.normalize(embedding, dim=1)
 
-    b = im_q.shape[0]
     embedding_q, _ = model.encoder_q(im_q)  # [b, embed_dim] [b, n_classes]
     embedding_q = nn.functional.normalize(embedding_q, dim=1)
     embedding_q = embedding_q.unsqueeze(1)  # [b, 1, embed_dim]
@@ -47,18 +48,25 @@ def test_facil_encoder(args: Any) -> None:
     l_pos = (embedding_q * embedding_k.unsqueeze(1)).sum(2).view(-1, 1)
 
     # negative logits: NxK
-    l_neg = torch.einsum("nc,ck->nk", [embedding_q.view(-1, model.args.moco_dim), model.queue.clone().detach()])
+    l_neg = torch.einsum(
+        "nc,ck->nk",
+        [embedding_q.view(-1, model.args.moco_dim), model.queue.clone().detach()],
+    )
 
     logits_global = torch.cat([l_pos, l_neg], dim=1)
-    targets = ((labels[:, None] == model.label_queue[None, :]) & (labels[:, None] != -1)).float().to(logits_global.device)
+    targets = (
+        ((labels[:, None] == model.label_queue[None, :]) & (labels[:, None] != -1))
+        .float()
+        .to(logits_global.device)
+    )
 
-
+    assert targets.shape[0] == logits_global.shape[0]
     assert len(logits.shape) == 2
     assert logits.shape[1] == model.args.num_classes
     assert embedding.shape[1] == model.args.moco_dim
 
     # Test number of fc layer
-    assert len(model.encoder_q.fc) == 2 * args.num_mlp -1
+    assert len(model.encoder_q.fc) == 2 * args.num_mlp - 1
     assert model.encoder_q.fc[0].weight.requires_grad
     assert model.encoder_q.fc[-1].weight.requires_grad
 
