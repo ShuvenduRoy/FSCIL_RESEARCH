@@ -234,7 +234,11 @@ def test(  # noqa: PLR0915
         ]
         session_acc[session_index] = count_acc(session_preds, session_labels)
         print(f"Session {session_index}: Accuracy={session_acc[session_index]:.4f}")
-    return base_acc, new_acc, va.item()  # TODO add all reduce for distributed training
+    return (
+        round(base_acc * 100, 2),
+        round(new_acc * 100, 2),
+        round(va.item() * 100, 2),
+    )  # TODO add all reduce for distributed training
 
 
 def train_one_epoch(
