@@ -167,7 +167,7 @@ class FSCITTrainer:
             train_set, trainloader, testloader = get_dataloader(self.args, session)
 
             # train session
-            print(f"Training session {session + 1}...")
+            print(f"Training session {session}...")
             print(f"Train set size: {len(train_set)}")
             print(f"Test set size: {len(testloader.dataset)}")
 
