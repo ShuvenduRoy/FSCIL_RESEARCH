@@ -66,7 +66,7 @@ class FSCITTrainer:
                 self.model,
                 device_ids=[self.device_id],
             )
-            self.model_without_ddp: FSCILencoder = self.model.module
+            self.model_without_ddp = self.model.module
 
         elif torch.cuda.is_available():
             self.model = self.model.cuda()
