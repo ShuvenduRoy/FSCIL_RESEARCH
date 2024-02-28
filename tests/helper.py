@@ -67,6 +67,7 @@ def get_default_args() -> argparse.Namespace:
     "seed": 1,
     "sessions": 11,
     "shot": 5,
+    "num_views": 2,
     "start_session": 0,
     "step": 40,
     "temperature": 16,
