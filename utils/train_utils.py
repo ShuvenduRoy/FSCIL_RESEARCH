@@ -285,6 +285,12 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
     # about training
     parser.add_argument("--num_workers", type=int, default=8)
     parser.add_argument("--seed", type=int, default=1)
+    parser.add_argument(
+        "--num_seeds",
+        type=int,
+        default=1,
+        help="number of random seeds",
+    )
 
     # distributed training
     parser.add_argument("--gpu", default="0")
@@ -317,7 +323,12 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
     parser.add_argument("--rank", type=int, default=5)
 
     # FSCIT configs
-    parser.add_argument("--encoder_ft_start_layer", type=int, default=-1)
+    parser.add_argument(
+        "--encoder_ft_start_layer",
+        type=int,
+        default=500,
+        help="Encoder fine-tuning start layer; -1 means full-tuning; Use large number of freeze the whole network.",
+    )
     parser.add_argument("--adapt_blocks", type=int, default=0)
     parser.add_argument("--encoder_ft_start_epoch", type=int, default=0)
     parser.add_argument("--encoder_lr_factor", type=float, default=1)

@@ -86,13 +86,12 @@ class FSCITTrainer:
         # handle trainable parameters in the base session
         # at certain epochs
         if session == 0:
-            # Unfreeze some encoder parameter at encoder_ft_start_epoch
-            # defined by args.encoder_ft_start_layer
+            # Freeze/Fine-tune the specified layers of encoder
             if (
                 epoch == self.args.encoder_ft_start_epoch
-                and self.args.encoder_ft_start_layer != -1
-            ):
-                status = False
+            ):  # current epoch is ft start epoch
+
+                status = self.args.encoder_ft_start_layer == -1  # full fine-tune
                 for (
                     name,
                     param,
@@ -103,6 +102,12 @@ class FSCITTrainer:
                     ):
                         status = True
                     param.requires_grad = status
+
+                # MLP (FC) and Classifier layers are always fine-tuned
+                self.model_without_ddp.encoder_q.fc.requires_grad = True
+                self.model_without_ddp.encoder_q.classifier.requires_grad = True
+
+                # print the status of the encoder
                 for (
                     name,
                     param,
@@ -118,6 +123,11 @@ class FSCITTrainer:
             # Freeze the encoder
             for _, param in self.model_without_ddp.encoder_q.named_parameters():
                 param.requires_grad = False
+
+            # MLP (FC) and Classifier layers are always fine-tuned
+            self.model_without_ddp.encoder_q.fc.requires_grad = True
+            self.model_without_ddp.encoder_q.classifier.requires_grad = True
+
             # Tune params as defined in config # TODO handle what to tune in the inc
 
             for (
@@ -238,5 +248,3 @@ class FSCITTrainer:
             print("Base acc: ", self.session_accuracies["base"])
             print("Inc. acc: ", self.session_accuracies["incremental"])
             print("Overall : ", self.session_accuracies["all"])
-
-            # save model # TODO

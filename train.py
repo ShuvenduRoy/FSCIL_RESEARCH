@@ -4,6 +4,8 @@ import argparse
 import os
 from pprint import pprint
 
+import numpy as np
+
 from methods.fscit import FSCITTrainer
 from utils import dist_utils
 from utils.train_utils import (
@@ -34,9 +36,20 @@ def main(args: argparse.Namespace) -> None:
             backend=args.distributed_backend,
         )
 
-    trainer = FSCITTrainer(args)
+    results_dict: dict = {}
+    # Loop over seeds
+    for i in range(args.num_seeds):
+        args.seed = i
+        trainer = FSCITTrainer(args)
+        trainer.train()
 
-    trainer.train()
+        # update the results dictionary
+        for key, val in trainer.session_accuracies.items():
+            results_dict[key] = results_dict.get(key, []) + [val]
+
+    # averae across seeds
+    for key in results_dict:
+        results_dict[key] = np.array(results_dict[key]).mean(axis=0)
 
 
 if __name__ == "__main__":
