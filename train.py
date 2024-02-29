@@ -39,6 +39,7 @@ def main(args: argparse.Namespace) -> None:
     results_dict: dict = {}
     # Loop over seeds
     for i in range(args.num_seeds):
+        print(f"!!!Training with seed {i}")
         args.seed = i
         trainer = FSCITTrainer(args)
         trainer.train()
@@ -50,6 +51,11 @@ def main(args: argparse.Namespace) -> None:
     # averae across seeds
     for key in results_dict:
         results_dict[key] = np.array(results_dict[key]).mean(axis=0)
+
+    # print the results
+    print("Final Results:")
+    for key, val in results_dict.items():
+        print(f"{key}: {val}")
 
 
 if __name__ == "__main__":
