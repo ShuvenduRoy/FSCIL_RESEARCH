@@ -4,7 +4,7 @@ import argparse
 import os
 import os.path
 import pickle
-from typing import Any, List
+from typing import Any, List, Union
 
 import numpy as np
 import torch
@@ -133,9 +133,9 @@ class Cifar100Dataset(VisionDataset):
 
     def select_by_class_index(
         self,
-        data: np.ndarray,
-        targets: np.ndarray,
-        index: np.ndarray,
+        data: Union[np.ndarray, list],
+        targets: Union[np.ndarray, list],
+        index: Union[np.ndarray, list],
     ) -> Any:
         """Select all sample of the given classes.
 
@@ -156,8 +156,8 @@ class Cifar100Dataset(VisionDataset):
         -------
         Any
         """
-        data_tmp: List[np.ndarray] = []
-        targets_tmp: List[np.ndarray] = []
+        data_tmp: np.ndarray = np.array([])
+        targets_tmp: np.ndarray = np.array([])
         for i in index:
             ind_cl = np.where(i == targets)[0]
             # Select a reduced subset of base samples per class
@@ -166,7 +166,7 @@ class Cifar100Dataset(VisionDataset):
                 samples_to_select = int(len(ind_cl) * self.args.limited_base_samples)
                 ind_cl = np.random.choice(ind_cl, samples_to_select, replace=False)
 
-            if data_tmp == []:
+            if data_tmp.size == 0:
                 data_tmp = data[ind_cl]
                 targets_tmp = targets[ind_cl]
             else:
@@ -177,9 +177,9 @@ class Cifar100Dataset(VisionDataset):
 
     def select_by_sample_index(
         self,
-        data: np.ndarray,
-        targets: np.ndarray,
-        index: np.ndarray,
+        data: Union[np.ndarray, list],
+        targets: Union[np.ndarray, list],
+        index: Union[np.ndarray, list],
     ) -> Any:
         """Select all by given index.
 
