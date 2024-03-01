@@ -1,4 +1,5 @@
 black
+matplotlib==3.4.3
 mypy
 numpy==1.23.5
 pre-commit
