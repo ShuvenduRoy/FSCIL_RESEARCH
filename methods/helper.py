@@ -84,7 +84,7 @@ def get_optimizer_base(model: Any, args: argparse.Namespace) -> Tuple[Any, Any]:
     return optimizer, scheduler
 
 
-def count_acc(logits: torch.tensor, label: torch.tensor) -> float:
+def count_acc(logits: torch.Tensor, label: torch.Tensor) -> float:
     """Count the accuracy of the model.
 
     Parameters
@@ -100,8 +100,8 @@ def count_acc(logits: torch.tensor, label: torch.tensor) -> float:
     """
     pred = torch.argmax(logits, dim=1)
     if torch.cuda.is_available():
-        return (pred == label).type(torch.cuda.FloatTensor).mean().item()
-    return (pred == label).type(torch.FloatTensor).mean().item()
+        return (pred == label).type(torch.cuda.FloatTensor).mean().item()  # type: ignore
+    return (pred == label).type(torch.FloatTensor).mean().item()  # type: ignore
 
 
 def test(  # noqa: PLR0915
@@ -185,15 +185,17 @@ def test(  # noqa: PLR0915
             except Exception:
                 pass
 
-    base_labels = torch.cat(base_labels, dim=0)
-    new_labels = torch.cat(new_labels, dim=0)
-    base_preds = torch.cat(base_preds, dim=0)
-    new_preds = torch.cat(new_preds, dim=0)
-    all_labels = torch.cat([base_labels, new_labels], dim=0)
-    all_preds = torch.cat([base_preds, new_preds], dim=0)
+    base_labels: torch.Tensor = torch.cat(base_labels, dim=0)  # type: ignore
+    new_labels: torch.Tensor = torch.cat(new_labels, dim=0)  # type: ignore
+    base_preds: torch.Tensor = torch.cat(base_preds, dim=0)  # type: ignore
+    new_preds: torch.Tensor = torch.cat(new_preds, dim=0)  # type: ignore
+    base_labels_tensor = torch.cat(base_labels, dim=0)
+    new_labels_tensor = torch.cat(new_labels, dim=0)
+    all_labels: torch.Tensor = torch.cat([base_labels_tensor, new_labels_tensor], dim=0)  # type: ignore
+    all_preds: torch.Tensor = torch.cat([base_preds, new_preds], dim=0)  # type: ignore
 
-    base_acc = count_acc(base_preds, base_labels)
-    new_acc = count_acc(new_preds, new_labels)
+    base_acc = count_acc(base_preds, base_labels)  # type: ignore
+    new_acc = count_acc(new_preds, new_labels)  # type: ignore
     print(
         "epo {}, test, loss={:.4f} acc={:.4f} base acc={:.4f} new acc={:.4f},".format(
             epoch,
@@ -388,8 +390,8 @@ def replace_base_fc(
             embedding_list.append(embedding.cpu())
             label_list.append(labels.cpu())
 
-    embedding_list = torch.cat(embedding_list, dim=0)
-    label_list = torch.cat(label_list, dim=0)
+    embedding_list = torch.cat(embedding_list, dim=0)  # type: ignore
+    label_list = torch.cat(label_list, dim=0)  # type: ignore
 
     for class_index in torch.unique(label_list):
         data_index = (label_list == class_index).nonzero()

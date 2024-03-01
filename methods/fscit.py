@@ -63,11 +63,11 @@ class FSCITTrainer:
             self.model = self.model.cuda(self.device_id)
             self.criterion = self.criterion.cuda(self.device_id)
 
-            self.model = DistributedDataParallel(
+            self.model = DistributedDataParallel(  # type: ignore
                 self.model,
                 device_ids=[self.device_id],
             )
-            self.model_without_ddp = self.model.module
+            self.model_without_ddp = self.model.module  # type: ignore
 
         elif torch.cuda.is_available():
             self.model = self.model.cuda()
@@ -106,9 +106,6 @@ class FSCITTrainer:
                     if "classifier" not in name and "fc" not in name:
                         param.requires_grad = status
 
-                self.model_without_ddp.encoder_q.fc.requires_grad = True
-                self.model_without_ddp.encoder_q.classifier.requires_grad = True
-
                 # print the status of the encoder
                 for (
                     name,
@@ -125,14 +122,7 @@ class FSCITTrainer:
 
         # handle trainable parameters for incremental sessions
         else:
-            # Freeze the encoder
-            for _, param in self.model_without_ddp.encoder_q.named_parameters():
-                param.requires_grad = False
-
-            # MLP (FC) and Classifier layers are always fine-tuned
-            self.model_without_ddp.encoder_q.fc.requires_grad = True
-            self.model_without_ddp.encoder_q.classifier.requires_grad = True
-
+            pass
             # Tune params as defined in config # TODO handle what to tune in the inc
 
             for (

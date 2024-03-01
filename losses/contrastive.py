@@ -18,7 +18,7 @@ class SupContrastive(nn.Module):
         super(SupContrastive, self).__init__()
         self.reduction = reduction
 
-    def forward(self, y_pred: torch.tensor, y_true: torch.tensor) -> torch.tensor:
+    def forward(self, y_pred: torch.Tensor, y_true: torch.Tensor) -> torch.Tensor:
         """Forward function.
 
         Parameters
@@ -33,8 +33,8 @@ class SupContrastive(nn.Module):
         loss (torch.tensor)
         """
         sum_neg = ((1 - y_true) * torch.exp(y_pred)).sum(1).unsqueeze(1)
-        sum_pos = y_true * torch.exp(-y_pred)
-        num_pos = y_true.sum(1)
+        sum_pos = y_true * torch.exp(torch.neg(y_pred))
+        num_pos = torch.sum(y_true, dim=1)
         loss = torch.log(1 + sum_neg * sum_pos).sum(1) / num_pos
 
         if self.reduction == "mean":

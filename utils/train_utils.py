@@ -445,7 +445,7 @@ def pseudo_intra_class_cdf() -> None:
 
     for key, value in intra_class_distances.items():
         # average
-        intra_class_distances[key] = np.mean(value)
+        intra_class_distances[key] = np.mean(value)  # type: ignore
 
     distances = intra_class_distances.values()
     sorted_distances = np.sort(list(distances))
