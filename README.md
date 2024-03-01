@@ -14,7 +14,13 @@ Install the dependencies
 pip install -r requirements.txt
 ```
 
-## Data
+### Download Data
+
+- CIFAR100 - Will be downloaded automatically
+
+### Download pre-trained models
+
+- TODO: Add links
 
 ## Runing the Experiments
 
