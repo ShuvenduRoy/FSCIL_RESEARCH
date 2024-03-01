@@ -6,6 +6,8 @@ pre-commit
 pytest
 pytest-cov
 ruff
+scikit-learn==1.2.1
+sklearn
 timm==0.5.4
 toml
 torch==1.13.1
