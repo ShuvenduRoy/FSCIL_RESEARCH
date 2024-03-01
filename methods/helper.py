@@ -185,14 +185,14 @@ def test(  # noqa: PLR0915
             except Exception:
                 pass
 
-    base_labels: torch.Tensor = torch.cat(base_labels, dim=0)  # type: ignore
-    new_labels: torch.Tensor = torch.cat(new_labels, dim=0)  # type: ignore
-    base_preds: torch.Tensor = torch.cat(base_preds, dim=0)  # type: ignore
-    new_preds: torch.Tensor = torch.cat(new_preds, dim=0)  # type: ignore
+    base_labels = torch.cat(base_labels, dim=0)  # type: ignore
+    new_labels = torch.cat(new_labels, dim=0)  # type: ignore
+    base_preds = torch.cat(base_preds, dim=0)  # type: ignore
+    new_preds = torch.cat(new_preds, dim=0)  # type: ignore
     base_labels_tensor = torch.cat(base_labels, dim=0)
     new_labels_tensor = torch.cat(new_labels, dim=0)
-    all_labels: torch.Tensor = torch.cat([base_labels_tensor, new_labels_tensor], dim=0)  # type: ignore
-    all_preds: torch.Tensor = torch.cat([base_preds, new_preds], dim=0)  # type: ignore
+    all_labels = torch.cat([base_labels_tensor, new_labels_tensor], dim=0)  # type: ignore
+    all_preds = torch.cat([base_preds, new_preds], dim=0)  # type: ignore
 
     base_acc = count_acc(base_preds, base_labels)  # type: ignore
     new_acc = count_acc(new_preds, new_labels)  # type: ignore

@@ -229,7 +229,7 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
         type=str,
         default="https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz",
         choices=[
-            None,
+            "None",
             "https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz",
             "./checkpoint/ibot_student.pth",
             "./checkpoint/ibot_1k.pth",

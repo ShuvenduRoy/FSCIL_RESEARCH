@@ -38,7 +38,8 @@ pip install -r requirements.txt
 python train.py \
   --update_base_classifier_with_prototypes True \
   --epochs_base 0 \
-  --num_seeds 3
+  --num_seeds 3 \
+  --pre_trained_url https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz
 
 # Expected output
 base: [78.92 77.92 77.23 75.85 75.43 74.05 73.32 72.87 72.  ]
