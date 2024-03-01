@@ -2,8 +2,7 @@
 
 import argparse
 import importlib
-import math
-from typing import Any, List, Optional, Tuple
+from typing import Any, Optional, Tuple
 
 import torch
 from torch import nn
@@ -249,7 +248,7 @@ class FSCILencoder(nn.Module):
         """
         if (
             base_sess
-        ):  # TODO this is horrible hard coded logic. also need to handle EMA with diff params
+        ):  # TODO:BUG this is horrible hard coded logic. also need to handle EMA with diff params
             for param_q, param_k in zip(
                 self.encoder_q.parameters(),
                 self.encoder_k.parameters(),
@@ -284,22 +283,22 @@ class FSCILencoder(nn.Module):
         None
         """
         batch_size = keys.shape[0]
-        ptr = int(self.queue_ptr.item())
+        ptr = int(self.queue_ptr.item())  # type: ignore
 
         # replace the keys and labels at ptr (dequeue and enqueue)
         if ptr + batch_size > self.args.moco_k:
             remains = ptr + batch_size - self.args.moco_k
             self.queue[:, ptr:] = keys.T[:, : batch_size - remains]
             self.queue[:, :remains] = keys.T[:, batch_size - remains :]
-            self.label_queue[ptr:] = labels[: batch_size - remains]
-            self.label_queue[:remains] = labels[batch_size - remains :]
+            self.label_queue[ptr:] = labels[: batch_size - remains]  # type: ignore
+            self.label_queue[:remains] = labels[batch_size - remains :]  # type: ignore
         else:
             self.queue[:, ptr : ptr + batch_size] = (
                 keys.T
             )  # this queue is feature queue
-            self.label_queue[ptr : ptr + batch_size] = labels
+            self.label_queue[ptr : ptr + batch_size] = labels  # type: ignore
         ptr = (ptr + batch_size) % self.args.moco_k  # move pointer
-        self.queue_ptr[0] = ptr
+        self.queue_ptr[0] = ptr  # type: ignore
 
     def forward(
         self,
@@ -371,7 +370,7 @@ class FSCILencoder(nn.Module):
         # find same label images from label queue
         # for the query with -1, all
         targets = (
-            ((labels[:, None] == self.label_queue[None, :]) & (labels[:, None] != -1))
+            ((labels[:, None] == self.label_queue[None, :]) & (labels[:, None] != -1))  # type: ignore
             .float()
             .to(logits_global.device)
         )
@@ -383,74 +382,3 @@ class FSCILencoder(nn.Module):
             self._dequeue_and_enqueue(embedding_k, labels)
 
         return logits, embedding_q, logits_global, targets_global
-
-    def update_fc(self, dataloader: Any, class_list: List, transform: Any) -> None:
-        """Update the fully connected layer.
-
-        Parameters
-        ----------
-        dataloader : Any
-            The dataloader.
-        class_list : list
-            The class list.
-        transform : Any
-            The transformations
-
-        Returns
-        -------
-        None
-        """
-        data_all = []
-        all_labels = []
-
-        for batch in dataloader:
-            if torch.cuda.is_available():
-                data, label = [_.cuda() for _ in batch]
-            else:
-                data, label = batch
-            data = transform(data)
-            labels = torch.stack([label], 1).view(-1)
-            data, _ = self.encode_q(data)
-            data.detach()
-
-            data_all.append(data)
-            all_labels.append(labels)
-
-        labels = torch.cat(all_labels, 0)
-        data = torch.cat(data_all, 0)
-
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        if self.args.not_data_init:
-            new_fc = nn.Parameter(
-                torch.rand(len(class_list), self.num_features, device=device),
-                requires_grad=True,
-            )
-            nn.init.kaiming_uniform_(new_fc, a=math.sqrt(5))
-        else:
-            new_fc = self.update_fc_avg(data, labels, class_list)
-
-    def update_fc_avg(self, data: Any, labels: Any, class_list: list) -> torch.Tensor:
-        """Update the fully connected layer.
-
-        Parameters
-        ----------
-        data : torch.Tensor
-            The data.
-        labels : torch.Tensor
-            The labels.
-        class_list : list
-            The class list.
-
-        Returns
-        -------
-        torch.Tensor
-            The new fully connected layer weight.
-        """
-        new_fc = []  # TODO need to fix this. This should be the classifier weight
-        for index in class_list:
-            data_index = (labels == index).nonzero().squeeze(-1)
-            embedding = data[data_index]
-            proto = embedding.mean(0)
-            new_fc.append(proto)
-            self.fc.weight.data[index] = proto
-        return torch.stack(new_fc, dim=0)

@@ -25,8 +25,12 @@ def test_facil_encoder(args: Any) -> None:
     trainer = FSCITTrainer(args)
     train_set, _, _ = get_dataloader(args, 1)
     old_fc_weight = trainer.model.encoder_q.classifier.weight.clone()
+
+    # testing replace_base_fc
     replace_base_fc(train_set, trainer.model, args, device_id=None)
     new_fc_weight = trainer.model.encoder_q.classifier.weight.clone()
+
+    # new weights should not be equal to old weights
     assert not torch.equal(old_fc_weight, new_fc_weight)
 
 

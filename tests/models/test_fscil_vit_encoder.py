@@ -56,7 +56,7 @@ def test_facil_encoder(args: Any) -> None:
 
     logits_global = torch.cat([l_pos, l_neg], dim=1)
     targets = (
-        ((labels[:, None] == model.label_queue[None, :]) & (labels[:, None] != -1))
+        ((labels[:, None] == model.label_queue[None, :]) & (labels[:, None] != -1))  # type: ignore
         .float()
         .to(logits_global.device)
     )
