@@ -100,10 +100,12 @@ class FSCITTrainer:
                         name.startswith("model.blocks")
                         and int(name.split(".")[2]) == self.args.encoder_ft_start_layer
                     ):
-                        status = True
-                    param.requires_grad = status
+                        status = True  # start fine-tuning from the specified layer
 
-                # MLP (FC) and Classifier layers are always fine-tuned
+                    # MLP (FC) and Classifier layers are always fine-tuned
+                    if "classifier" not in name and "fc" not in name:
+                        param.requires_grad = status
+
                 self.model_without_ddp.encoder_q.fc.requires_grad = True
                 self.model_without_ddp.encoder_q.classifier.requires_grad = True
 
