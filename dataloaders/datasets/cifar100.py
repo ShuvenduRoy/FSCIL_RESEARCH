@@ -109,7 +109,6 @@ class Cifar100Dataset(VisionDataset):
 
         txt_path = (
             "dataloaders/index_list/cifar100/{}way{}shot/".format(args.way, args.shot)
-            + args.dataset
             + "/session_"
             + str(session + 1)
             + ".txt"

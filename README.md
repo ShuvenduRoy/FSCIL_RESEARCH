@@ -1,13 +1,15 @@
 # FSCIT
 
 Official implementation of our paper:
+
 > [**Few-shot Class-incremental Tuning**](https://arxiv.org/abs/)
 > Shuvendu Roy, Ali Etemad
-> *Under-reivew*
-
+> _Under-reivew_
 
 ## Getting started
+
 Install the dependencies
+
 ```
 pip install -r requirements.txt
 ```
@@ -16,8 +18,15 @@ pip install -r requirements.txt
 
 ## Runing the Experiments
 
+### Important Config Notes
+
+- Default config for CIFAR100: 60 base classes, 5-way 5-shot incremental
+- To use no-base 10-way 10-shot, used `--shot 10 --way 10`
+
 ### Baseline
+
 - No training (Prototyp-based FSCIT)
+
 ```bash
 # Supervised ViT-16/B
 python train.py \
@@ -31,7 +40,6 @@ incremental: [  nan 68.2  72.6  70.2  71.45 72.92 73.9  71.6  70.58]
 all: [78.92 77.17 76.57 74.72 74.44 73.72 73.51 72.4  71.43]
 ```
 
-
 ```bash
 # SSL MoCo v3
 
@@ -44,6 +52,7 @@ python train.py \
 ```
 
 - Full fine-tune + incremental frozen
+
 ```
 python train.py --..
 ```
