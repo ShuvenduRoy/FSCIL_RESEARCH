@@ -29,7 +29,7 @@ class EncoderWrapper(nn.Module):
         super(EncoderWrapper, self).__init__()
         self.args = args
         if self.args.encoder == "vit-16":
-            print("Loading ViT-16")
+            print("Encoder: ViT-16")
             net_module = importlib.import_module("models.public.backbones.vit")
             self.model = net_module.vit_b16_in21k(
                 True,

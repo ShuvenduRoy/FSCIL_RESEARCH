@@ -15,7 +15,8 @@ paper `DeiT: Data-efficient Image Transformers` - https://arxiv.org/abs/2012.128
 
 Acknowledgments:
 * The paper authors for releasing code and weights, thanks!
-* I fixed my class token impl based on Phil Wang's https://github.com/lucidrains/vit-pytorch ... check it out
+* I fixed my class token impl based on Phil Wang's
+https://github.com/lucidrains/vit-pytorch ... check it out
 for some einops/einsum fun
 * Simple transformer style inspired by Andrej Karpathy's https://github.com/karpathy/minGPT
 * Bert reference code checks against Huggingface Transformers and Tensorflow Bert
@@ -286,7 +287,7 @@ default_cfgs = {
 
 
 class Mlp(nn.Module, AdapterMixin):
-    """MLP as used in Vision Transformer, MLP-Mixer and related networks"""
+    """MLP as used in Vision Transformer, MLP-Mixer and related networks."""
 
     def __init__(
         self,
@@ -308,15 +309,17 @@ class Mlp(nn.Module, AdapterMixin):
         self.drop2 = nn.Dropout(drop_probs[1])
 
     def forward(self, x):
+        """Forward method."""
         x = self.adapt_module("fc1", x)  # x = self.fc1(x)
         x = self.act(x)
         x = self.drop1(x)
         x = self.adapt_module("fc2", x)  # x = self.fc2(x)
-        x = self.drop2(x)
-        return x
+        return self.drop2(x)
 
 
 class Attention(nn.Module, PromptMixin, PrefixMixin, AdapterMixin):
+    """Attention layer."""
+
     def __init__(
         self,
         dim,
@@ -336,9 +339,10 @@ class Attention(nn.Module, PromptMixin, PrefixMixin, AdapterMixin):
         self.proj_drop = nn.Dropout(proj_drop)
 
     def forward(self, x):
+        """Forward funciton."""
         x = self.add_prompt(x)
 
-        B, N, C = x.shape
+        B, N, C = x.shape  # noqa: N806
         qkv = self.adapt_module("qkv", x)
 
         # make torchscript happy (cannot use tensor as tuple)
@@ -363,12 +367,12 @@ class Attention(nn.Module, PromptMixin, PrefixMixin, AdapterMixin):
         x = self.adapt_module("proj", x)  # x = self.proj(x)
         x = self.proj_drop(x)
 
-        x = self.reduce_prompt(x)
-
-        return x
+        return self.reduce_prompt(x)
 
 
 class Block(nn.Module, AdapterMixin):
+    """Transformer block."""
+
     def __init__(
         self,
         dim,
@@ -390,7 +394,7 @@ class Block(nn.Module, AdapterMixin):
             attn_drop=attn_drop,
             proj_drop=drop,
         )
-        # NOTE: drop path for stochastic depth, we shall see if this is better than dropout here
+        # drop path for stochastic depth, we shall see if this is better than dropout
         self.drop_path = DropPath(drop_path) if drop_path > 0.0 else nn.Identity()
         self.norm2 = norm_layer(dim)
         mlp_hidden_dim = int(dim * mlp_ratio)
@@ -402,22 +406,24 @@ class Block(nn.Module, AdapterMixin):
         )
 
     def forward(self, x):
+        """Forward funciton."""
         x = x + self.drop_path(
             self.adapt_module("attn", self.norm1(x)),  # self.attn(self.norm1(x))
         )
-        x = x + self.drop_path(
+        return x + self.drop_path(
             self.adapt_module("mlp", self.norm2(x)),  # self.mlp(self.norm2(x))
         )
-        return x
 
 
 class VisionTransformer(nn.Module):
     """Vision Transformer.
 
-    A PyTorch impl of : `An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale`
+    A PyTorch impl of : `An Image is Worth 16x16 Words:
+        Transformers for Image Recognition at Scale`
         - https://arxiv.org/abs/2010.11929
 
-    Includes distillation token & head support for `DeiT: Data-efficient Image Transformers`
+    Includes distillation token & head support for
+        `DeiT: Data-efficient Image Transformers`
         - https://arxiv.org/abs/2012.12877
     """
 
@@ -452,7 +458,8 @@ class VisionTransformer(nn.Module):
             num_heads (int): number of attention heads
             mlp_ratio (int): ratio of mlp hidden dim to embedding dim
             qkv_bias (bool): enable bias for qkv if True
-            distilled (bool): model includes a distillation token and head as in DeiT models
+            distilled (bool): model includes a distillation token
+                and head as in DeiT models
             drop_rate (float): dropout rate
             attn_drop_rate (float): attention dropout rate
             drop_path_rate (float): stochastic depth rate
@@ -508,6 +515,7 @@ class VisionTransformer(nn.Module):
         self.init_weights(weight_init)
 
     def init_weights(self, mode=""):
+        """Initialize weights."""
         assert mode in ("jax", "jax_nlhb", "nlhb", "")
         trunc_normal_(self.pos_embed, std=0.02)
         if self.dist_token is not None:
@@ -525,13 +533,16 @@ class VisionTransformer(nn.Module):
 
     @torch.jit.ignore()
     def load_pretrained(self, checkpoint_path, prefix=""):
+        """Load pretrained weights."""
         _load_weights(self, checkpoint_path, prefix)
 
     @torch.jit.ignore
     def no_weight_decay(self):
+        """No weight decay."""
         return {"pos_embed", "cls_token", "dist_token"}
 
     def forward_features(self, x):
+        """Forward features."""
         x = self.patch_embed(x)
         # stole cls_tokens impl from Phil Wang, thanks
         cls_token = self.cls_token.expand(x.shape[0], -1, -1)
@@ -543,13 +554,11 @@ class VisionTransformer(nn.Module):
         x = self.pos_drop(x + self.pos_embed)
 
         x = self.blocks(x)
-        x = self.norm(x)
-
-        return x
+        return self.norm(x)
 
     def forward(self, x):
-        x = self.forward_features(x)  # shape: B N C
-        return x
+        """Forward method."""
+        return self.forward_features(x)  # shape: B N C
 
 
 def _init_vit_weights(
@@ -560,8 +569,10 @@ def _init_vit_weights(
     """ViT weight initialization.
 
     * When called without n, jax_impl args it will behave exactly the same
-      as my original init for compatibility with prev hparam / downstream use cases (ie DeiT).
-    * When called w/ valid n (module name) and jax_impl=True, will (hopefully) match JAX impl
+      as my original init for compatibility with prev
+      hparam / downstream use cases (ie DeiT).
+    * When called w/ valid n (module name) and jax_impl=True,
+        will (hopefully) match JAX impl
     """
     if isinstance(module, nn.Linear):
         if jax_impl:
@@ -779,29 +790,28 @@ def _create_vision_transformer(
     **kwargs,
 ):
     default_cfg = default_cfg or default_cfgs[variant]
-    if kwargs.get("features_only", None):
-        raise RuntimeError(
-            "features_only not implemented for Vision Transformer models.",
-        )
-    if "pre_trained_url" in kwargs and kwargs["pre_trained_url"] is not None:
-        if "/scratch" in kwargs["pre_trained_url"]:
-            default_cfg["url"] = ""
-            default_cfg["file"] = kwargs["pre_trained_url"]
-        else:
-            default_cfg["url"] = kwargs["pre_trained_url"]
-    path = kwargs.pop("pre_trained_url")
+    default_cfg["url"] = kwargs.pop("pre_trained_url")
 
     model = build_model_with_cfg(
         VisionTransformer,
         variant,
-        pretrained,
+        pretrained=(
+            False
+            if default_cfg["url"] is None or "checkpoint/" in default_cfg["url"]
+            else pretrained
+        ),
         default_cfg=default_cfg,
         pretrained_filter_fn=checkpoint_filter_fn,
-        pretrained_custom_load="npz" in default_cfg["url"],
+        pretrained_custom_load=False,
         **kwargs,
     )
-    if path and "/scratch" in path:
-        state_dict = torch.load(path, map_location="cpu")
+    if "checkpoint/" in default_cfg["url"]:  # load pretrained weights from local file
+        print(
+            "Loading pretrained weights from local file: {}".format(
+                default_cfg["url"],
+            ),
+        )
+        state_dict = torch.load(default_cfg["url"], map_location="cpu")
         message = model.load_state_dict(state_dict, strict=False)
         assert (
             message.missing_keys == []
@@ -889,12 +899,11 @@ def vit_small_patch16_224(pretrained=True, **kwargs):
         num_heads=6,
         **kwargs,
     )
-    model = _create_vision_transformer(
+    return _create_vision_transformer(
         "vit_small_patch16_224",
         pretrained=pretrained,
         **model_kwargs,
     )
-    return model
 
 
 def vit_small_patch16_384(pretrained=True, **kwargs):

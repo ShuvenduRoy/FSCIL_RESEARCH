@@ -227,7 +227,15 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
     parser.add_argument(
         "--pre_trained_url",
         type=str,
-        default=None,
+        default="https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz",
+        choices=[
+            None,
+            "https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz",
+            "./checkpoint/ibot_student.pth",
+            "./checkpoint/ibot_1k.pth",
+            "./checkpoint/moco_v3.pth",
+            "https://dl.fbaipublicfiles.com/dino/dino_vitbase16_pretrain/dino_vitbase16_pretrain.pth",
+        ],  # TODO need more options
         help="loading model parameter from a specific dir",
     )
 
@@ -321,6 +329,12 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
         choices=[None, "Prefix", "Adapter", "LoRA"],
     )
     parser.add_argument("--rank", type=int, default=5)
+    parser.add_argument(
+        "--pet_tuning_start_epoch",
+        type=int,
+        default=0,
+        help="PET tuning start epoch, by defeault (0) starts from the beginning of training.",
+    )
 
     # FSCIT configs
     parser.add_argument(

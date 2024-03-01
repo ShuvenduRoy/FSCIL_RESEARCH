@@ -6,3 +6,4 @@ dev/
 .dmypy.json
 .vscode
 .trunk/
+checkpoint/
