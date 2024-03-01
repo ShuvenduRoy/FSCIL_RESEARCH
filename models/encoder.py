@@ -31,7 +31,7 @@ class EncoderWrapper(nn.Module):
         if self.args.encoder == "vit-16":
             print("Encoder: ViT-16")
             net_module = importlib.import_module("models.public.backbones.vit")
-            self.model = net_module.vit_b16_in21k(
+            self.model = net_module.vit_b16_in21k(  # TODO this name is ambiguous, it has nothing to do with 21k
                 True,
                 pre_trained_url=args.pre_trained_url,
             )

@@ -805,7 +805,9 @@ def _create_vision_transformer(
         pretrained_custom_load=False,
         **kwargs,
     )
-    if "checkpoint/" in default_cfg["url"]:  # load pretrained weights from local file
+    if (
+        default_cfg["url"] is not None and "checkpoint/" in default_cfg["url"]
+    ):  # load pretrained weights from local file
         print(
             "Loading pretrained weights from local file: {}".format(
                 default_cfg["url"],
