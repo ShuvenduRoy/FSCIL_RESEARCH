@@ -107,24 +107,17 @@ class Cifar100Dataset(VisionDataset):
         self.data = np.vstack(self.data).reshape(-1, 3, 32, 32).transpose((0, 2, 3, 1))
         self.targets = np.asarray(self.targets)
 
-        if session > 0:
-            txt_path = (
-                "dataloaders/index_list/".format()
-                + args.dataset
-                + "/session_"
-                + str(session + 1)
-                + ".txt"
-            )
-            with open(txt_path) as f:
-                sample_index = f.read().splitlines()
+        txt_path = (
+            "dataloaders/index_list/cifar100/{}way{}shot/".format(args.way, args.shot)
+            + args.dataset
+            + "/session_"
+            + str(session + 1)
+            + ".txt"
+        )
+        with open(txt_path) as f:
+            sample_index = f.read().splitlines()
 
-        if session == 0:  # base session, train and test; select all of certain classes
-            self.data, self.targets = self.select_by_class_index(
-                self.data,
-                self.targets,
-                class_index,
-            )
-        elif train:  # incremental session, train; select by sample index
+        if train:  # incremental session, train; select by sample index
             self.data, self.targets = self.select_by_sample_index(
                 self.data,
                 self.targets,
