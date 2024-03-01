@@ -104,8 +104,8 @@ class Cifar100Dataset(VisionDataset):
                 else:
                     self.targets.extend(entry["fine_labels"])
 
-        self.data = np.vstack(self.data).reshape(-1, 3, 32, 32).transpose((0, 2, 3, 1))
-        self.targets = np.asarray(self.targets)
+        self.data = np.vstack(self.data).reshape(-1, 3, 32, 32).transpose((0, 2, 3, 1))  # type: ignore
+        self.targets = np.asarray(self.targets)  # type: ignore
 
         txt_path = (
             "dataloaders/index_list/cifar100/{}way{}shot/".format(args.way, args.shot)

@@ -10,7 +10,7 @@ Official implementation of our paper:
 
 Install the dependencies
 
-```
+```bash
 pip install -r requirements.txt
 ```
 
@@ -53,7 +53,7 @@ python train.py \
 
 - Full fine-tune + incremental frozen
 
-```
+```bash
 python train.py --..
 ```
 
@@ -61,7 +61,7 @@ python train.py --..
 
 If you find our work useful to your research, please cite our paper:
 
-```
+```bash
 @article{FSCIT,
   title={Few-shot Class-incremental Tuning},
   author={Roy, Shuvendu and Etemad, Ali},
