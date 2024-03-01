@@ -117,6 +117,9 @@ class FSCITTrainer:
                         name,
                         param.requires_grad,
                     )
+            if epoch == self.args.pet_tuning_start_epoch:
+                # Fine-tune the PET layer
+                pass  # TODO handle PET tuning
 
         # handle trainable parameters for incremental sessions
         else:

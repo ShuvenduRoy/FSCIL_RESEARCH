@@ -29,4 +29,5 @@ def test_facil_encoder(args: Any) -> None:
     new_fc_weight = trainer.model.encoder_q.classifier.weight.clone()
     assert not torch.equal(old_fc_weight, new_fc_weight)
 
+
 test_facil_encoder(get_default_args())
