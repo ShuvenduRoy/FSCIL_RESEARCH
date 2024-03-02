@@ -213,8 +213,8 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
     parser.add_argument(
         "--moco_loss_factor",
         type=float,
-        default=1.0,
-        help="coefficient of the moco loss",
+        default=0.0,
+        help="coefficient of the moco loss; disabled by default",
     )
     parser.add_argument(
         "--num_views",

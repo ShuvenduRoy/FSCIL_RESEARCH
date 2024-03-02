@@ -29,9 +29,7 @@ pip install -r requirements.txt
 - Default config for CIFAR100: 60 base classes, 5-way 5-shot incremental
 - To use no-base 10-way 10-shot, used `--shot 10 --way 10 --base_class 10`
 
-### Baseline
-
-- No training (Prototyp-based FSCIT)
+### Baseline: No training (Prototyp-based FSCIT)
 
 ```bash
 # Supervised ViT-B16
@@ -103,7 +101,7 @@ incremental: [  nan 32.6  16.5  15.07 13.55 10.88 10.17 10.94 12.18]
 all: [ 8.62 10.17  9.47  9.04  9.02  8.51  8.31  8.68  7.5 ]
 ```
 
-- No training (Prototyp-based FSCIT) for 10-way 10-shot
+### Baseline: No training (Prototype-based FSCIT) for 10-way 10-shot
 
 ```bash
 # Supervised ViT-B16
@@ -115,7 +113,9 @@ python train.py \
   --shot 10 --way 10 --base_class 10
 
 # Expected output
-
+Base acc:  [94.1, 91.2, 85.4, 83.3, 81.4, 80.1, 79.6, 78.4, 77.4]
+Inc. acc:  [nan, 82.9, 79.25, 78.23, 75.28, 73.2, 72.1, 70.2, 70.29]
+Overall :  [94.1, 87.05, 81.3, 79.5, 76.5, 74.35, 73.17, 71.22, 71.08]
 ```
 
 ```bash
@@ -128,7 +128,9 @@ python train.py \
   --shot 10 --way 10 --base_class 10
 
 # Expected output
-
+base: [51.1 50.5 37.3 36.7 33.7 33.7 32.2 32.2 31.5]
+incremental: [  nan 23.1  28.55 27.63 22.43 20.82 20.47 20.2  19.65]
+all: [51.1  36.8  31.47 29.9  24.68 22.97 22.14 21.7  20.97]
 ```
 
 ```bash
@@ -141,7 +143,9 @@ python train.py \
   --shot 10 --way 10 --base_class 10
 
 # Expected output
-
+Base acc:  [87.3, 80.7, 72.6, 66.4, 60.9, 58.7, 57.2, 54.0, 53.7]
+Inc. acc:  [nan, 69.4, 66.5, 61.3, 56.53, 54.52, 52.5, 50.93, 50.08]
+Overall :  [87.3, 75.05, 68.53, 62.57, 57.4, 55.22, 53.17, 51.31, 50.48]
 ```
 
 ```bash
@@ -154,7 +158,9 @@ python train.py \
   --shot 10 --way 10 --base_class 10
 
 # Expected output
-
+base: [64.8 60.  45.8 39.6 38.4 33.1 29.6 26.8 26.3]
+incremental: [  nan 45.6  33.3  33.1  31.5  28.26 25.7  23.97 22.88]
+all: [64.8  52.8  37.47 34.72 32.88 29.07 26.26 24.32 23.26]
 ```
 
 ```bash
@@ -167,12 +173,37 @@ python train.py \
   --shot 10 --way 10 --base_class 10
 
 # Expected output
+base: [38.  20.1 14.1  7.3  7.3  7.3  7.1  6.5  6.5]
+incremental: [  nan 22.6  16.65 11.07 10.25  9.08  9.08  8.79  8.  ]
+all: [38.   21.35 15.8  10.12  9.66  8.78  8.8   8.5   7.83]
 ```
 
-- Full fine-tune + incremental frozen
+```bash
+# MAE
+python train.py \
+  --update_base_classifier_with_prototypes True \
+  --epochs_base 0 \
+  --num_seeds 3 \
+  --pre_trained_url https://dl.fbaipublicfiles.com/mae/pretrain/mae_pretrain_vit_base.pth \
+  --shot 10 --way 10 --base_class 10
+
+# Expected output
+base: [22.2 12.4 11.3 10.7 10.4  3.   2.8  2.5  2.5]
+incremental: [  nan 11.4   8.45  5.2   4.    5.08  4.3   3.93  3.45]
+all: [22.2  11.9   9.4   6.57  5.28  4.73  4.09  3.75  3.34]
+```
+
+### Full fine-tune + incremental frozen
 
 ```bash
-python train.py --..
+python train.py \
+  --update_base_classifier_with_prototypes True \
+  --epochs_base 10 \
+  --lr_base 0.001 \
+  --encoder_ft_start_layer -1 \
+  --num_seeds 3 \
+  --pre_trained_url ./checkpoint/moco_v3.pth \
+  --shot 10 --way 10 --base_class 10
 ```
 
 ## Citing FSCIT

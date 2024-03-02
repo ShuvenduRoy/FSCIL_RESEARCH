@@ -86,7 +86,6 @@ class FSCITTrainer:
         # handle trainable parameters in the base session
         # at certain epochs
         if session == 0:
-            # Freeze/Fine-tune the specified layers of encoder
             if (
                 epoch == self.args.encoder_ft_start_epoch
             ):  # current epoch is ft start epoch
@@ -100,11 +99,10 @@ class FSCITTrainer:
                         name.startswith("model.blocks")
                         and int(name.split(".")[2]) == self.args.encoder_ft_start_layer
                     ):
-                        status = True  # start fine-tuning from the specified layer
+                        status = True  # start fine-tuning from this layer
 
-                    # MLP (FC) and Classifier layers are always fine-tuned
-                    if "classifier" not in name and "fc" not in name:
-                        param.requires_grad = status
+                    # update the requires_grad status is not already trainable
+                    param.requires_grad = status or param.requires_grad
 
                 # print the status of the encoder
                 for (
@@ -124,16 +122,7 @@ class FSCITTrainer:
         else:
             pass
             # Tune params as defined in config # TODO handle what to tune in the inc
-
-            for (
-                name,
-                param,
-            ) in self.model_without_ddp.encoder_q.named_parameters():
-                print(
-                    "ecnoder_q @session {} @epoch {},".format(session, epoch),
-                    name,
-                    param.requires_grad,
-                )
+            # TODO:FEAT: print all if something changes
 
     def update_matrix(self, accuracies: Tuple, session: int) -> None:
         """Update the accuracy matrix.
