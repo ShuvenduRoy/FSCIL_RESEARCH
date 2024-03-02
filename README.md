@@ -199,7 +199,7 @@ all: [22.2  11.9   9.4   6.57  5.28  4.73  4.09  3.75  3.34]
 python train.py \
   --update_base_classifier_with_prototypes True \
   --epochs_base 10 \
-  --lr_base 0.001 \
+  --lr_base 0.01 \
   --encoder_ft_start_layer -1 \
   --num_seeds 3 \
   --pre_trained_url ./checkpoint/moco_v3.pth \

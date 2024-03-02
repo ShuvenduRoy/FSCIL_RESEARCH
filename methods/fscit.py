@@ -73,7 +73,7 @@ class FSCITTrainer:
             self.model = self.model.cuda()
             self.criterion = self.criterion.cuda()
 
-    def adjust_learnable_parameters(self, session: int, epoch: int = 0) -> None:
+    def adjust_learnable_parameters(self, session: int, epoch: int) -> None:
         """Adjust the learnable parameters base of config and current step.
 
         Parameters
@@ -173,7 +173,7 @@ class FSCITTrainer:
                         testloader.sampler.set_epoch(epoch)
 
                     # adjust learnable params
-                    self.adjust_learnable_parameters(session)
+                    self.adjust_learnable_parameters(session, epoch)
 
                     # train and test
                     train_one_epoch(
