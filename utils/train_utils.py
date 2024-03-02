@@ -35,7 +35,7 @@ def override_training_configs(args: argparse.Namespace) -> argparse.Namespace:
 
     args.save_path = os.path.join("checkpoint", args.exp_name)
 
-    if args.encoder == "vit-16":
+    if args.encoder in ["vit-b16", "vit-b14"]:
         args.size_crops = [224, 224]
     return args
 
@@ -242,7 +242,7 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
     parser.add_argument(
         "--encoder",
         type=str,
-        default="vit-16",
+        default="vit-b16",
         help="encoder architecture",
     )
 

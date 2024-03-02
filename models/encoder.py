@@ -27,10 +27,18 @@ class EncoderWrapper(nn.Module):
         """
         super(EncoderWrapper, self).__init__()
         self.args = args
-        if self.args.encoder == "vit-16":
-            print("Encoder: ViT-16")
+        if self.args.encoder == "vit-b16":
+            print("Encoder: ViT-B16")
             net_module = importlib.import_module("models.public.backbones.vit")
             self.model = net_module.vit_b16(
+                True,
+                pre_trained_url=args.pre_trained_url,
+            )
+            self.num_features = 768
+        elif self.args.encoder == "vit-b14":
+            print("Encoder: ViT-B14")
+            net_module = importlib.import_module("models.public.backbones.vit")
+            self.model = net_module.vit_b14(
                 True,
                 pre_trained_url=args.pre_trained_url,
             )

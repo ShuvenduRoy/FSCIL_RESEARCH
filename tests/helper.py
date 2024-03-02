@@ -23,7 +23,7 @@ def get_default_args() -> argparse.Namespace:
         "distributed": False,
         "distributed_backend": "nccl",
         "distributed_launcher": "pytorch",
-        "encoder": "vit-16",
+        "encoder": "vit-b16",
         "encoder_lr_factor": 0.1,
         "epochs_base": 100,
         "epochs_new": 10,

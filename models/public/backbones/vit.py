@@ -438,3 +438,27 @@ def vit_h14(pretrained: bool = True, **kwargs: Any) -> Any:
         pretrained=pretrained,
         **model_kwargs,
     )
+
+
+def vit_b14(pretrained: bool = True, **kwargs: Any) -> Any:
+    """ViT-B/14 Distilled model configuration.
+
+    ImageNet-1k weights @ 224x224, distilled version.
+    """
+    model_kwargs = dict(
+        patch_size=16,
+        embed_dim=768,
+        depth=14,  # Adjusted depth to 14 for ViT-B/14 Distilled model
+        num_heads=12,  # Adjusted num_heads to match the original configuration
+        intermediate_size=3072,  # Set intermediate_size to match the desired value
+        hidden_act="gelu",  # Ensure hidden activation function is "gelu"
+        hidden_dropout_prob=0.0,  # Maintain dropout probability for fully connected layers
+        attention_probs_dropout_prob=0.0,  # Maintain dropout ratio for attention probabilities
+        layer_norm_eps=1e-12,  # Set layer normalization epsilon value
+        **kwargs,
+    )
+    return _create_vision_transformer(
+        "vit_b14",
+        pretrained=pretrained,
+        **model_kwargs,
+    )
