@@ -12,6 +12,7 @@ from utils.train_utils import (
     get_command_line_parser,
     get_dataset_configs,
     override_training_configs,
+    save_results,
 )
 
 
@@ -57,6 +58,7 @@ def main(args: argparse.Namespace) -> None:
     print("Final Results:")
     for key, val in results_dict.items():
         print(f"{key}: {val}")
+    save_results(results_dict, args)
 
 
 if __name__ == "__main__":

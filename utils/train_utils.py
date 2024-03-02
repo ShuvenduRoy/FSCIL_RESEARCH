@@ -566,3 +566,30 @@ def count_acc(logits: torch.Tensor, label: torch.Tensor) -> float:
     """
     pred = torch.argmax(logits, dim=1)
     return (pred == label).float().mean().item()
+
+
+def save_results(results_dict: dict, args: argparse.Namespace) -> None:
+    """Save the results to a file.
+
+    Parameters
+    ----------
+    results_dict : dict
+        The results dictionary.
+    args : argparse.Namespace
+        The command-line arguments.
+
+    Returns
+    -------
+    None
+    """
+    ensure_path("results")
+    path = "results/{args.dataset}.csv"
+
+    if not os.path.exists(path):
+        with open(path, "w") as f:
+            output = list(args.__dict__)
+            f.write(",".join(output) + "\n")
+
+    with open(path, "a") as f:
+        output = [str(results_dict[key]) for key in args.__dict__]
+        f.write(",".join(output) + "\n")
