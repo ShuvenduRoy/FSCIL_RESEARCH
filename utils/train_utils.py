@@ -54,14 +54,14 @@ def get_dataset_configs(args: argparse.Namespace) -> argparse.Namespace:
     with the datasets configs.
     """
     if args.dataset == "cifar100":
-        args.base_class = 60
+        args.base_class = 60 if args.base_class == -1 else args.base_class
         args.num_classes = 100
         args.way = 5 if args.way == -1 else args.way
         args.shot = 5 if args.shot == -1 else args.shot
         args.sessions = 9 if args.session == -1 else args.session
 
     elif args.dataset == "cub200":
-        args.base_class = 100
+        args.base_class = 100 if args.base_class == -1 else args.base_class
         args.num_classes = 200
         args.way = 10 if args.way == -1 else args.way
         args.shot = 5 if args.shot == -1 else args.shot
@@ -71,7 +71,7 @@ def get_dataset_configs(args: argparse.Namespace) -> argparse.Namespace:
         args.milestones = [60, 80, 100]
 
     elif args.dataset == "mini_imagenet":
-        args.base_class = 60
+        args.base_class = 60 if args.base_class == -1 else args.base_class
         args.num_classes = 100
         args.way = 5 if args.way == -1 else args.way
         args.shot = 5 if args.shot == -1 else args.shot
@@ -264,8 +264,14 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
         default=-1,
         help="number of sessions; -1 means sessions taken as the defaults for the dataset",
     )
+    parser.add_argument(
+        "--base_class",
+        type=int,
+        default=-1,
+        help="number of base classes; -1 means base classes taken as the defaults for the dataset",
+    )
 
-    # incremental few-shot configs
+    # incremental fine-tune configs
     parser.add_argument(
         "--incft",
         type=str2bool,

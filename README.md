@@ -20,7 +20,7 @@ pip install -r requirements.txt
 
 ### Download pre-trained models
 
-- TODO: Add links
+- SAM: https://storage.googleapis.com/vit_models/sam/ViT-B_16.npz
 
 ## Runing the Experiments
 
@@ -97,9 +97,76 @@ python train.py \
   --num_seeds 3 \
   --pre_trained_url https://dl.fbaipublicfiles.com/dino/dino_vitbase16_pretrain/dino_vitbase16_pretrain.pth
 
+# Expected output
 base: [8.62 8.3  8.3  7.53 7.52 7.52 7.38 7.37 4.38]
 incremental: [  nan 32.6  16.5  15.07 13.55 10.88 10.17 10.94 12.18]
 all: [ 8.62 10.17  9.47  9.04  9.02  8.51  8.31  8.68  7.5 ]
+```
+
+- No training (Prototyp-based FSCIT) for 10-way 10-shot
+
+```bash
+# Supervised ViT-B16
+python train.py \
+  --update_base_classifier_with_prototypes True \
+  --epochs_base 0 \
+  --num_seeds 3 \
+  --pre_trained_url https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz \
+  --shot 10 --way 10 --base_class 10
+
+# Expected output
+
+```
+
+```bash
+# SSL MoCo v3
+python train.py \
+  --update_base_classifier_with_prototypes True \
+  --epochs_base 0 \
+  --num_seeds 3 \
+  --pre_trained_url ./checkpoint/moco_v3.pth \
+  --shot 10 --way 10 --base_class 10
+
+# Expected output
+
+```
+
+```bash
+# iBOT 21K
+python train.py \
+  --update_base_classifier_with_prototypes True \
+  --epochs_base 0 \
+  --num_seeds 3 \
+  --pre_trained_url ./checkpoint/ibot_student.pth \
+  --shot 10 --way 10 --base_class 10
+
+# Expected output
+
+```
+
+```bash
+# iBOT 1K
+python train.py \
+  --update_base_classifier_with_prototypes True \
+  --epochs_base 0 \
+  --num_seeds 3 \
+  --pre_trained_url ./checkpoint/ibot_1k.pth \
+  --shot 10 --way 10 --base_class 10
+
+# Expected output
+
+```
+
+```bash
+# DINO
+python train.py \
+  --update_base_classifier_with_prototypes True \
+  --epochs_base 0 \
+  --num_seeds 3 \
+  --pre_trained_url https://dl.fbaipublicfiles.com/dino/dino_vitbase16_pretrain/dino_vitbase16_pretrain.pth \
+  --shot 10 --way 10 --base_class 10
+
+# Expected output
 ```
 
 - Full fine-tune + incremental frozen
