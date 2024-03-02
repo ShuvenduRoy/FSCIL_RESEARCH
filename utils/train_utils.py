@@ -227,16 +227,16 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
     parser.add_argument(
         "--pre_trained_url",
         type=str,
-        default="https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz",
+        default=None,
         choices=[
-            "None",
+            None,
             "https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz",
             "./checkpoint/ibot_student.pth",
             "./checkpoint/ibot_1k.pth",
             "./checkpoint/moco_v3.pth",
             "https://dl.fbaipublicfiles.com/dino/dino_vitbase16_pretrain/dino_vitbase16_pretrain.pth",
         ],  # TODO need more options
-        help="loading model parameter from a specific dir",
+        help="loading model parameter from local or remote url",
     )
 
     parser.add_argument(

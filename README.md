@@ -27,7 +27,7 @@ pip install -r requirements.txt
 ### Important Config Notes
 
 - Default config for CIFAR100: 60 base classes, 5-way 5-shot incremental
-- To use no-base 10-way 10-shot, used `--shot 10 --way 10`
+- To use no-base 10-way 10-shot, used `--shot 10 --way 10 --base_class 10`
 
 ### Baseline
 
