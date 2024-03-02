@@ -58,6 +58,36 @@ python train.py \
 
 ```
 
+```bash
+# iBOT 21K
+python train.py \
+  --update_base_classifier_with_prototypes True \
+  --epochs_base 0 \
+  --num_seeds 3 \
+  --pre_trained_url ./checkpoint/ibot_student.pth
+
+```
+
+```bash
+# iBOT 1K
+python train.py \
+  --update_base_classifier_with_prototypes True \
+  --epochs_base 0 \
+  --num_seeds 3 \
+  --pre_trained_url ./checkpoint/ibot_1k.pth
+
+```
+
+```bash
+# DINO
+python train.py \
+  --update_base_classifier_with_prototypes True \
+  --epochs_base 0 \
+  --num_seeds 3 \
+  --pre_trained_url https://dl.fbaipublicfiles.com/dino/dino_vitbase16_pretrain/dino_vitbase16_pretrain.pth
+
+```
+
 - Full fine-tune + incremental frozen
 
 ```bash

@@ -231,9 +231,9 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
         choices=[
             None,
             "https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz",
+            "./checkpoint/moco_v3.pth",
             "./checkpoint/ibot_student.pth",
             "./checkpoint/ibot_1k.pth",
-            "./checkpoint/moco_v3.pth",
             "https://dl.fbaipublicfiles.com/dino/dino_vitbase16_pretrain/dino_vitbase16_pretrain.pth",
         ],  # TODO need more options
         help="loading model parameter from local or remote url",
