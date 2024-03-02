@@ -5,6 +5,7 @@ numpy==1.23.5
 pre-commit
 pytest
 pytest-cov
+pyyaml
 ruff
 scikit-learn==1.2.2
 timm==0.5.4
