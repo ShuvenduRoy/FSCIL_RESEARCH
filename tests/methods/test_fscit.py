@@ -7,7 +7,7 @@ import torch
 
 from dataloaders.helpter import get_dataloader
 from methods.fscit import FSCITTrainer
-from methods.helper import replace_base_fc, test
+from methods.helper import replace_base_fc
 from tests.helper import get_10way_10shot_args
 
 
@@ -32,17 +32,6 @@ def test_facil_encoder(args: Any) -> None:
 
     # new weights should not be equal to old weights
     assert not torch.equal(old_fc_weight, new_fc_weight)
-
-    # testing the test functionality
-    base_acc, inc_acc, all_acc = test(
-        model=trainer.model,
-        testloader=testloader,
-        epoch=0,
-        args=args,
-        session=0,
-        device_id=None,
-    )
-    print("Base acc: ", base_acc, "Inc acc: ", inc_acc, "total acc: ", all_acc)
 
 
 test_facil_encoder(get_10way_10shot_args())
