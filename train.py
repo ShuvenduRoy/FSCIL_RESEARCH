@@ -51,12 +51,12 @@ def main(args: argparse.Namespace) -> None:
     # averae across seeds
     for key in results_dict:
         results_dict[key] = np.array(results_dict[key]).mean(axis=0)
+        results_dict[key] = [round(v, 2) for v in results_dict[key]]
 
     # print the results
     print("Final Results:")
     for key, val in results_dict.items():
-        val_formatted = [f"{v:.2f}" for v in val]
-        print(f"{key}: {val_formatted}")
+        print(f"{key}: {val}")
 
 
 if __name__ == "__main__":

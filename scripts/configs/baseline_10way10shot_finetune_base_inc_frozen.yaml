@@ -6,6 +6,8 @@ metric:
   goal: maximize
   name: session_max_acc
 parameters:
+  exp_name:
+    value: baseline_10way10shot_finetune_base_inc_frozen
   update_base_classifier_with_prototypes:
     values: [True, False]
   epochs_base:
