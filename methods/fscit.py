@@ -206,7 +206,10 @@ class FSCITTrainer:
                     # replace base classifier weight with prototypes
                     print("Replacing base classifier weight with prototypes...")
                     replace_base_fc(
-                        train_set, self.model_without_ddp, self.args, self.device_id
+                        train_set,
+                        self.model_without_ddp,
+                        self.args,
+                        self.device_id,
                     )
                     base_acc, inc_acc, all_acc = test(
                         model=self.model,
@@ -221,7 +224,10 @@ class FSCITTrainer:
 
             else:
                 replace_base_fc(
-                    train_set, self.model_without_ddp, self.args, self.device_id
+                    train_set,
+                    self.model_without_ddp,
+                    self.args,
+                    self.device_id,
                 )
                 base_acc, inc_acc, all_acc = test(
                     model=self.model,
