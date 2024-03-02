@@ -55,7 +55,8 @@ def main(args: argparse.Namespace) -> None:
     # print the results
     print("Final Results:")
     for key, val in results_dict.items():
-        print(f"{key}: {val}")
+        val_formatted = [f"{v:.2f}" for v in val]
+        print(f"{key}: {val_formatted}")
 
 
 if __name__ == "__main__":
