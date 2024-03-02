@@ -27,7 +27,7 @@ def test_facil_encoder(args: Any) -> None:
 
     # testing replace_base_fc
     old_fc_weight = trainer.model.encoder_q.classifier.weight.clone()
-    replace_base_fc(train_set, trainer.model, args, device_id=None)
+    replace_base_fc(train_set, trainer.model_without_ddp, args, device_id=None)
     new_fc_weight = trainer.model.encoder_q.classifier.weight.clone()
 
     # new weights should not be equal to old weights

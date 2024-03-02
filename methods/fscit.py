@@ -160,9 +160,6 @@ class FSCITTrainer:
             # initialize dataset
             train_set, trainloader, testloader = get_dataloader(self.args, session)
 
-            # start by replacing the base classifier with the prototype
-            replace_base_fc(train_set, self.model, self.args, self.device_id)
-
             # train session
             print(f"Training session {session}...")
             print(f"Train set size: {len(train_set)}")
@@ -208,7 +205,9 @@ class FSCITTrainer:
                 if self.args.update_base_classifier_with_prototypes:
                     # replace base classifier weight with prototypes
                     print("Replacing base classifier weight with prototypes...")
-                    replace_base_fc(train_set, self.model, self.args, self.device_id)
+                    replace_base_fc(
+                        train_set, self.model_without_ddp, self.args, self.device_id
+                    )
                     base_acc, inc_acc, all_acc = test(
                         model=self.model,
                         testloader=testloader,
@@ -221,9 +220,9 @@ class FSCITTrainer:
                 self.update_matrix((base_acc, inc_acc, all_acc), session)
 
             else:
-                # already replaced the base classifier with the prototype
-                # TODO:FEAT: train the incremental session
-
+                replace_base_fc(
+                    train_set, self.model_without_ddp, self.args, self.device_id
+                )
                 base_acc, inc_acc, all_acc = test(
                     model=self.model,
                     testloader=testloader,
