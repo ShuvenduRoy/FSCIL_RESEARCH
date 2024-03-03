@@ -350,7 +350,7 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
         "--pet_on_teacher",
         type=str2bool,
         default=False,
-        help="Flag to set whether of not use PET on the teacher model. If not, "
+        help="Flag to set whether or not use PET on the teacher model. If not, "
         "teacher will be different from student, and will only be updated for "
         "the pre-trained parameters that are opt for fine-tuning. If no pre-trained"
         " parameters are tuned, EMA will enb up remaining the same as the pre-trained model.",
@@ -359,13 +359,21 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
         "--update_base_classifier_with_prototypes",
         type=str2bool,
         default=False,
-        help="Flag to set whether of not update the base classifier with the prototypes",
+        help="Flag to set whether or not update the base classifier with the prototypes",
+    )
+    parser.add_argument(
+        "--start_training_with_prototypes",
+        type=str2bool,
+        default=False,
+        help="Flag to set whether or not update the base classifier with the prototypes "
+        "before the start of base training. Bascially, this is used to avoid training "
+        "from randomly initialized classifier.",
     )
     parser.add_argument(
         "--add_bias_in_classifier",
         type=str2bool,
         default=False,
-        help="Flag to set whether of not add bias in the classifier layer",
+        help="Flag to set whether or not add bias in the classifier layer",
     )
     return parser
 

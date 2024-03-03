@@ -171,7 +171,15 @@ class FSCITTrainer:
             print(f"Test set size: {len(testloader.dataset)}")
 
             if session == 0:  # base session
-                # Attempt auto resume # TODO
+                if self.args.start_training_with_prototypes:
+                    # replace base classifier weight with prototypes
+                    print("Replacing base classifier weight with prototypes...")
+                    replace_fc_with_prototypes(
+                        train_set,
+                        self.model_without_ddp,
+                        self.args,
+                        self.device_id,
+                    )
                 for epoch in range(self.args.epochs_base):
                     if dist_utils.is_dist_avail_and_initialized():
                         trainloader.sampler.set_epoch(epoch)
@@ -228,6 +236,7 @@ class FSCITTrainer:
                 self.update_matrix((base_acc, inc_acc, all_acc), session)
 
             else:
+                print("Replacing inc. classifier weight with prototypes...")
                 replace_fc_with_prototypes(
                     train_set,
                     self.model_without_ddp,

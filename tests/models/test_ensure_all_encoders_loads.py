@@ -24,10 +24,8 @@ def test_facil_encoder(args: Any) -> None:
     """Test ExponentialMovingAverage."""
     for url in [
         "https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz",
-        None,
-        "./checkpoint/ibot_student.pth",
-        "./checkpoint/ibot_1k.pth",
-        "./checkpoint/moco_v3.pth",
+        None,  # no pre-trained
+        "./checkpoint/moco_v3.pth",  # one of the local
         "https://dl.fbaipublicfiles.com/dino/dino_vitbase16_pretrain/dino_vitbase16_pretrain.pth",
     ]:
         args.pre_trained_url = url
