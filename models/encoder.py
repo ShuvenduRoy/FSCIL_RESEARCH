@@ -1,11 +1,15 @@
 """Encoder model for FSCIL."""
 
 import argparse
-import importlib
 from typing import Any, Optional, Tuple
 
 import torch
 from torch import nn
+
+from models.public.backbones.vit import vit_b16
+from models.public.pet.adapter import Adapter
+from models.public.pet.lora import KVLoRA
+from models.public.pet.prefix import Prefix
 
 
 class EncoderWrapper(nn.Module):
@@ -29,8 +33,7 @@ class EncoderWrapper(nn.Module):
         self.args = args
         if self.args.encoder == "vit-b16":
             print("Encoder: ViT-B16")
-            net_module = importlib.import_module("models.public.backbones.vit")
-            self.model = net_module.vit_b16(
+            self.model = vit_b16(
                 True,
                 pre_trained_url=args.pre_trained_url,
             )
@@ -184,7 +187,6 @@ class FSCILencoder(nn.Module):
 
     def create_pets_vit(self) -> nn.ModuleList:
         """Create PETs for ViT."""
-        pet_module = importlib.import_module("models.public.pet")
         assert self.args.pet_cls in ["Adapter", "LoRA", "Prefix"]
 
         n = len(self.args.adapt_blocks)
@@ -193,16 +195,16 @@ class FSCILencoder(nn.Module):
         kwargs = dict(**self.args.pet_kwargs)
         if self.args.pet_cls == "Adapter":
             kwargs["embed_dim"] = embed_dim
-            return nn.ModuleList([pet_module.Adapter(**kwargs) for _ in range(n)])
+            return nn.ModuleList([Adapter(**kwargs) for _ in range(n)])
 
         if self.args.pet_cls == "LoRA":
             kwargs["in_features"] = embed_dim
             kwargs["out_features"] = embed_dim
             kwargs["rank"] = self.args.rank
-            return nn.ModuleList([pet_module.KVLoRA(**kwargs) for _ in range(n)])
+            return nn.ModuleList([KVLoRA(**kwargs) for _ in range(n)])
 
         kwargs["dim"] = embed_dim
-        return nn.ModuleList([pet_module.Prefix(**kwargs) for i in range(n)])
+        return nn.ModuleList([Prefix(**kwargs) for i in range(n)])
 
     def attach_pets_vit(self, pets: nn.ModuleList, encoder: Any) -> None:
         """Attach PETs for ViT.

@@ -36,13 +36,19 @@ from timm.data import (
     IMAGENET_INCEPTION_STD,
 )
 from timm.models.helpers import adapt_input_conv, build_model_with_cfg, named_apply
-from timm.models.layers import PatchEmbed, trunc_normal_
+from timm.models.layers import (
+    DropPath,
+    PatchEmbed,
+    trunc_normal_,
+)
+from timm.models.layers.helpers import to_2tuple
 from timm.models.vision_transformer import (
-    Block,
     _init_vit_weights,
     resize_pos_embed,
 )
 from torch import nn
+
+from models.public.pet_mixin import AdapterMixin, PrefixMixin, PromptMixin
 
 
 def _cfg(url: str = "", **kwargs: dict) -> dict:
@@ -218,6 +224,135 @@ def _load_weights(  # noqa: PLR0915
             )
         block.norm2.weight.copy_(_n2p(w[f"{block_prefix}LayerNorm_2/scale"]))
         block.norm2.bias.copy_(_n2p(w[f"{block_prefix}LayerNorm_2/bias"]))
+
+
+class Mlp(nn.Module, AdapterMixin):
+    """MLP as used in Vision Transformer, MLP-Mixer and related networks."""
+
+    def __init__(
+        self,
+        in_features: int,
+        hidden_features: Any = None,
+        out_features: Any = None,
+        act_layer: Any = nn.GELU,
+        drop: float = 0.0,
+    ):
+        super().__init__()
+        out_features = out_features or in_features
+        hidden_features = hidden_features or in_features
+        drop_probs = to_2tuple(drop)
+
+        self.fc1 = nn.Linear(in_features, hidden_features)
+        self.act = act_layer()
+        self.drop1 = nn.Dropout(drop_probs[0])
+        self.fc2 = nn.Linear(hidden_features, out_features)
+        self.drop2 = nn.Dropout(drop_probs[1])
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Forward method."""
+        x = self.adapt_module("fc1", x)  # x = self.fc1(x)
+        x = self.act(x)
+        x = self.drop1(x)
+        x = self.adapt_module("fc2", x)  # x = self.fc2(x)
+        return self.drop2(x)
+
+
+class Attention(nn.Module, PromptMixin, PrefixMixin, AdapterMixin):
+    """Attention layer of Transformer."""
+
+    def __init__(
+        self,
+        dim: int,
+        num_heads: int = 8,
+        qkv_bias: bool = False,
+        attn_drop: float = 0.0,
+        proj_drop: float = 0.0,
+    ):
+        super().__init__()
+        self.num_heads = num_heads
+        head_dim = dim // num_heads
+        self.scale = head_dim**-0.5
+
+        self.qkv = nn.Linear(dim, dim * 3, bias=qkv_bias)
+        self.attn_drop = nn.Dropout(attn_drop)
+        self.proj = nn.Linear(dim, dim)
+        self.proj_drop = nn.Dropout(proj_drop)
+
+    def forward(self, x: Any) -> torch.Tensor:
+        """Forward function."""
+        x = self.add_prompt(x)
+
+        B, N, C = x.shape  # noqa: N806
+        qkv = self.adapt_module("qkv", x)
+
+        # make torchscript happy (cannot use tensor as tuple)
+        q, k, v = qkv.chunk(3, dim=-1)
+        k, v = self.add_prefix(k, v)
+
+        q = q.reshape(B, N, self.num_heads, C // self.num_heads)
+        q = q.permute(0, 2, 1, 3)
+
+        k = k.reshape(B, -1, self.num_heads, C // self.num_heads)
+        k = k.permute(0, 2, 1, 3)
+
+        v = v.reshape(B, -1, self.num_heads, C // self.num_heads)
+        v = v.permute(0, 2, 1, 3)
+
+        attn = (q @ k.transpose(-2, -1)) * self.scale
+        attn = attn.softmax(dim=-1)
+        attn = self.attn_drop(attn)
+        attn = self.compensate_prefix(attn)
+
+        x = (attn @ v).transpose(1, 2).reshape(B, N, C)
+        x = self.adapt_module("proj", x)  # x = self.proj(x)
+        x = self.proj_drop(x)
+
+        return self.reduce_prompt(x)
+
+
+class Block(nn.Module, AdapterMixin):
+    """Transformer block."""
+
+    def __init__(
+        self,
+        dim: int,
+        num_heads: int,
+        mlp_ratio: float = 4.0,
+        qkv_bias: bool = False,
+        drop: float = 0.0,
+        attn_drop: float = 0.0,
+        drop_path: float = 0.0,
+        act_layer: Any = nn.GELU,
+        norm_layer: Any = nn.LayerNorm,
+    ):
+        super().__init__()
+        self.norm1 = norm_layer(dim)
+        self.attn = Attention(
+            dim,
+            num_heads=num_heads,
+            qkv_bias=qkv_bias,
+            attn_drop=attn_drop,
+            proj_drop=drop,
+        )
+        # drop path for stoch. depth, we shall see if this is better than dropout
+        self.drop_path = DropPath(drop_path) if drop_path > 0.0 else nn.Identity()
+        self.norm2 = norm_layer(dim)
+        mlp_hidden_dim = int(dim * mlp_ratio)
+        self.mlp = Mlp(
+            in_features=dim,
+            hidden_features=mlp_hidden_dim,
+            act_layer=act_layer,
+            drop=drop,
+        )
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Forward method."""
+        x = x + self.drop_path(
+            self.adapt_module("attn", self.norm1(x)),  # self.attn(self.norm1(x))
+        )
+        return x + self.drop_path(
+            self.adapt_module("mlp", self.norm2(x)),  # self.mlp(self.norm2(x))
+        )
 
 
 class VisionTransformer(nn.Module):

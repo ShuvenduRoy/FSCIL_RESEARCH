@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+"""PET mixin module."""
 
 from .adapter import AdapterMixin
 from .prefix import PrefixMixin

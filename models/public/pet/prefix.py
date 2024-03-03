@@ -1,14 +1,16 @@
-# -*- coding: utf-8 -*-
+"""Prefix module for PET."""
 
-from typing import Optional
+from typing import Any, Optional
 
 import torch
 from torch import nn
 
-from .prompt import Prompt
+from models.public.pet.prompt import Prompt
 
 
 class Prefix(nn.Module):
+    """Prefix module for PET."""
+
     def __init__(
         self,
         length: int = 10,
@@ -26,10 +28,12 @@ class Prefix(nn.Module):
         self.key = Prompt(*args, scale=key_scale)
         self.val = Prompt(*args, scale=val_scale)
 
-    def forward(self, key: torch.Tensor, val: torch.Tensor):
+    def forward(self, key: torch.Tensor, val: torch.Tensor) -> Any:
+        """Forward function."""
         return self.key(key), self.val(val)
 
-    def compensate(self, attn):
+    def compensate(self, attn: torch.Tensor) -> torch.Tensor:
+        """Compensate attention weights."""
         if not self.compensatory:
             return attn
 
@@ -39,6 +43,4 @@ class Prefix(nn.Module):
         attn1 = attn[..., :s]
         attn2 = attn[..., s:t] / lamb.clamp(min=1e-12)
         attn3 = attn[..., t:]
-        attn = torch.cat([attn1, attn2, attn3], dim=-1)
-
-        return attn
+        return torch.cat([attn1, attn2, attn3], dim=-1)
