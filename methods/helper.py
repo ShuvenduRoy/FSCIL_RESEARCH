@@ -1,6 +1,7 @@
 """Traing helper module."""
 
 import argparse
+import copy
 from typing import Any, Tuple
 
 import torch
@@ -336,7 +337,7 @@ def train_one_epoch(
         ta.add(acc)
 
 
-def replace_base_fc(
+def replace_fc_with_prototypes(
     trainset: Any,
     model: Any,
     args: argparse.Namespace,
@@ -359,12 +360,15 @@ def replace_base_fc(
     -------
     None
     """
+    # make a copy of the dataset
+    new_train_set = copy.deepcopy(trainset)
+
     model = model.eval()
     _, val_transforms = get_transform(args)
-    trainset.transform = val_transforms
+    new_train_set.transform = val_transforms
 
     trainloader = torch.utils.data.DataLoader(
-        dataset=trainset,
+        dataset=new_train_set,
         batch_size=args.batch_size_base,
         num_workers=args.num_workers,
         pin_memory=False,

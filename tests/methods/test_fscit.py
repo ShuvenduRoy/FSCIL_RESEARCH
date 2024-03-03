@@ -7,7 +7,7 @@ import torch
 
 from dataloaders.helpter import get_dataloader
 from methods.fscit import FSCITTrainer
-from methods.helper import replace_base_fc
+from methods.helper import replace_fc_with_prototypes
 from tests.helper import get_10way_10shot_args
 
 
@@ -27,7 +27,9 @@ def test_facil_encoder(args: Any) -> None:
 
     # testing replace_base_fc
     old_fc_weight = trainer.model.encoder_q.classifier.weight.clone()
-    replace_base_fc(train_set, trainer.model_without_ddp, args, device_id=None)
+    replace_fc_with_prototypes(
+        train_set, trainer.model_without_ddp, args, device_id=None
+    )
     new_fc_weight = trainer.model.encoder_q.classifier.weight.clone()
 
     # new weights should not be equal to old weights

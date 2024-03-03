@@ -8,7 +8,12 @@ from torch.nn.parallel import DistributedDataParallel
 
 from dataloaders.helpter import get_dataloader
 from losses.contrastive import SupContrastive
-from methods.helper import get_optimizer_base, replace_base_fc, test, train_one_epoch
+from methods.helper import (
+    get_optimizer_base,
+    replace_fc_with_prototypes,
+    test,
+    train_one_epoch,
+)
 from models.encoder import FSCILencoder
 from utils import dist_utils
 from utils.dist_utils import is_main_process
@@ -205,7 +210,7 @@ class FSCITTrainer:
                 if self.args.update_base_classifier_with_prototypes:
                     # replace base classifier weight with prototypes
                     print("Replacing base classifier weight with prototypes...")
-                    replace_base_fc(
+                    replace_fc_with_prototypes(
                         train_set,
                         self.model_without_ddp,
                         self.args,
@@ -223,7 +228,7 @@ class FSCITTrainer:
                 self.update_matrix((base_acc, inc_acc, all_acc), session)
 
             else:
-                replace_base_fc(
+                replace_fc_with_prototypes(
                     train_set,
                     self.model_without_ddp,
                     self.args,
