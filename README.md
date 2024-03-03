@@ -206,6 +206,24 @@ python train.py \
   --shot 10 --way 10 --base_class 10
 ```
 
+### LoRA + Asyn. MoCo
+
+````bash
+### Full fine-tune + incremental frozen
+
+```bash
+python train.py \
+  --update_base_classifier_with_prototypes True \
+  --start_training_with_prototypes True \
+  --epochs_base 10 \
+  --lr_base 0.001 \
+  --encoder_ft_start_layer 15 \
+  --num_seeds 3 \
+  --pre_trained_url ./checkpoint/moco_v3.pth \
+  --shot 10 --way 10 --base_class 10 \
+  --pet_cls LoRA --adapt_blocks 3 \
+````
+
 ## Citing FSCIT
 
 If you find our work useful to your research, please cite our paper:

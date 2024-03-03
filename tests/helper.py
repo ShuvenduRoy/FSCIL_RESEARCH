@@ -6,7 +6,7 @@ import argparse
 def get_default_args() -> argparse.Namespace:
     """Get default arguments for the tests."""
     args = {
-        "adapt_blocks": [],
+        "adapt_blocks": [0, 1],
         "alpha": 0.5,
         "auto_augment": [],
         "base_class": 60,
