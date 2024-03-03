@@ -584,13 +584,13 @@ def save_results(results_dict: dict, args: argparse.Namespace) -> None:
     """
     ensure_path("results")
     path = "results/{}.tsv".format(args.dataset)
-    args: dict = dict(args.__dict__)  # type: ignore
+    args_dict = dict(args.__dict__)  # type: ignore
     if not os.path.exists(path):
         with open(path, "w") as f:
             output = (
                 [k + "_last" for k in list(results_dict.keys())]
                 + list(results_dict.keys())
-                + list(args.keys())
+                + list(args_dict.keys())
             )
             f.write("\t".join(output) + "\n")
 
@@ -598,6 +598,6 @@ def save_results(results_dict: dict, args: argparse.Namespace) -> None:
         output_res = (
             [str(results_dict[key][-1]) for key in results_dict]
             + [str(results_dict[key]) for key in results_dict]
-            + [str(args[key]) for key in args]  # type: ignore
+            + [str(args_dict[key]) for key in args_dict]
         )
         f.write("\t".join(output_res) + "\n")
