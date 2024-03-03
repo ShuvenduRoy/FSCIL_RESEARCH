@@ -62,6 +62,7 @@ class FSCITTrainer:
 
         # distributed training setup
         self.model_without_ddp = self.model
+        self.best_model_dict = deepcopy(self.model_without_ddp.state_dict())
         if args.distributed and dist_utils.is_dist_avail_and_initialized():
             self.device_id = torch.cuda.current_device()
             torch.cuda.set_device(self.device_id)

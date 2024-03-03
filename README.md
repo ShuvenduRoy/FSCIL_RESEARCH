@@ -21,6 +21,13 @@ pip install -r requirements.txt
 ### Download pre-trained models
 
 - SAM: https://storage.googleapis.com/vit_models/sam/ViT-B_16.npz
+- https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz
+- ./checkpoint/moco_v3.pth
+- ./checkpoint/ibot_student.pth
+- ./checkpoint/ibot_1k.pth
+- https://storage.googleapis.com/vit_models/sam/ViT-B_16.npz
+- https://dl.fbaipublicfiles.com/mae/pretrain/mae_pretrain_vit_base.pth
+- https://dl.fbaipublicfiles.com/dino/dino_vitbase16_pretrain/dino_vitbase16_pretrain.pth
 
 ## Runing the Experiments
 
