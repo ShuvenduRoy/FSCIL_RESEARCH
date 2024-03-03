@@ -583,7 +583,7 @@ def save_results(results_dict: dict, args: argparse.Namespace) -> None:
     None
     """
     ensure_path("results")
-    path = "results/{}.tsv".format(args.dataset)
+    path = "results/{}_{}way{}shot.tsv".format(args.dataset, args.shot, args.way)
     args_dict = dict(args.__dict__)  # type: ignore
     if not os.path.exists(path):
         with open(path, "w") as f:
