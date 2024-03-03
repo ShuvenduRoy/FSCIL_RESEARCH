@@ -248,26 +248,11 @@ class FSCILencoder(nn.Module):
         -------
         None
         """
-        if (
-            base_sess
-        ):  # TODO:BUG this is horrible hard coded logic. also need to handle EMA with diff params
-            for param_q, param_k in zip(
-                self.encoder_q.parameters(),
-                self.encoder_k.parameters(),
-            ):
-                param_k.data = param_k.data * self.args.moco_m + param_q.data * (
-                    1.0 - self.args.moco_m
-                )
-        else:
-            for k, v in self.encoder_q.named_parameters():
-                if (
-                    k.startswith("fc")
-                    or k.startswith("layer4")
-                    or k.startswith("layer3")
-                ):
-                    self.encoder_k.state_dict()[k].data = self.encoder_k.state_dict()[
-                        k
-                    ].data * self.args.moco_m + v.data * (1.0 - self.args.moco_m)
+        encoder_q_params = self.encoder_q.state_dict()
+        for name, param in self.encoder_k.named_parameters():
+            param.data = param.data * self.args.moco_m + encoder_q_params[name] * (
+                1.0 - self.args.moco_m
+            )
 
     @torch.no_grad()
     def _dequeue_and_enqueue(self, keys: torch.Tensor, labels: torch.Tensor) -> None:
