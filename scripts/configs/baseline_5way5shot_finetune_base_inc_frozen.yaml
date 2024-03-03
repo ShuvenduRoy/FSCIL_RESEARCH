@@ -10,6 +10,8 @@ parameters:
     value: baseline_10way10shot_finetune_base_inc_frozen
   update_base_classifier_with_prototypes:
     values: [True, False]
+  start_training_with_prototypes:
+    values: [True, False]
   epochs_base:
     values: [10, 15, 20]
   lr_base:
