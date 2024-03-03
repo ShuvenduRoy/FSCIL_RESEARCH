@@ -583,13 +583,21 @@ def save_results(results_dict: dict, args: argparse.Namespace) -> None:
     None
     """
     ensure_path("results")
-    path = "results/{args.dataset}.csv"
-
+    path = "results/{}.tsv".format(args.dataset)
+    args: dict = dict(args.__dict__)  # type: ignore
     if not os.path.exists(path):
         with open(path, "w") as f:
-            output = list(args.__dict__)
-            f.write(",".join(output) + "\n")
+            output = (
+                [k + "_last" for k in list(results_dict.keys())]
+                + list(results_dict.keys())
+                + list(args.keys())
+            )
+            f.write("\t".join(output) + "\n")
 
     with open(path, "a") as f:
-        output = [str(results_dict[key]) for key in args.__dict__]
-        f.write(",".join(output) + "\n")
+        output_res = (
+            [str(results_dict[key][-1]) for key in results_dict]
+            + [str(results_dict[key]) for key in results_dict]
+            + [str(args[key]) for key in args]  # type: ignore
+        )
+        f.write("\t".join(output_res) + "\n")
