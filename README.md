@@ -202,7 +202,7 @@ all: [22.2  11.9   9.4   6.57  5.28  4.73  4.09  3.75  3.34]
 
 ### Full fine-tune + incremental frozen
 
-```
+```bash
 python train.py \
   --update_base_classifier_with_prototypes False  \
   --start_training_with_prototypes False \
