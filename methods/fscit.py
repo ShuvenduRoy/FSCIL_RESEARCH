@@ -1,6 +1,7 @@
 """FSCIL training module."""
 
 import argparse
+from copy import deepcopy
 from typing import Tuple
 
 import torch
@@ -37,7 +38,7 @@ class FSCITTrainer:
         """
         self.args = args
 
-        # train statistics
+        # train statistics. # TODO:CLEAN: probably never used
         self.trlog = {
             "train_loss": [],
             "val_loss": [],
@@ -156,7 +157,7 @@ class FSCITTrainer:
 
     def train(self) -> None:
         """Train the model."""
-        self.session_accuracies = {  # TODO save in the checkpoint for resuming
+        self.session_accuracies = {
             "base": [0] * self.args.sessions,
             "incremental": [0] * self.args.sessions,
             "all": [0] * self.args.sessions,
@@ -209,11 +210,15 @@ class FSCITTrainer:
                         device_id=self.device_id,
                     )
 
+                    if all_acc > self.session_accuracies["all"][session]:
+                        self.best_model_dict = deepcopy(
+                            self.model_without_ddp.state_dict(),
+                        )
+
                     self.update_matrix((base_acc, inc_acc, all_acc), session)
 
-                    # TODO hold the bast model in a variable
-
-                    # TODO save everything for auto resume capability
+                # load the best saved model for the base session
+                self.model_without_ddp.load_state_dict(self.best_model_dict)
 
                 if self.args.update_base_classifier_with_prototypes:
                     # replace base classifier weight with prototypes
