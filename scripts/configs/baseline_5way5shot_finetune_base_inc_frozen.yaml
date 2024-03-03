@@ -1,0 +1,28 @@
+program: train.py
+method: grid
+project: FSCIT
+name: tuning3_adapter
+metric:
+  goal: maximize
+  name: session_max_acc
+parameters:
+  exp_name:
+    value: baseline_10way10shot_finetune_base_inc_frozen
+  update_base_classifier_with_prototypes:
+    values: [True, False]
+  epochs_base:
+    values: [10, 15, 20]
+  lr_base:
+    values: [0.01, 0.001]
+  encoder_ft_start_layer:
+    values: [-1, 2, 4, 6, 8, 10, 11, 12]
+  num_seeds:
+    value: 3
+  pre_trained_url:
+    value: ./checkpoint/moco_v3.pth
+  shot:
+    value: 5
+  way:
+    value: 5
+  base_class:
+    value: 60
