@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from models.public.pet.prompt import Prompt
+from models.pet.prompt import Prompt
 
 
 class PromptMixin:

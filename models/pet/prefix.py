@@ -5,7 +5,7 @@ from typing import Any, Optional
 import torch
 from torch import nn
 
-from models.public.pet.prompt import Prompt
+from models.pet.prompt import Prompt
 
 
 class Prefix(nn.Module):

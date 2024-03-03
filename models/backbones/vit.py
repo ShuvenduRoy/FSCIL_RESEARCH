@@ -48,7 +48,7 @@ from timm.models.vision_transformer import (
 )
 from torch import nn
 
-from models.public.pet_mixin import AdapterMixin, PrefixMixin, PromptMixin
+from models.pet_mixin import AdapterMixin, PrefixMixin, PromptMixin
 
 
 def _cfg(url: str = "", **kwargs: dict) -> dict:

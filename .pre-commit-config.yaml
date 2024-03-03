@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0  # Use the ref you want to point at
+    rev: v4.4.0 # Use the ref you want to point at
     hooks:
       - id: trailing-whitespace
       - id: check-ast
@@ -43,10 +43,10 @@ repos:
 
   - repo: local
     hooks:
-    - id: pytest
-      name: pytest
-      entry: python3 -m pytest
-      language: system
-      pass_filenames: false
-      always_run: true
-exclude: "tests|models/public"
+      - id: pytest
+        name: pytest
+        entry: python3 -m pytest
+        language: system
+        pass_filenames: false
+        always_run: true
+exclude: "tests"

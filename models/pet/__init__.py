@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+"""Package for PET models."""
 
 from .adapter import Adapter, Conv2dAdapter
 from .lora import Conv2dLoRA, KVLoRA, LinearLoRA

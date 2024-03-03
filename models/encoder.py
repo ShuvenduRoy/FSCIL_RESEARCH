@@ -6,10 +6,10 @@ from typing import Any, Optional, Tuple
 import torch
 from torch import nn
 
-from models.public.backbones.vit import vit_b16
-from models.public.pet.adapter import Adapter
-from models.public.pet.lora import KVLoRA
-from models.public.pet.prefix import Prefix
+from models.backbones.vit import vit_b16
+from models.pet.adapter import Adapter
+from models.pet.lora import KVLoRA
+from models.pet.prefix import Prefix
 
 
 class EncoderWrapper(nn.Module):

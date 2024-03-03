@@ -5,7 +5,7 @@ from typing import Any, Dict, List
 import torch
 from torch import nn
 
-from models.public.pet import Adapter, Conv2dAdapter
+from models.pet import Adapter, Conv2dAdapter
 
 
 NAME_SEP = "/"

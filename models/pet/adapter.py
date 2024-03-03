@@ -5,7 +5,7 @@ from typing import Any, Optional, Type, Union
 
 from torch import nn
 
-from models.public.misc.scaler import Scaler
+from models.misc.scaler import Scaler
 
 
 class Adapter(nn.Module):

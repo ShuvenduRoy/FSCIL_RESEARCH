@@ -5,7 +5,7 @@ from typing import Optional
 import torch
 from torch import nn
 
-from models.public.misc.scaler import Scaler
+from models.misc.scaler import Scaler
 
 
 class Prompt(nn.Module):

@@ -2,7 +2,7 @@
 
 from typing import Any, Optional, Tuple
 
-from models.public.pet.prefix import Prefix
+from models.pet.prefix import Prefix
 
 
 class PrefixMixin:
