@@ -135,6 +135,7 @@ def test(  # noqa: PLR0915
     Val accuracies on base, new and overall classes
     """
     model = model.eval()
+    print(f"Testing at session {session}...")
 
     vl = Averager()
     va = Averager()

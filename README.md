@@ -202,15 +202,17 @@ all: [22.2  11.9   9.4   6.57  5.28  4.73  4.09  3.75  3.34]
 
 ### Full fine-tune + incremental frozen
 
-```bash
+```
 python train.py \
-  --update_base_classifier_with_prototypes True \
+  --update_base_classifier_with_prototypes False  \
+  --start_training_with_prototypes False \
   --epochs_base 10 \
-  --lr_base 0.01 \
-  --encoder_ft_start_layer -1 \
+  --lr_base 0.1 \
+  --encoder_ft_start_layer 12 \
   --num_seeds 3 \
-  --pre_trained_url ./checkpoint/moco_v3.pth \
-  --shot 10 --way 10 --base_class 10
+  --pre_trained_url https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz \
+  --shot 10 --way 10 --base_class 10  \
+  --encoder_ft_start_epoch 0
 ```
 
 ### LoRA + Asyn. MoCo
