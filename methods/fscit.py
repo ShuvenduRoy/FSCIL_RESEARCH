@@ -239,7 +239,7 @@ class FSCITTrainer:
                         device_id=self.device_id,
                     )
 
-                self.update_matrix((base_acc, inc_acc, all_acc), session)
+                    self.update_matrix((base_acc, inc_acc, all_acc), session)
 
             else:
                 print("Replacing inc. classifier weight with prototypes...")
