@@ -2,9 +2,17 @@
 
 Official implementation of our paper:
 
-> [**Few-shot Class-incremental Tuning**](https://arxiv.org/abs/)
-> Shuvendu Roy, Ali Etemad
-> _Under-reivew_
+> [**Few-shot Class-incremental Tuning**](https://arxiv.org/abs/) <br>
+> Shuvendu Roy, Ali Etemad <br> > _Under-reivew_
+
+## Overview
+
+Abstract here
+
+- main figure here
+- other important figure
+
+- Preliminiary table
 
 ## Getting started
 
@@ -14,29 +22,178 @@ Install the dependencies
 pip install -r requirements.txt
 ```
 
-### Download Data
+## Prepare Data
 
 - CIFAR100 - Will be downloaded automatically
 
-### Download pre-trained models
+## Download pre-trained models
 
 - SAM: https://storage.googleapis.com/vit_models/sam/ViT-B_16.npz
+- DeiT: https://dl.fbaipublicfiles.com/deit/deit_base_patch16_224-b5f2ef4d.pth
+- CLIP: vit_base_patch16_clip_224.laion2b_ft_in12k_in1k
+- MAE: https://dl.fbaipublicfiles.com/mae/pretrain/mae_pretrain_vit_base.pth
 - https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz
 - ./checkpoint/moco_v3.pth
 - ./checkpoint/ibot_student.pth
 - ./checkpoint/ibot_1k.pth
+- ./checkpoint/clip_vit_b16.pth # clip
 - https://storage.googleapis.com/vit_models/sam/ViT-B_16.npz
 - https://dl.fbaipublicfiles.com/mae/pretrain/mae_pretrain_vit_base.pth
 - https://dl.fbaipublicfiles.com/dino/dino_vitbase16_pretrain/dino_vitbase16_pretrain.pth
 
-## Runing the Experiments
+## Experiments
 
 ### Important Config Notes
 
 - Default config for CIFAR100: 60 base classes, 5-way 5-shot incremental
 - To use no-base 10-way 10-shot, used `--shot 10 --way 10 --base_class 10`
 
-### Baseline: No training (Prototyp-based FSCIT)
+## Experiments: FSCIT
+
+### BASELINE: Tune on base session > Incremental frozen continual session
+
+```bash
+python train.py \
+  --update_base_classifier_with_prototypes False  \
+  --epochs_base 10 \
+  --lr_base 0.1 \
+  --encoder_ft_start_layer 12 \
+  --num_seeds 3 \
+  --pre_trained_url https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz \
+  --shot 10 --way 10 --base_class 10  \
+  --encoder_ft_start_epoch 0
+
+# Expected output
+base: [93.33, 39.8, 25.43, 20.5, 12.97, 10.63, 10.37, 10.0, 8.6]
+incremental: [nan, 91.7, 84.6, 81.6, 77.95, 75.44, 74.22, 72.04, 72.01]
+all: [93.33, 65.75, 64.88, 66.32, 64.95, 64.64, 65.1, 64.28, 64.96]
+```
+
+```bash
+# Tuning layer 11 and onward
+python train.py \
+  --update_base_classifier_with_prototypes False  \
+  --epochs_base 10 \
+  --lr_base 0.1 \
+  --encoder_ft_start_layer 11 \
+  --num_seeds 3 \
+  --pre_trained_url https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz \
+  --shot 10 --way 10 --base_class 10  \
+  --encoder_ft_start_epoch 0
+
+base: [91.77, 0.07, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+incremental: [nan, 68.6, 58.33, 54.42, 53.18, 53.21, 51.66, 49.92, 50.23]
+all: [91.77, 34.33, 38.89, 40.81, 42.54, 44.34, 44.28, 43.68, 44.64]
+```
+
+### BASELINE: Add adapter (Base session training) > Incremental Frozen
+
+```bash
+python train.py \
+  --update_base_classifier_with_prototypes False  \
+  --epochs_base 10 \
+  --lr_base 0.1 \
+  --encoder_ft_start_layer 12 \
+  --num_seeds 3 \
+  --pre_trained_url https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz \
+  --shot 10 --way 10 --base_class 10  \
+  --encoder_ft_start_epoch 0 \
+  --pet_cls LoRA --adapt_blocks 3
+
+base: [92.6, 44.57, 29.63, 24.03, 15.73, 13.1, 12.73, 12.43, 10.73]
+incremental: [nan, 91.7, 84.6, 81.6, 77.95, 75.45, 74.23, 72.05, 72.01]
+all: [92.6, 68.13, 66.28, 67.21, 65.51, 65.06, 65.44, 64.6, 65.2]
+
+# with --pet_cls Adapter
+base: [93.27, 48.8, 33.07, 26.87, 18.2, 15.37, 15.0, 14.53, 13.03]
+incremental: [nan, 91.77, 84.68, 81.7, 78.24, 75.77, 74.47, 72.32, 72.28]
+all: [93.27, 70.28, 67.48, 67.99, 66.23, 65.71, 65.97, 65.1, 65.7]
+
+# with --pet_cls Prefix
+base: [93.27, 51.9, 35.8, 29.4, 20.17, 17.17, 16.83, 16.4, 14.47]
+incremental: [nan, 91.93, 84.7, 81.81, 78.68, 76.35, 75.24, 73.08, 72.95]
+all: [93.27, 71.92, 68.4, 68.71, 66.97, 66.49, 66.9, 65.99, 66.45]
+```
+
+### BASELINE: No training (Prototype-based FSCIT)
+
+```bash
+# Supervised ViT-B16
+python train.py \
+  --update_base_classifier_with_prototypes True \
+  --epochs_base 0 \
+  --num_seeds 3 \
+  --shot 10 --way 10 --base_class 10 \
+  --pre_trained_url https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz
+
+# Expected output
+Base acc:  [94.1, 91.2, 85.4, 83.3, 81.4, 80.1, 79.6, 78.4, 77.4]
+Inc. acc:  [nan, 82.9, 79.25, 78.23, 75.28, 73.2, 72.1, 70.2, 70.29]
+Overall :  [94.1, 87.05, 81.3, 79.5, 76.5, 74.35, 73.17, 71.22, 71.08]
+```
+
+```bash
+# DeiT
+... --pre_trained_url https://dl.fbaipublicfiles.com/deit/deit_base_patch16_224-b5f2ef4d.pth
+
+base: [90.7, 81.5, 72.2, 68.7, 67.3, 61.6, 60.4, 59.8, 59.4]
+incremental: [nan, 73.7, 72.85, 69.2, 66.05, 60.7, 58.78, 56.39, 56.55]
+all: [90.7, 77.6, 72.63, 69.07, 66.3, 60.85, 59.01, 56.81, 56.87]
+```
+
+```bash
+# SSL MoCo v3
+...  --pre_trained_url ./checkpoint/moco_v3.pth
+
+# Expected output
+base: [51.1 50.5 37.3 36.7 33.7 33.7 32.2 32.2 31.5]
+incremental: [  nan 23.1  28.55 27.63 22.43 20.82 20.47 20.2  19.65]
+all: [51.1  36.8  31.47 29.9  24.68 22.97 22.14 21.7  20.97]
+```
+
+```bash
+# iBOT 21K
+...  --pre_trained_url ./checkpoint/ibot_student.pth
+
+# Expected output
+Base acc:  [87.3, 80.7, 72.6, 66.4, 60.9, 58.7, 57.2, 54.0, 53.7]
+Inc. acc:  [nan, 69.4, 66.5, 61.3, 56.53, 54.52, 52.5, 50.93, 50.08]
+Overall :  [87.3, 75.05, 68.53, 62.57, 57.4, 55.22, 53.17, 51.31, 50.48]
+```
+
+```bash
+# iBOT 1K
+...  --pre_trained_url ./checkpoint/ibot_1k.pth
+
+# Expected output
+base: [64.8 60.  45.8 39.6 38.4 33.1 29.6 26.8 26.3]
+incremental: [  nan 45.6  33.3  33.1  31.5  28.26 25.7  23.97 22.88]
+all: [64.8  52.8  37.47 34.72 32.88 29.07 26.26 24.32 23.26]
+```
+
+```bash
+# DINO
+... --pre_trained_url https://dl.fbaipublicfiles.com/dino/dino_vitbase16_pretrain/dino_vitbase16_pretrain.pth
+
+# Expected output
+base: [38.  20.1 14.1  7.3  7.3  7.3  7.1  6.5  6.5]
+incremental: [  nan 22.6  16.65 11.07 10.25  9.08  9.08  8.79  8.  ]
+all: [38.   21.35 15.8  10.12  9.66  8.78  8.8   8.5   7.83]
+```
+
+```bash
+# MAE
+...  --pre_trained_url https://dl.fbaipublicfiles.com/mae/pretrain/mae_pretrain_vit_base.pth
+
+# Expected output
+base: [22.2 12.4 11.3 10.7 10.4  3.   2.8  2.5  2.5]
+incremental: [  nan 11.4   8.45  5.2   4.    5.08  4.3   3.93  3.45]
+all: [22.2  11.9   9.4   6.57  5.28  4.73  4.09  3.75  3.34]
+```
+
+## BASELINE: FSCIL
+
+### No training (Prototyp-based FSCIT)
 
 ```bash
 # Supervised ViT-B16
@@ -108,113 +265,6 @@ incremental: [  nan 32.6  16.5  15.07 13.55 10.88 10.17 10.94 12.18]
 all: [ 8.62 10.17  9.47  9.04  9.02  8.51  8.31  8.68  7.5 ]
 ```
 
-### Baseline: No training (Prototype-based FSCIT) for 10-way 10-shot
-
-```bash
-# Supervised ViT-B16
-python train.py \
-  --update_base_classifier_with_prototypes True \
-  --epochs_base 0 \
-  --num_seeds 3 \
-  --pre_trained_url https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz \
-  --shot 10 --way 10 --base_class 10
-
-# Expected output
-Base acc:  [94.1, 91.2, 85.4, 83.3, 81.4, 80.1, 79.6, 78.4, 77.4]
-Inc. acc:  [nan, 82.9, 79.25, 78.23, 75.28, 73.2, 72.1, 70.2, 70.29]
-Overall :  [94.1, 87.05, 81.3, 79.5, 76.5, 74.35, 73.17, 71.22, 71.08]
-```
-
-```bash
-# SSL MoCo v3
-python train.py \
-  --update_base_classifier_with_prototypes True \
-  --epochs_base 0 \
-  --num_seeds 3 \
-  --pre_trained_url ./checkpoint/moco_v3.pth \
-  --shot 10 --way 10 --base_class 10
-
-# Expected output
-base: [51.1 50.5 37.3 36.7 33.7 33.7 32.2 32.2 31.5]
-incremental: [  nan 23.1  28.55 27.63 22.43 20.82 20.47 20.2  19.65]
-all: [51.1  36.8  31.47 29.9  24.68 22.97 22.14 21.7  20.97]
-```
-
-```bash
-# iBOT 21K
-python train.py \
-  --update_base_classifier_with_prototypes True \
-  --epochs_base 0 \
-  --num_seeds 3 \
-  --pre_trained_url ./checkpoint/ibot_student.pth \
-  --shot 10 --way 10 --base_class 10
-
-# Expected output
-Base acc:  [87.3, 80.7, 72.6, 66.4, 60.9, 58.7, 57.2, 54.0, 53.7]
-Inc. acc:  [nan, 69.4, 66.5, 61.3, 56.53, 54.52, 52.5, 50.93, 50.08]
-Overall :  [87.3, 75.05, 68.53, 62.57, 57.4, 55.22, 53.17, 51.31, 50.48]
-```
-
-```bash
-# iBOT 1K
-python train.py \
-  --update_base_classifier_with_prototypes True \
-  --epochs_base 0 \
-  --num_seeds 3 \
-  --pre_trained_url ./checkpoint/ibot_1k.pth \
-  --shot 10 --way 10 --base_class 10
-
-# Expected output
-base: [64.8 60.  45.8 39.6 38.4 33.1 29.6 26.8 26.3]
-incremental: [  nan 45.6  33.3  33.1  31.5  28.26 25.7  23.97 22.88]
-all: [64.8  52.8  37.47 34.72 32.88 29.07 26.26 24.32 23.26]
-```
-
-```bash
-# DINO
-python train.py \
-  --update_base_classifier_with_prototypes True \
-  --epochs_base 0 \
-  --num_seeds 3 \
-  --pre_trained_url https://dl.fbaipublicfiles.com/dino/dino_vitbase16_pretrain/dino_vitbase16_pretrain.pth \
-  --shot 10 --way 10 --base_class 10
-
-# Expected output
-base: [38.  20.1 14.1  7.3  7.3  7.3  7.1  6.5  6.5]
-incremental: [  nan 22.6  16.65 11.07 10.25  9.08  9.08  8.79  8.  ]
-all: [38.   21.35 15.8  10.12  9.66  8.78  8.8   8.5   7.83]
-```
-
-```bash
-# MAE
-python train.py \
-  --update_base_classifier_with_prototypes True \
-  --epochs_base 0 \
-  --num_seeds 3 \
-  --pre_trained_url https://dl.fbaipublicfiles.com/mae/pretrain/mae_pretrain_vit_base.pth \
-  --shot 10 --way 10 --base_class 10
-
-# Expected output
-base: [22.2 12.4 11.3 10.7 10.4  3.   2.8  2.5  2.5]
-incremental: [  nan 11.4   8.45  5.2   4.    5.08  4.3   3.93  3.45]
-all: [22.2  11.9   9.4   6.57  5.28  4.73  4.09  3.75  3.34]
-```
-
-### Full fine-tune + incremental frozen
-
-```bash
-python train.py \
-  --update_base_classifier_with_prototypes False  \
-  --start_training_with_prototypes False \
-  --epochs_base 10 \
-  --lr_base 0.1 \
-  --encoder_ft_start_layer 12 \
-  --num_seeds 3 \
-  --pre_trained_url https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz \
-  --shot 10 --way 10 --base_class 10  \
-  --encoder_ft_start_epoch 0
-```
-
 ### LoRA + Asyn. MoCo
 
 ````bash
@@ -232,6 +282,8 @@ python train.py \
   --shot 10 --way 10 --base_class 10 \
   --pet_cls LoRA --adapt_blocks 3 \
 ````
+
+## Acknowledgements # TODO
 
 ## Citing FSCIT
 

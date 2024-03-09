@@ -1,19 +1,15 @@
-# only has to pass for python 3.9
 name: Static code checks
 
 on:
   push:
-    branches:
-      main
+    branches: main
   pull_request:
-    branches:
-      main
+    branches: main
 
 jobs:
   run-code-check:
     runs-on: ubuntu-latest
     steps:
-
       - name: Checkout code
         uses: actions/checkout@v4.1.1
 
