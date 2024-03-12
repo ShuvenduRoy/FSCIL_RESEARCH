@@ -13,15 +13,15 @@ parameters:
   start_training_with_prototypes:
     values: [True, False]
   epochs_base:
-    values: [5, 10, 15, 20]
+    values: [5, 10, 15]
   lr_base:
-    values: [0.01, 0.001]
+    values: [0.001]
   encoder_ft_start_layer:
-    values: [-1, 2, 4, 6, 8, 10, 11, 12]
+    values: [-1, 1, 6, 9, 12]
   rank:
-    values: [1, 3, 5, 7, 9]
+    values: [1, 3, 5]
   pet_cls:
-    values: [None, Prefix, Adapter, LoRA]
+    values: [Prefix, Adapter, LoRA]
   num_seeds:
     value: 3
   encoder_lr_factor:
