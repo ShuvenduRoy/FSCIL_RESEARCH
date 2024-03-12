@@ -161,7 +161,6 @@ class Cifar100Dataset(VisionDataset):
         for i in index:
             ind_cl = np.where(i == targets)[0]
             # Select a reduced subset of base samples per class
-            # if limited_base_samples < 1.0
             if self.args:
                 samples_to_select = int(len(ind_cl) * self.args.limited_base_samples)
                 ind_cl = np.random.choice(ind_cl, samples_to_select, replace=False)

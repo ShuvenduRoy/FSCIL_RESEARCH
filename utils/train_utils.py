@@ -345,7 +345,12 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
     parser.add_argument("--encoder_ft_start_epoch", type=int, default=0)
     parser.add_argument("--encoder_lr_factor", type=float, default=1)
     parser.add_argument("--limited_base_class", type=int, default=-1)
-    parser.add_argument("--limited_base_samples", type=float, default=1)
+    parser.add_argument(
+        "--limited_base_samples",
+        type=float,
+        default=1.0,
+        help="Percenrage of labelled data to select from base. 1.0 means 100%. Use a value <1.0 to select a subset.",
+    )
     parser.add_argument(
         "--pet_on_teacher",
         type=str2bool,
