@@ -58,14 +58,14 @@ def get_dataset_configs(args: argparse.Namespace) -> argparse.Namespace:
         args.num_classes = 100
         args.way = 5 if args.way == -1 else args.way
         args.shot = 5 if args.shot == -1 else args.shot
-        args.sessions = 9 if args.session == -1 else args.session
+        args.sessions = ((args.num_classes - args.base_class) // args.way) + 1
 
     elif args.dataset == "cub200":
         args.base_class = 100 if args.base_class == -1 else args.base_class
         args.num_classes = 200
         args.way = 10 if args.way == -1 else args.way
         args.shot = 5 if args.shot == -1 else args.shot
-        args.sessions = 11 if args.session == -1 else args.session
+        args.sessions = ((args.num_classes - args.base_class) // args.way) + 1
         args.min_scale_crops = [0.2, 0.05]
         args.max_scale_crops = [1, 0.14]
         args.milestones = [60, 80, 100]
@@ -75,7 +75,7 @@ def get_dataset_configs(args: argparse.Namespace) -> argparse.Namespace:
         args.num_classes = 100
         args.way = 5 if args.way == -1 else args.way
         args.shot = 5 if args.shot == -1 else args.shot
-        args.sessions = 9 if args.session == -1 else args.session
+        args.sessions = ((args.num_classes - args.base_class) // args.way) + 1
         args.min_scale_crops = [0.2, 0.05]
         args.max_scale_crops = [1, 0.14]
         args.milestones = [40, 70, 100]
