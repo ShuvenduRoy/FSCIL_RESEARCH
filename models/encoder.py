@@ -345,4 +345,4 @@ class FSCILencoder(nn.Module):
             embedding_q = embedding_q.unsqueeze(1)
         embedding_k = embedding_k.unsqueeze(1)
 
-        return logits, embedding_q, embedding_k
+        return logits[: embedding_q.shape[0]], embedding_q, embedding_k
