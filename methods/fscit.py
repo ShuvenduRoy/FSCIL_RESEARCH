@@ -102,11 +102,11 @@ class FSCITTrainer:
                     name,
                     param,
                 ) in self.model_without_ddp.encoder_q.named_parameters():
-                    if (
-                        name.startswith("model.blocks")
-                        and int(name.split(".")[2]) == self.args.encoder_ft_start_layer
-                    ):
-                        status = True  # start fine-tuning from this layer
+                    if "layer." in name:
+                        # find number in name with regex
+                        layer_num = int("".join(filter(str.isdigit, name)))
+                        if layer_num == self.args.encoder_ft_start_layer:
+                            status = True  # start fine-tuning from this layer
 
                     # update the requires_grad status is not already trainable
                     param.requires_grad = status or param.requires_grad

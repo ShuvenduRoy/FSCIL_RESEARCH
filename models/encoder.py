@@ -4,26 +4,40 @@ import argparse
 from typing import Any, Optional, Tuple
 
 import torch
+from peft import LoraConfig, get_peft_model
 from torch import nn
+from transformers import AutoModelForImageClassification
 
-from models.backbones.vit import vit_b16
-from models.pet.adapter import Adapter
-from models.pet.lora import KVLoRA
-from models.pet.prefix import Prefix
+
+def print_trainable_parameters(model: Any) -> None:
+    """Print the number of trainable parameters in the model."""
+    trainable_params = 0
+    all_param = 0
+    for _, param in model.named_parameters():
+        all_param += param.numel()
+        if param.requires_grad:
+            trainable_params += param.numel()
+    print(
+        f"trainable params: {trainable_params} || all params: {all_param} || trainable%: {100 * trainable_params / all_param:.2f}",
+    )
 
 
 class EncoderWrapper(nn.Module):
     """Encoder Wrapper encoders."""
 
-    def __init__(self, args: argparse.Namespace) -> None:
+    def __init__(
+        self,
+        args: argparse.Namespace,
+        pet_config: Optional[Any] = None,
+    ) -> None:
         """Initialize the EncoderWrapper.
 
         Parameters
         ----------
-        num_classes : int
-            Number of classes.
         args : argparse.ArgumentParser
             Arguments passed to the model.
+        pet_config : Any
+            PET configuration.
 
         Returns
         -------
@@ -33,11 +47,23 @@ class EncoderWrapper(nn.Module):
         self.args = args
         if self.args.encoder == "vit-b16":
             print("Encoder: ViT-B16")
-            self.model = vit_b16(
-                True,
-                pre_trained_url=args.pre_trained_url,
-            )
             self.num_features = 768
+            model_checkpoint = "google/vit-base-patch16-224-in21k"
+
+            print(f"Loading model from {model_checkpoint}")
+            self.model = AutoModelForImageClassification.from_pretrained(
+                model_checkpoint,
+            )
+            self.model.classifier = nn.Identity()
+            print_trainable_parameters(self.model)
+        # Freeze pre-trained layers
+        for param in self.model.parameters():
+            param.requires_grad = False
+
+        if pet_config is not None:
+            print("Adding PET moduels.")
+            self.model = get_peft_model(self.model, pet_config)
+
         if args.num_mlp == 2:
             self.fc = nn.Sequential(
                 nn.Linear(self.num_features, self.num_features),
@@ -80,7 +106,9 @@ class EncoderWrapper(nn.Module):
             projecting embedding, [b, moco_dim]
             output logits, [b, n_classes]
         """
-        x = self.model(x).mean(1)  # [b, n_tokens=197, embed_dim=768] -> [b, embed_dim]
+        x = self.model(x)[
+            "logits"
+        ]  # [b, n_tokens=197, embed_dim=768] -> [b, embed_dim]
         return (
             x,  # [b, embed_dim=768]
             self.fc(x),  # [b, moco_dim=128]
@@ -106,39 +134,28 @@ class FSCILencoder(nn.Module):
         super().__init__()
 
         self.args = args
-        self.encoder_q = EncoderWrapper(args)
+        config = LoraConfig(  # TODO Handle dynamically
+            r=16,
+            lora_alpha=16,
+            target_modules=["query", "value"],
+            lora_dropout=0.1,
+            bias="none",
+        )
+        self.encoder_q = EncoderWrapper(args, pet_config=config)
         self.num_features = 768
 
-        # By default all pre-trained parameters are frozen
-        # except the MLP and the classifier layers
-        for param in self.encoder_q.parameters():
-            param.requires_grad = False
-        for param in self.encoder_q.fc.parameters():
-            param.requires_grad = True
-        for param in self.encoder_q.classifier.parameters():
-            param.requires_grad = True
+        print_trainable_parameters(self.encoder_q)
 
         self.encoder_k = EncoderWrapper(args)
 
-        # Add PET modules. Doing after initializing the both encoders
-        if self.args.pet_cls is not None:
-            self.args.pet_kwargs = {}
-
-            self.pets = self.create_pets()
-            self.attach_pets(self.pets, self.encoder_q)
-
-            if self.args.pet_on_teacher:
-                self.args.pet_kwargs = {}
-
-                self.pets = self.create_pets()
-                self.attach_pets(self.pets, self.encoder_k)
-
         # Handle the case that EMA can be different in terms of parameters
-        encoder_q_params = self.encoder_q.state_dict()
+        encoder_q_params = self._get_encoder_q_state_dict()
         for name, param in self.encoder_k.named_parameters():
             param.requires_grad = False
             if name in encoder_q_params:
                 param.data.copy_(encoder_q_params[name])
+            else:
+                print(f"Warning: {name} not found in encoder_q")
 
         # print param name and status
         print("\nencoder_q parameters:")
@@ -151,7 +168,7 @@ class FSCILencoder(nn.Module):
 
         pet_name = "none" if self.args.pet_cls is None else self.args.pet_cls.lower()
         self.params_with_lr = [
-            # Higher LR for newly initalized parameters
+            # TODO: this need to be updated
             {
                 "params": [
                     p
@@ -171,73 +188,24 @@ class FSCILencoder(nn.Module):
             },
         ]
 
-        # create the queue
-        self.register_buffer(
-            "queue",
-            torch.randn(self.args.moco_dim, self.args.moco_k, dtype=torch.float32),
-        )
-        self.queue: torch.Tensor = nn.functional.normalize(self.queue, dim=0)
-
-        self.register_buffer("queue_ptr", torch.zeros(1, dtype=torch.long))
-        self.register_buffer("label_queue", torch.zeros(int(args.moco_k)).long() - 1)
-
-    def create_pets(self) -> nn.ModuleList:
-        """Create PETs."""
-        return self.create_pets_vit()
-
-    def attach_pets(self, pets: nn.ModuleList, encoder: nn.Module) -> None:
-        """Attach PETs."""
-        return self.attach_pets_vit(pets, encoder)
-
-    def create_pets_vit(self) -> nn.ModuleList:
-        """Create PETs for ViT."""
-        assert self.args.pet_cls in ["Adapter", "LoRA", "Prefix"]
-
-        n = len(self.args.adapt_blocks)
-        embed_dim = self.num_features
-
-        kwargs = dict(**self.args.pet_kwargs)
-        if self.args.pet_cls == "Adapter":
-            kwargs["embed_dim"] = embed_dim
-            return nn.ModuleList([Adapter(**kwargs) for _ in range(n)])
-
-        if self.args.pet_cls == "LoRA":
-            kwargs["in_features"] = embed_dim
-            kwargs["out_features"] = embed_dim
-            kwargs["rank"] = self.args.rank
-            return nn.ModuleList([KVLoRA(**kwargs) for _ in range(n)])
-
-        kwargs["dim"] = embed_dim
-        return nn.ModuleList([Prefix(**kwargs) for i in range(n)])
-
-    def attach_pets_vit(self, pets: nn.ModuleList, encoder: Any) -> None:
-        """Attach PETs for ViT.
-
-        Parameters
-        ----------
-        pets : nn.ModuleList
-            PETs.
-        encoder : Any
-            Encoder to which PETs are attached.
+    def _get_encoder_q_state_dict(self) -> dict:
+        """Get the state dictionary of the encoder_q.
 
         Returns
         -------
-        None
+        dict
+            The state dictionary of the encoder_q.
         """
-        assert self.args.pet_cls in ["Adapter", "LoRA", "Prefix"]
-
-        if self.args.pet_cls == "Adapter":
-            for i, b in enumerate(self.args.adapt_blocks):
-                encoder.model.blocks[b].attach_adapter(attn=pets[i])
-            return
-
-        if self.args.pet_cls == "LoRA":
-            for i, b in enumerate(self.args.adapt_blocks):
-                encoder.model.blocks[b].attn.attach_adapter(qkv=pets[i])
-            return
-
-        for i, b in enumerate(self.args.adapt_blocks):
-            encoder.model.blocks[b].attn.attach_prefix(pets[i])
+        encoder_q_params_original = self.encoder_q.state_dict()
+        encoder_q_params = {}
+        # remove prefix 'base_model.model.' and "base_layer." from keys
+        for key, value in encoder_q_params_original.items():
+            if "base_model.model." in key:
+                key = key.replace("base_model.model.", "")  # noqa: PLW2901
+            if "base_layer." in key:
+                key = key.replace("base_layer.", "")  # noqa: PLW2901
+            encoder_q_params[key] = value
+        return encoder_q_params
 
     @torch.no_grad()
     def _momentum_update_key_encoder(self, base_sess: bool) -> None:
@@ -252,44 +220,11 @@ class FSCILencoder(nn.Module):
         -------
         None
         """
-        encoder_q_params = self.encoder_q.state_dict()
+        encoder_q_params = self._get_encoder_q_state_dict()
         for name, param in self.encoder_k.named_parameters():
             param.data = param.data * self.args.moco_m + encoder_q_params[name] * (
                 1.0 - self.args.moco_m
             )
-
-    @torch.no_grad()
-    def _dequeue_and_enqueue(self, keys: torch.Tensor, labels: torch.Tensor) -> None:
-        """Update the queue.
-
-        Parameters
-        ----------
-        keys : torch.Tensor
-            The keys.
-        labels : torch.Tensor
-            The labels.
-
-        Returns
-        -------
-        None
-        """
-        batch_size = keys.shape[0]
-        ptr = int(self.queue_ptr.item())  # type: ignore
-
-        # replace the keys and labels at ptr (dequeue and enqueue)
-        if ptr + batch_size > self.args.moco_k:
-            remains = ptr + batch_size - self.args.moco_k
-            self.queue[:, ptr:] = keys.T[:, : batch_size - remains]
-            self.queue[:, :remains] = keys.T[:, batch_size - remains :]
-            self.label_queue[ptr:] = labels[: batch_size - remains]  # type: ignore
-            self.label_queue[:remains] = labels[batch_size - remains :]  # type: ignore
-        else:
-            self.queue[:, ptr : ptr + batch_size] = (
-                keys.T
-            )  # this queue is feature queue
-            self.label_queue[ptr : ptr + batch_size] = labels  # type: ignore
-        ptr = (ptr + batch_size) % self.args.moco_k  # move pointer
-        self.queue_ptr[0] = ptr  # type: ignore
 
     def forward(
         self,

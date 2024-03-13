@@ -15,3 +15,4 @@ torchvision==0.14.1
 tqdm==4.65.0
 types-PyYAML
 types-requests
+git+https://github.com/huggingface/peft
