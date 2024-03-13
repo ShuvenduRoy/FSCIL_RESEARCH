@@ -64,9 +64,9 @@ python train.py \
   --encoder_ft_start_epoch 0
 
 # Expected output
-base: [93.33, 39.8, 25.43, 20.5, 12.97, 10.63, 10.37, 10.0, 8.6]
-incremental: [nan, 91.7, 84.6, 81.6, 77.95, 75.44, 74.22, 72.04, 72.01]
-all: [93.33, 65.75, 64.88, 66.32, 64.95, 64.64, 65.1, 64.28, 64.96]
+base: [92.17, 46.37, 30.77, 25.27, 17.13, 15.13, 14.63, 14.23, 12.63, 10.9]
+incremental: [nan, 91.73, 84.6, 81.6, 77.95, 75.44, 74.22, 72.04, 72.0, 70.33]
+all: [92.17, 69.05, 66.65, 67.51, 65.79, 65.39, 65.7, 64.81, 65.4, 64.39]
 ```
 
 ```bash
@@ -100,9 +100,9 @@ python train.py \
   --encoder_ft_start_epoch 0 \
   --pet_cls LoRA --adapt_blocks 3
 
-base: [92.6, 44.57, 29.63, 24.03, 15.73, 13.1, 12.73, 12.43, 10.73]
-incremental: [nan, 91.7, 84.6, 81.6, 77.95, 75.45, 74.23, 72.05, 72.01]
-all: [92.6, 68.13, 66.28, 67.21, 65.51, 65.06, 65.44, 64.6, 65.2]
+base: [92.87, 48.67, 32.43, 25.77, 16.93, 14.67, 14.3, 13.93, 12.17, 10.37]
+incremental: [nan, 91.67, 84.6, 81.6, 77.95, 75.44, 74.22, 72.03, 72.0, 70.33]
+all: [92.87, 70.17, 67.21, 67.64, 65.75, 65.31, 65.66, 64.77, 65.35, 64.34]
 
 # with --pet_cls Adapter
 base: [93.27, 48.8, 33.07, 26.87, 18.2, 15.37, 15.0, 14.53, 13.03]
@@ -127,9 +127,9 @@ python train.py \
   --pre_trained_url https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz
 
 # Expected output
-Base acc:  [94.1, 91.2, 85.4, 83.3, 81.4, 80.1, 79.6, 78.4, 77.4]
-Inc. acc:  [nan, 82.9, 79.25, 78.23, 75.28, 73.2, 72.1, 70.2, 70.29]
-Overall :  [94.1, 87.05, 81.3, 79.5, 76.5, 74.35, 73.17, 71.22, 71.08]
+base: [94.1, 91.2, 85.4, 83.3, 81.4, 80.1, 79.6, 78.4, 77.4, 77.0]
+incremental: [nan, 82.9, 79.25, 78.23, 75.28, 73.2, 72.1, 70.2, 70.29, 68.86]
+all: [94.1, 87.05, 81.3, 79.5, 76.5, 74.35, 73.17, 71.22, 71.08, 69.67]
 ```
 
 ```bash
@@ -275,12 +275,15 @@ python train.py \
   --update_base_classifier_with_prototypes True \
   --start_training_with_prototypes True \
   --epochs_base 10 \
+  --moco_loss_factor 1.0 \
   --lr_base 0.001 \
-  --encoder_ft_start_layer 15 \
+  --encoder_ft_start_layer -1 \
+  --encoder_ft_start_epoch 0 \
+  --encoder_lr_factor 2.0 \
   --num_seeds 3 \
-  --pre_trained_url ./checkpoint/moco_v3.pth \
+  --pre_trained_url https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz  \
   --shot 10 --way 10 --base_class 10 \
-  --pet_cls LoRA --adapt_blocks 3 \
+  --pet_cls LoRA --adapt_blocks 1 \
 ````
 
 ## Acknowledgements # TODO
