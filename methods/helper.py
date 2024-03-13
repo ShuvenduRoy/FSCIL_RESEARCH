@@ -305,9 +305,9 @@ def train_one_epoch(
             labels = labels.cuda(non_blocking=True)
 
         # model foward pass
-        logits, embedding_q, embedding_k = model(data[0], data[1], labels)
+        logits, embedding_q, embedding_k = model(data[:-1], data[-1], labels)
         features = torch.cat(
-            [embedding_q.unsqueeze(1), embedding_k.unsqueeze(1)],
+            [embedding_q, embedding_k],
             dim=1,
         )
 

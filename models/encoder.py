@@ -80,8 +80,12 @@ class EncoderWrapper(nn.Module):
             projecting embedding, [b, moco_dim]
             output logits, [b, n_classes]
         """
-        x = self.model(x).mean(1)  # [b, n_tokens, embed_dim] -> [b, embed_dim]
-        return x, self.fc(x), self.classifier(x)
+        x = self.model(x).mean(1)  # [b, n_tokens=197, embed_dim=768] -> [b, embed_dim]
+        return (
+            x,  # [b, embed_dim=768]
+            self.fc(x),  # [b, moco_dim=128]
+            self.classifier(x),  # [b, n_classes]
+        )
 
 
 class FSCILencoder(nn.Module):
@@ -312,15 +316,17 @@ class FSCILencoder(nn.Module):
         Any
             The output tensor.
         """
+        if isinstance(im_q, list):
+            im_q = torch.cat(im_q, dim=0)
         token_embeding, embedding_q, logits = self.encoder_q(
             im_q,
-        )  # [b, embed_dim] [b, n_classes]
+        )  # [b, embed_dim=768], [b, moco_dim=128], [b, n_classes]
         assert len(logits.shape) == 2
         assert logits.shape[1] == self.args.num_classes
         assert embedding_q.shape[1] == self.args.moco_dim
 
-        if labels is None:  # during evaluation
-            return token_embeding, logits  # [b, n_classes]
+        if labels is None:  # during evaluation, im_q should be a single image
+            return (token_embeding, logits)
         embedding_q = nn.functional.normalize(embedding_q, dim=1)
 
         # foward key
@@ -328,5 +334,15 @@ class FSCILencoder(nn.Module):
             self._momentum_update_key_encoder(base_sess)  # update the key encoder
             _, embedding_k, _ = self.encoder_k(im_k)  # keys: bs x dim
             embedding_k = nn.functional.normalize(embedding_k, dim=1)
+
+        if embedding_q.shape[0] != embedding_k.shape[0]:  # multiple views
+            embedding_q = embedding_q.view(
+                embedding_k.shape[0],
+                -1,
+                embedding_k.shape[1],
+            )
+        else:
+            embedding_q = embedding_q.unsqueeze(1)
+        embedding_k = embedding_k.unsqueeze(1)
 
         return logits, embedding_q, embedding_k
