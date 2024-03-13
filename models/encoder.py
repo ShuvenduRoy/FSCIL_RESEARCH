@@ -293,7 +293,6 @@ class FSCILencoder(nn.Module):
         im_k: Optional[torch.Tensor] = None,
         labels: Optional[torch.Tensor] = None,
         base_sess: bool = True,
-        last_epochs_new: bool = False,
     ) -> Any:
         """Forward pass of the model.
 
@@ -307,8 +306,6 @@ class FSCILencoder(nn.Module):
             The labels, by default None.
         base_sess : bool, optional
             Whether the current session is a base session, by default True.
-        last_epochs_new : bool, optional
-            Whether the last epoch an incremental session, by default False.
 
         Returns
         -------
@@ -325,47 +322,11 @@ class FSCILencoder(nn.Module):
         if labels is None:  # during evaluation
             return token_embeding, logits  # [b, n_classes]
         embedding_q = nn.functional.normalize(embedding_q, dim=1)
-        embedding_q = embedding_q.unsqueeze(1)  # [b, 1, embed_dim]
 
         # foward key
-        b = im_q.shape[0]
         with torch.no_grad():  # no gradient to keys
             self._momentum_update_key_encoder(base_sess)  # update the key encoder
             _, embedding_k, _ = self.encoder_k(im_k)  # keys: bs x dim
             embedding_k = nn.functional.normalize(embedding_k, dim=1)
 
-        # compute logits
-        # Einstein sum is more intuitive
-        # positive logits: Nx1
-        l_pos = (embedding_q * embedding_k.unsqueeze(1)).sum(2).view(-1, 1)
-
-        # negative logits: NxK
-        l_neg = torch.einsum(
-            "nc,ck->nk",
-            [embedding_q.view(-1, self.args.moco_dim), self.queue.clone().detach()],
-        )
-
-        # logits with shape Nx(1+K)``
-        logits_global = torch.cat([l_pos, l_neg], dim=1)
-
-        # apply temperature
-        logits_global /= self.args.moco_t
-
-        # one-hot target from augmented image
-        positive_target = torch.ones((b, 1)).to(logits_global.device)
-
-        # find same label images from label queue
-        # for the query with -1, all
-        targets = (
-            ((labels[:, None] == self.label_queue[None, :]) & (labels[:, None] != -1))  # type: ignore
-            .float()
-            .to(logits_global.device)
-        )
-
-        targets_global = torch.cat([positive_target, targets], dim=1)
-
-        # dequeue and enqueue
-        if base_sess or (not base_sess and last_epochs_new):
-            self._dequeue_and_enqueue(embedding_k, labels)
-
-        return logits, embedding_q, logits_global, targets_global
+        return logits, embedding_q, embedding_k

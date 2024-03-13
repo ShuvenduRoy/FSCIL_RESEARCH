@@ -305,10 +305,14 @@ def train_one_epoch(
             labels = labels.cuda(non_blocking=True)
 
         # model foward pass
-        logits, _, logits_global, targets_global = model(data[0], data[1], labels)
+        logits, embedding_q, embedding_k = model(data[0], data[1], labels)
+        features = torch.cat(
+            [embedding_q.unsqueeze(1), embedding_k.unsqueeze(1)],
+            dim=1,
+        )
 
         # calculate the loss
-        moco_loss = criterion(logits_global, targets_global)
+        moco_loss = criterion(features, labels)  # supcon loss
         ce_loss = F.cross_entropy(logits, labels)
         loss = args.ce_loss_factor * ce_loss + args.moco_loss_factor * moco_loss
         if torch.isnan(loss):

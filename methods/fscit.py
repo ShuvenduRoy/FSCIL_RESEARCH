@@ -8,7 +8,7 @@ import torch
 from torch.nn.parallel import DistributedDataParallel
 
 from dataloaders.helpter import get_dataloader
-from losses.contrastive import SupContrastive
+from losses.contrastive import SupConLoss
 from methods.helper import (
     get_optimizer_base,
     replace_fc_with_prototypes,
@@ -56,7 +56,7 @@ class FSCITTrainer:
 
         # initialize model
         self.model = FSCILencoder(args)
-        self.criterion = SupContrastive()
+        self.criterion = SupConLoss()
         self.optimizer, self.scheduler = get_optimizer_base(self.model, self.args)
         self.device_id = None
 
