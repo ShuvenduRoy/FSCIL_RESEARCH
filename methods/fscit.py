@@ -15,7 +15,7 @@ from methods.helper import (
     test,
     train_one_epoch,
 )
-from models.encoder import FSCILencoder
+from models.encoder import FSCILencoder, print_trainable_parameters
 from utils import dist_utils
 from utils.dist_utils import is_main_process
 from utils.train_utils import ensure_path
@@ -96,6 +96,7 @@ class FSCITTrainer:
             if (
                 epoch == self.args.encoder_ft_start_epoch
             ):  # current epoch is ft start epoch
+                print_trainable_parameters(self.model_without_ddp.encoder_q)
 
                 status = self.args.encoder_ft_start_layer == -1  # full fine-tune
                 for (
@@ -121,6 +122,9 @@ class FSCITTrainer:
                         name,
                         param.requires_grad,
                     )
+
+                print_trainable_parameters(self.model_without_ddp.encoder_q)
+
             if epoch == self.args.pet_tuning_start_epoch:
                 # Fine-tune the PET layer
                 pass  # TODO handle PET tuning

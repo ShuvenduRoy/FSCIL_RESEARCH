@@ -163,7 +163,7 @@ Inc. acc:  [nan, 79.4, 74.3, 73.1, 70.95, 69.1, 68.37, 67.03, 66.86, 65.73]
 Overall :  [92.9, 84.75, 77.5, 75.47, 72.62, 70.68, 69.73, 68.24, 67.86, 66.66]
 ```
 
-### BASELINE: Start with prototype then finetune
+### BASELINE: Start with prototype then finetune linear only
 
 ```bash
 python train.py \
@@ -174,6 +174,20 @@ python train.py \
   --result_key _baseline_linear \
   --hf_model_checkpoint "google/vit-base-patch16-224"\
   --encoder_ft_start_layer 12
+```
+
+### BASELINE: Start with prototype then finetune linear and LoRA
+
+```bash
+python train.py \
+  --start_training_with_prototypes True \
+  --epochs_base 10 \
+  --num_seeds 3 \
+  --shot 10 --way 10 --base_class 10 \
+  --result_key _baseline_linear \
+  --hf_model_checkpoint "google/vit-base-patch16-224"\
+  --encoder_ft_start_layer 12 \
+  --pet_cls LoRA --adapt_blocks 3
 ```
 
 ### BASELINE: Tune on base session > Incremental frozen continual session
