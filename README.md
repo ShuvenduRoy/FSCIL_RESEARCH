@@ -50,71 +50,6 @@ pip install -r requirements.txt
 
 ## Experiments: FSCIT
 
-### BASELINE: Tune on base session > Incremental frozen continual session
-
-```bash
-python train.py \
-  --update_base_classifier_with_prototypes False  \
-  --epochs_base 10 \
-  --lr_base 0.1 \
-  --encoder_ft_start_layer 12 \
-  --num_seeds 3 \
-  --pre_trained_url https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz \
-  --shot 10 --way 10 --base_class 10  \
-  --encoder_ft_start_epoch 0
-
-# Expected output
-base: [92.17, 46.37, 30.77, 25.27, 17.13, 15.13, 14.63, 14.23, 12.63, 10.9]
-incremental: [nan, 91.73, 84.6, 81.6, 77.95, 75.44, 74.22, 72.04, 72.0, 70.33]
-all: [92.17, 69.05, 66.65, 67.51, 65.79, 65.39, 65.7, 64.81, 65.4, 64.39]
-```
-
-```bash
-# Tuning layer 11 and onward
-python train.py \
-  --update_base_classifier_with_prototypes False  \
-  --epochs_base 10 \
-  --lr_base 0.1 \
-  --encoder_ft_start_layer 11 \
-  --num_seeds 3 \
-  --pre_trained_url https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz \
-  --shot 10 --way 10 --base_class 10  \
-  --encoder_ft_start_epoch 0
-
-base: [91.77, 0.07, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-incremental: [nan, 68.6, 58.33, 54.42, 53.18, 53.21, 51.66, 49.92, 50.23]
-all: [91.77, 34.33, 38.89, 40.81, 42.54, 44.34, 44.28, 43.68, 44.64]
-```
-
-### BASELINE: Add adapter (Base session training) > Incremental Frozen
-
-```bash
-python train.py \
-  --update_base_classifier_with_prototypes False  \
-  --epochs_base 10 \
-  --lr_base 0.1 \
-  --encoder_ft_start_layer 12 \
-  --num_seeds 3 \
-  --pre_trained_url https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz \
-  --shot 10 --way 10 --base_class 10  \
-  --encoder_ft_start_epoch 0 \
-  --pet_cls LoRA --adapt_blocks 3
-
-base: [92.87, 48.67, 32.43, 25.77, 16.93, 14.67, 14.3, 13.93, 12.17, 10.37]
-incremental: [nan, 91.67, 84.6, 81.6, 77.95, 75.44, 74.22, 72.03, 72.0, 70.33]
-all: [92.87, 70.17, 67.21, 67.64, 65.75, 65.31, 65.66, 64.77, 65.35, 64.34]
-
-# with --pet_cls Adapter
-base: [93.27, 48.8, 33.07, 26.87, 18.2, 15.37, 15.0, 14.53, 13.03]
-incremental: [nan, 91.77, 84.68, 81.7, 78.24, 75.77, 74.47, 72.32, 72.28]
-all: [93.27, 70.28, 67.48, 67.99, 66.23, 65.71, 65.97, 65.1, 65.7]
-
-# with --pet_cls Prefix
-base: [93.27, 51.9, 35.8, 29.4, 20.17, 17.17, 16.83, 16.4, 14.47]
-incremental: [nan, 91.93, 84.7, 81.81, 78.68, 76.35, 75.24, 73.08, 72.95]
-all: [93.27, 71.92, 68.4, 68.71, 66.97, 66.49, 66.9, 65.99, 66.45]
-```
-
 ### BASELINE: No training (Prototype-based FSCIT)
 
 ```bash
@@ -189,6 +124,98 @@ all: [38.   21.35 15.8  10.12  9.66  8.78  8.8   8.5   7.83]
 base: [22.2 12.4 11.3 10.7 10.4  3.   2.8  2.5  2.5]
 incremental: [  nan 11.4   8.45  5.2   4.    5.08  4.3   3.93  3.45]
 all: [22.2  11.9   9.4   6.57  5.28  4.73  4.09  3.75  3.34]
+```
+
+```bash
+HF google/vit-base-patch16-224-in21k
+python train.py \
+  --update_base_classifier_with_prototypes True \
+  --epochs_base 0 \
+  --num_seeds 1 \
+  --shot 10 --way 10 --base_class 10 \
+  --hf_model_checkpoint "google/vit-base-patch16-224-in21k"
+
+Base acc:  [92.9, 90.1, 83.9, 82.6, 79.3, 78.6, 77.9, 76.7, 75.8, 75.0]
+Inc. acc:  [nan, 79.4, 74.3, 73.1, 70.95, 69.1, 68.37, 67.03, 66.86, 65.73]
+Overall :  [92.9, 84.75, 77.5, 75.47, 72.62, 70.68, 69.73, 68.24, 67.86, 66.66]
+```
+
+```bash
+python train.py \
+  --update_base_classifier_with_prototypes True \
+  --epochs_base 0 \
+  --num_seeds 1 \
+  --shot 10 --way 10 --base_class 10 \
+  --hf_model_checkpoint "google/vit-base-patch16-224"
+
+base: [92.5, 90.0, 83.4, 81.2, 78.8, 78.0, 77.4, 76.1, 75.8, 75.0]
+incremental: [nan, 76.5, 73.35, 71.8, 69.0, 65.72, 64.52, 62.4, 62.59, 61.56]
+all: [92.5, 83.25, 76.7, 74.15, 70.96, 67.77, 66.36, 64.11, 64.06, 62.9]
+```
+
+### BASELINE: Tune on base session > Incremental frozen continual session
+
+```bash
+python train.py \
+  --update_base_classifier_with_prototypes False  \
+  --epochs_base 10 \
+  --lr_base 0.1 \
+  --encoder_ft_start_layer 12 \
+  --num_seeds 3 \
+  --pre_trained_url https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz \
+  --shot 10 --way 10 --base_class 10  \
+  --encoder_ft_start_epoch 0
+
+# Expected output
+base: [92.17, 46.37, 30.77, 25.27, 17.13, 15.13, 14.63, 14.23, 12.63, 10.9]
+incremental: [nan, 91.73, 84.6, 81.6, 77.95, 75.44, 74.22, 72.04, 72.0, 70.33]
+all: [92.17, 69.05, 66.65, 67.51, 65.79, 65.39, 65.7, 64.81, 65.4, 64.39]
+```
+
+```bash
+# Tuning layer 11 and onward
+python train.py \
+  --update_base_classifier_with_prototypes False  \
+  --epochs_base 10 \
+  --lr_base 0.1 \
+  --encoder_ft_start_layer 11 \
+  --num_seeds 3 \
+  --pre_trained_url https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz \
+  --shot 10 --way 10 --base_class 10  \
+  --encoder_ft_start_epoch 0
+
+base: [91.77, 0.07, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+incremental: [nan, 68.6, 58.33, 54.42, 53.18, 53.21, 51.66, 49.92, 50.23]
+all: [91.77, 34.33, 38.89, 40.81, 42.54, 44.34, 44.28, 43.68, 44.64]
+```
+
+### BASELINE: Add adapter (Base session training) > Incremental Frozen
+
+```bash
+python train.py \
+  --update_base_classifier_with_prototypes False  \
+  --epochs_base 10 \
+  --lr_base 0.1 \
+  --encoder_ft_start_layer 12 \
+  --num_seeds 3 \
+  --pre_trained_url https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz \
+  --shot 10 --way 10 --base_class 10  \
+  --encoder_ft_start_epoch 0 \
+  --pet_cls LoRA --adapt_blocks 3
+
+base: [92.87, 48.67, 32.43, 25.77, 16.93, 14.67, 14.3, 13.93, 12.17, 10.37]
+incremental: [nan, 91.67, 84.6, 81.6, 77.95, 75.44, 74.22, 72.03, 72.0, 70.33]
+all: [92.87, 70.17, 67.21, 67.64, 65.75, 65.31, 65.66, 64.77, 65.35, 64.34]
+
+# with --pet_cls Adapter
+base: [93.27, 48.8, 33.07, 26.87, 18.2, 15.37, 15.0, 14.53, 13.03]
+incremental: [nan, 91.77, 84.68, 81.7, 78.24, 75.77, 74.47, 72.32, 72.28]
+all: [93.27, 70.28, 67.48, 67.99, 66.23, 65.71, 65.97, 65.1, 65.7]
+
+# with --pet_cls Prefix
+base: [93.27, 51.9, 35.8, 29.4, 20.17, 17.17, 16.83, 16.4, 14.47]
+incremental: [nan, 91.93, 84.7, 81.81, 78.68, 76.35, 75.24, 73.08, 72.95]
+all: [93.27, 71.92, 68.4, 68.71, 66.97, 66.49, 66.9, 65.99, 66.45]
 ```
 
 ## BASELINE: FSCIL

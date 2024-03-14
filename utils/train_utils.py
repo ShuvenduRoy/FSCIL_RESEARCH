@@ -33,8 +33,9 @@ def override_training_configs(args: argparse.Namespace) -> argparse.Namespace:
 
     args.save_path = os.path.join("checkpoint", args.exp_name)
 
-    if args.encoder in ["vit-b16", "vit-b14"]:
-        args.size_crops = [224, 224]
+    args.size_crops = [224, 224]
+    if "384" in args.hf_model_checkpoint:
+        args.size_crops = [384, 384]
     return args
 
 

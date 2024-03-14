@@ -6,7 +6,8 @@ from typing import Any, Optional, Tuple
 import torch
 from peft import LoraConfig, get_peft_model
 from torch import nn
-from transformers import ViTModel
+
+from models.model_utils import get_model_args
 
 
 def print_trainable_parameters(model: Any) -> None:
@@ -44,16 +45,17 @@ class EncoderWrapper(nn.Module):
         None
         """
         super(EncoderWrapper, self).__init__()
-        self.args = args
-        if self.args.encoder == "vit-b16":
-            print("Encoder: ViT-B16")
-            self.num_features = 768
+        print("Loading encoder: ", args.hf_model_checkpoint)
 
-            print(f"Loading model from {args.hf_model_checkpoint}")
-            self.model = ViTModel.from_pretrained(
-                args.hf_model_checkpoint,
-            )
-            print_trainable_parameters(self.model)
+        self.args = args
+        model_args = get_model_args(args.hf_model_checkpoint)
+        self.num_features = model_args["embedding_dim"]
+
+        print(f"Loading model from {args.hf_model_checkpoint}")
+        self.model = model_args["hf_model_class"].from_pretrained(
+            args.hf_model_checkpoint,
+        )
+        print_trainable_parameters(self.model)
         # Freeze pre-trained layers
         for param in self.model.parameters():
             param.requires_grad = False
@@ -133,7 +135,7 @@ class FSCILencoder(nn.Module):
         self.args = args
         config = self._get_pet_config()
         self.encoder_q = EncoderWrapper(args, pet_config=config)
-        self.num_features = 768
+        self.num_features = self.encoder_q.num_features
 
         print_trainable_parameters(self.encoder_q)
 
