@@ -47,9 +47,9 @@ def test_facil_encoder(args: Any) -> None:
     assert embedding.shape[1] == model.args.moco_dim
 
     # Test number of fc layer
-    assert len(model.encoder_q.fc) == 2 * args.num_mlp - 1
-    assert model.encoder_q.fc[0].weight.requires_grad
-    assert model.encoder_q.fc[-1].weight.requires_grad
+    assert len(model.encoder_q.mlp) == 2 * args.num_mlp - 1
+    assert model.encoder_q.mlp[0].weight.requires_grad
+    assert model.encoder_q.mlp[-1].weight.requires_grad
 
     # Test right lr for parameter
     assert model.params_with_lr[0]["lr"] == args.lr_base

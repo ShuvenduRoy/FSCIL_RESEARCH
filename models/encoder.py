@@ -65,14 +65,14 @@ class EncoderWrapper(nn.Module):
             self.model = get_peft_model(self.model, pet_config)
 
         if args.num_mlp == 2:
-            self.fc = nn.Sequential(
+            self.mlp = nn.Sequential(
                 nn.Linear(self.num_features, self.num_features),
                 nn.ReLU(),
                 nn.Linear(self.num_features, self.args.moco_dim),
             )
 
         elif args.num_mlp == 3:
-            self.fc = nn.Sequential(
+            self.mlp = nn.Sequential(
                 nn.Linear(self.num_features, self.num_features),
                 nn.ReLU(),
                 nn.Linear(self.num_features, self.num_features),
@@ -80,7 +80,7 @@ class EncoderWrapper(nn.Module):
                 nn.Linear(self.num_features, self.args.moco_dim),
             )
         else:
-            self.fc = nn.Sequential(nn.Linear(self.num_features, self.args.moco_dim))
+            self.mlp = nn.Sequential(nn.Linear(self.num_features, self.args.moco_dim))
 
         self.classifier = nn.Linear(
             self.num_features,
@@ -110,7 +110,7 @@ class EncoderWrapper(nn.Module):
         output = output.pooler_output  # [b, embed_dim]
         return (
             output,  # [b, embed_dim=768]
-            self.fc(output),  # [b, moco_dim=128]
+            self.mlp(output),  # [b, moco_dim=128]
             self.classifier(output),  # [b, n_classes]
         )
 

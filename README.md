@@ -127,12 +127,35 @@ all: [22.2  11.9   9.4   6.57  5.28  4.73  4.09  3.75  3.34]
 ```
 
 ```bash
-HF google/vit-base-patch16-224-in21k
+# HF google/vit-base-patch16-224-in21k
 python train.py \
   --update_base_classifier_with_prototypes True \
   --epochs_base 0 \
   --num_seeds 1 \
   --shot 10 --way 10 --base_class 10 \
+  --result_key _baseline \
+  --hf_model_checkpoint "google/vit-base-patch16-224"
+
+base: [92.5, 90.0, 83.4, 81.2, 78.8, 78.0, 77.4, 76.1, 75.8, 75.0]
+incremental: [nan, 76.5, 73.35, 71.8, 69.0, 65.72, 64.52, 62.4, 62.59, 61.56]
+all: [92.5, 83.25, 76.7, 74.15, 70.96, 67.77, 66.36, 64.11, 64.06, 62.9]
+```
+
+```bash
+# google/vit-large-patch16-224-in21k
+base: [95.2, 92.4, 88.5, 87.5, 86.8, 86.2, 85.7, 83.8, 83.0, 82.5]
+incremental: [nan, 84.0, 80.75, 79.63, 77.23, 76.08, 75.37, 74.47, 74.66, 73.89]
+all: [95.2, 88.2, 83.33, 81.6, 79.14, 77.77, 76.84, 75.64, 75.59, 74.75]
+```
+
+```bash
+# HF google/vit-base-patch16-224-in21k
+python train.py \
+  --update_base_classifier_with_prototypes True \
+  --epochs_base 0 \
+  --num_seeds 1 \
+  --shot 10 --way 10 --base_class 10 \
+  --result_key _baseline \
   --hf_model_checkpoint "google/vit-base-patch16-224-in21k"
 
 Base acc:  [92.9, 90.1, 83.9, 82.6, 79.3, 78.6, 77.9, 76.7, 75.8, 75.0]
@@ -140,17 +163,17 @@ Inc. acc:  [nan, 79.4, 74.3, 73.1, 70.95, 69.1, 68.37, 67.03, 66.86, 65.73]
 Overall :  [92.9, 84.75, 77.5, 75.47, 72.62, 70.68, 69.73, 68.24, 67.86, 66.66]
 ```
 
+### BASELINE: Start with prototype then finetune
+
 ```bash
 python train.py \
-  --update_base_classifier_with_prototypes True \
-  --epochs_base 0 \
-  --num_seeds 1 \
+  --start_training_with_prototypes True \
+  --epochs_base 10 \
+  --num_seeds 3 \
   --shot 10 --way 10 --base_class 10 \
-  --hf_model_checkpoint "google/vit-base-patch16-224"
-
-base: [92.5, 90.0, 83.4, 81.2, 78.8, 78.0, 77.4, 76.1, 75.8, 75.0]
-incremental: [nan, 76.5, 73.35, 71.8, 69.0, 65.72, 64.52, 62.4, 62.59, 61.56]
-all: [92.5, 83.25, 76.7, 74.15, 70.96, 67.77, 66.36, 64.11, 64.06, 62.9]
+  --result_key _baseline_linear \
+  --hf_model_checkpoint "google/vit-base-patch16-224"\
+  --encoder_ft_start_layer 12
 ```
 
 ### BASELINE: Tune on base session > Incremental frozen continual session
