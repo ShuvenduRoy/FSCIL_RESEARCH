@@ -48,11 +48,10 @@ class EncoderWrapper(nn.Module):
         if self.args.encoder == "vit-b16":
             print("Encoder: ViT-B16")
             self.num_features = 768
-            model_checkpoint = "google/vit-base-patch16-224-in21k"
 
-            print(f"Loading model from {model_checkpoint}")
+            print(f"Loading model from {args.hf_model_checkpoint}")
             self.model = AutoModelForImageClassification.from_pretrained(
-                model_checkpoint,
+                args.hf_model_checkpoint,
             )
             self.model.classifier = nn.Identity()
             print_trainable_parameters(self.model)
@@ -134,13 +133,7 @@ class FSCILencoder(nn.Module):
         super().__init__()
 
         self.args = args
-        config = LoraConfig(  # TODO Handle dynamically
-            r=16,
-            lora_alpha=16,
-            target_modules=["query", "value"],
-            lora_dropout=0.1,
-            bias="none",
-        )
+        config = self._get_pet_config()
         self.encoder_q = EncoderWrapper(args, pet_config=config)
         self.num_features = 768
 
@@ -187,6 +180,29 @@ class FSCILencoder(nn.Module):
                 "lr": args.lr_base * args.encoder_lr_factor,
             },
         ]
+
+    def _get_pet_config(self) -> Optional[Any]:
+        """Get the PET configuration.
+
+        Returns
+        -------
+        Optional[Any]
+            The PET configuration.
+        """
+        config = None
+        if self.args.pet_cls is None:
+            return config
+        if self.args.pet_cls.lower() == "lora":
+            config = LoraConfig(  # TODO Handle parameters dynamically
+                r=16,
+                lora_alpha=16,
+                target_modules=["query", "value"],
+                lora_dropout=0.1,
+                layers_to_transform=list(range(self.args.adapt_blocks)),
+                bias="none",
+            )
+        # TODO: other pet modules
+        return config
 
     def _get_encoder_q_state_dict(self) -> dict:
         """Get the state dictionary of the encoder_q.

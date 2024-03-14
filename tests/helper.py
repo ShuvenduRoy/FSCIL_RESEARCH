@@ -67,6 +67,7 @@ def get_default_args() -> argparse.Namespace:
         "sessions": 11,
         "shot": 5,
         "num_views": 2,
+        "hf_model_checkpoint": "google/vit-base-patch16-224-in21k",
         "start_session": 0,
         "step": 40,
         "temperature": 16,

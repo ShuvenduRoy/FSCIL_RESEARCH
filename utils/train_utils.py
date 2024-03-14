@@ -225,10 +225,10 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
 
     # model config
     parser.add_argument(
-        "--pre_trained_url",
+        "--hf_model_checkpoint",
         type=str,
-        default=None,
-        help="loading model parameter from local or remote url",
+        default="google/vit-base-patch16-224-in21k",
+        help="name of the huggingface model checkpoint to load",
     )
 
     parser.add_argument(
