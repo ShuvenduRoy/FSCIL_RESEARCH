@@ -59,7 +59,6 @@ def get_default_args() -> argparse.Namespace:
         "pet_cls": None,
         "pre_train_epochs": 0,
         "pre_train_lr": 0.001,
-        "pre_trained_url": "https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz",
         "rank": 5,
         "save_path": "checkpoint/cifar100_baseline",
         "schedule": "Step",

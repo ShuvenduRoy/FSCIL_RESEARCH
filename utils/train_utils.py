@@ -25,8 +25,6 @@ def override_training_configs(args: argparse.Namespace) -> argparse.Namespace:
     with the overridden training configurations.
     """
     args.exp_name = args.dataset + "_" + args.exp_name
-    if args.pre_trained_url == "None":
-        args.pre_trained_url = None
     if args.adapt_blocks < 0:
         args.adapt_blocks *= -1
         args.adapt_blocks = list(range(args.adapt_blocks, 12))
@@ -126,6 +124,12 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
         choices=["mini_imagenet", "cub200", "cifar100"],
     )
     parser.add_argument("--dataroot", type=str, default="./data")
+    parser.add_argument(
+        "--result_key",
+        type=str,
+        default="",
+        help="Additional key to filename for saving results at a different file.",
+    )
 
     # about pre-training
     parser.add_argument(
@@ -596,7 +600,12 @@ def save_results(results_dict: dict, args: argparse.Namespace) -> None:
     None
     """
     ensure_path("results")
-    path = "results/{}_{}way{}shot.tsv".format(args.dataset, args.shot, args.way)
+    path = "results/{}_{}way{}shot{}.tsv".format(
+        args.dataset,
+        args.shot,
+        args.way,
+        args.result_key,
+    )
     args_dict = dict(args.__dict__)  # type: ignore
     if not os.path.exists(path):
         with open(path, "w") as f:

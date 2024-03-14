@@ -20,8 +20,6 @@ parameters:
     values: [-1, 2, 4, 6, 8, 10, 11, 12]
   num_seeds:
     value: 3
-  pre_trained_url:
-    value: ./checkpoint/moco_v3.pth
   shot:
     value: 5
   way:
