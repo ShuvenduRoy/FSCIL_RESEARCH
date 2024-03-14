@@ -6,7 +6,7 @@ from typing import Any, Optional, Tuple
 import torch
 from peft import LoraConfig, get_peft_model
 from torch import nn
-from transformers import AutoModelForImageClassification
+from transformers import ViTModel
 
 
 def print_trainable_parameters(model: Any) -> None:
@@ -50,10 +50,9 @@ class EncoderWrapper(nn.Module):
             self.num_features = 768
 
             print(f"Loading model from {args.hf_model_checkpoint}")
-            self.model = AutoModelForImageClassification.from_pretrained(
+            self.model = ViTModel.from_pretrained(
                 args.hf_model_checkpoint,
             )
-            self.model.classifier = nn.Identity()
             print_trainable_parameters(self.model)
         # Freeze pre-trained layers
         for param in self.model.parameters():
@@ -105,13 +104,12 @@ class EncoderWrapper(nn.Module):
             projecting embedding, [b, moco_dim]
             output logits, [b, n_classes]
         """
-        x = self.model(x)[
-            "logits"
-        ]  # [b, n_tokens=197, embed_dim=768] -> [b, embed_dim]
+        output = self.model(x)
+        output = output.pooler_output  # [b, embed_dim]
         return (
-            x,  # [b, embed_dim=768]
-            self.fc(x),  # [b, moco_dim=128]
-            self.classifier(x),  # [b, n_classes]
+            output,  # [b, embed_dim=768]
+            self.fc(output),  # [b, moco_dim=128]
+            self.classifier(output),  # [b, n_classes]
         )
 
 
