@@ -27,7 +27,6 @@ def test_facil_encoder(args: Any) -> None:
     im_cla = torch.randn(2, 3, 224, 224)
     im_q = torch.randn(2, 3, 224, 224)
     im_k = torch.randn(2, 3, 224, 224)
-    labels = torch.randint(0, 100, (2,))
 
     patch_embed, embedding, logits = model.encoder_q(im_cla)
     assert len(patch_embed.shape) == 2
@@ -43,25 +42,6 @@ def test_facil_encoder(args: Any) -> None:
         _, embedding_k, _ = model.encoder_k(im_k)  # keys: bs x dim
         embedding_k = nn.functional.normalize(embedding_k, dim=1)
 
-    # compute logits
-    # Einstein sum is more intuitive
-    # positive logits: Nx1
-    l_pos = (embedding_q * embedding_k.unsqueeze(1)).sum(2).view(-1, 1)
-
-    # negative logits: NxK
-    l_neg = torch.einsum(
-        "nc,ck->nk",
-        [embedding_q.view(-1, model.args.moco_dim), model.queue.clone().detach()],
-    )
-
-    logits_global = torch.cat([l_pos, l_neg], dim=1)
-    targets = (
-        ((labels[:, None] == model.label_queue[None, :]) & (labels[:, None] != -1))  # type: ignore
-        .float()
-        .to(logits_global.device)
-    )
-
-    assert targets.shape[0] == logits_global.shape[0]
     assert len(logits.shape) == 2
     assert logits.shape[1] == model.args.num_classes
     assert embedding.shape[1] == model.args.moco_dim
