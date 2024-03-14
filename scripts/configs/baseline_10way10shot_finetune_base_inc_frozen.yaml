@@ -30,8 +30,6 @@ parameters:
     values: [0.5, 1, 2]
   encoder_ft_start_epoch:
     values: [0, 1, 5]
-  pre_trained_url:
-    value: https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz
   shot:
     value: 10
   way:

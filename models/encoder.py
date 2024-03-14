@@ -198,7 +198,7 @@ class FSCILencoder(nn.Module):
                 lora_alpha=16,
                 target_modules=["query", "value"],
                 lora_dropout=0.1,
-                layers_to_transform=list(range(self.args.adapt_blocks)),
+                layers_to_transform=self.args.adapt_blocks,
                 bias="none",
             )
         # TODO: other pet modules
