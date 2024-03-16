@@ -19,6 +19,7 @@ def hf_dataset_name_map(dataset_name: str) -> str:
         "country211": "clip-benchmark/wds_country211",
         "eurosat": "clip-benchmark/wds_vtab-eurosat",
         "fgvc_aircraft": "clip-benchmark/wds_fgvc_aircraft",
+        "gtsrb": "clip-benchmark/wds_gtsrb",
         "cifar10": "cifar10",
         "cifar100": "cifar100",
         "omniglot": "omniglot",
@@ -42,7 +43,7 @@ def get_hf_data(dataset_name: str, split: str) -> Any:
             split = "valid"
     dataset = dataset[split]
 
-    if dataset_name in ["caltech101", "eurosat"]:
+    if dataset_name in ["caltech101", "eurosat", "gtsrb"]:
         dataset = dataset.remove_columns(["__key__", "__url__"])
         dataset = dataset.rename_column("cls", "label")
         dataset = dataset.rename_column("webp", "image")

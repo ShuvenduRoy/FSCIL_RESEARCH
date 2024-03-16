@@ -13,6 +13,7 @@ fscil_ways = {
 }
 
 fscit_base_classes = {
+    "gtsrb": 7,
     "fgvc_aircraft": 10,
     "eurosat": 1,
     "country211": 22,
@@ -24,6 +25,7 @@ fscit_base_classes = {
 }
 
 fscit_ways = {
+    "gtsrb": 4,
     "fgvc_aircraft": 10,
     "eurosat": 1,
     "country211": 21,
@@ -35,6 +37,7 @@ fscit_ways = {
 }
 
 num_classes = {
+    "gtsrb": 43,
     "fgvc_aircraft": 100,
     "eurosat": 10,
     "country211": 211,
