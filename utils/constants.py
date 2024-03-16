@@ -13,6 +13,7 @@ fscil_ways = {
 }
 
 num_classes = {
+    "oxford_pets": 37,
     "oxford_flowers": 102,
     "gtsrb": 43,
     "fgvc_aircraft": 100,
@@ -26,6 +27,7 @@ num_classes = {
 }
 
 fscit_base_classes = {
+    "oxford_pets": 5,
     "oxford_flowers": 12,
     "gtsrb": 7,
     "fgvc_aircraft": 10,
@@ -39,6 +41,7 @@ fscit_base_classes = {
 }
 
 fscit_ways = {
+    "oxford_pets": 4,
     "oxford_flowers": 10,
     "gtsrb": 4,
     "fgvc_aircraft": 10,
