@@ -148,7 +148,6 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
             "stanford_cars",
             "voc2007",
             "dtd",
-            "objectnet",
             "sun397",
         ],
     )

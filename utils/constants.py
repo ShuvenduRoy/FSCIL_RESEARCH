@@ -13,7 +13,6 @@ fscil_ways = {
 }
 
 num_classes = {
-    "objectnet": 113,
     "sun397": 397,
     "dtd": 47,
     "voc2007": 20,
@@ -33,7 +32,6 @@ num_classes = {
 }
 
 fscit_base_classes = {
-    "objectnet": 14,
     "sun397": 40,
     "dtd": 5,
     "voc2007": 2,
@@ -53,7 +51,6 @@ fscit_base_classes = {
 }
 
 fscit_ways = {
-    "objectnet": 11,
     "sun397": 40,
     "dtd": 5,
     "voc2007": 2,

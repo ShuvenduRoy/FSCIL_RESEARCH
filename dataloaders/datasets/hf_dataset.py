@@ -32,7 +32,7 @@ hf_dataset_name_map = {
     "ucf101": "ucf101",
 }
 
-additional_hf_configs = {"dtd": ["partition_1"]}
+additional_hf_configs = {"dtd": ["partition_1"], "sun397": ["standard-part1-120k"]}
 
 
 def get_hf_data(dataset_name: str, split: str) -> Any:
@@ -40,6 +40,7 @@ def get_hf_data(dataset_name: str, split: str) -> Any:
     dataset = load_dataset(
         hf_dataset_name_map.get(dataset_name),
         *additional_hf_configs.get(dataset_name, []),
+        cache_dir="/scratch/a/amiilab/shuvendu/.cache/",  # TODO: remove from release
     )
     if split == "validation" and split not in dataset:
         if "test" in dataset:
