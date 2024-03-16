@@ -7,7 +7,7 @@ import pytest
 import torch
 
 from dataloaders.helpter import get_dataloader
-from tests.helper import get_food101_dataset_args
+from tests.helper import get_caltech101_dataset_args, get_food101_dataset_args
 
 
 torch.manual_seed(42)
@@ -17,6 +17,7 @@ torch.manual_seed(42)
     "args",
     [
         (get_food101_dataset_args()),
+        (get_caltech101_dataset_args()),
     ],
 )
 def test_hf_dataset(args: Any) -> None:

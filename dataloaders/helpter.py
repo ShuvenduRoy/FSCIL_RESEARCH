@@ -10,14 +10,15 @@ from torchvision import transforms
 from transformers import ViTImageProcessor
 
 from dataloaders.datasets.cifar100 import Cifar100Dataset
-from dataloaders.datasets.food101 import food101dataset
+from dataloaders.datasets.hf_dataset import hf_dataset
 from dataloaders.sampler import DistributedEvalSampler
 from utils import dist_utils
 
 
 dataset_class_map = {
     "cifar100": Cifar100Dataset,
-    "food101": food101dataset,
+    "food101": hf_dataset,
+    "caltech101": hf_dataset,
 }
 
 

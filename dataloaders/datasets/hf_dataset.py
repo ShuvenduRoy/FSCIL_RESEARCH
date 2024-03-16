@@ -11,7 +11,37 @@ from dataloaders.utils import (
 )
 
 
-def food101dataset(
+def hf_dataset_name_map(dataset_name: str) -> str:
+    """Map dataset name to Hugging Face dataset name."""
+    return {
+        "food101": "food101",
+        "caltech101": "clip-benchmark/wds_vtab-caltech101",
+        "cifar10": "cifar10",
+        "cifar100": "cifar100",
+        "omniglot": "omniglot",
+        "aircraft": "aircraft",
+        "dtd": "dtd",
+        "vgg-flowers": "vgg_flowers",
+        "stanford-cars": "stanford_cars",
+        "svhn": "svhn_cropped",
+        "ucf101": "ucf101",
+        "imagenet2012": "imagenet2012",
+    }[dataset_name]
+
+
+def get_hf_data(dataset_name: str, split: str) -> Any:
+    """Get data from Hugging Face dataset."""
+    dataset = load_dataset(hf_dataset_name_map(dataset_name))[split]
+
+    if dataset_name == "caltech101":
+        dataset = dataset.remove_columns(["__key__", "__url__"])
+        dataset = dataset.rename_column("cls", "label")
+        dataset = dataset.rename_column("webp", "image")
+
+    return dataset
+
+
+def hf_dataset(
     root: str,
     args: argparse.Namespace,
     train: bool = True,
@@ -19,7 +49,7 @@ def food101dataset(
     session: int = 0,
     transformations: Any = None,
 ) -> Any:
-    """Initialize Food101 dataset.
+    """Initialize HF dataset.
 
     Parameters
     ----------
@@ -27,7 +57,8 @@ def food101dataset(
         Root directory of the dataset.
     """
     split = "train" if train else "validation"
-    dataset = load_dataset("food101")[split]
+    dataset = get_hf_data(args.dataset, split)
+
     if session == -1:  # way of getting the whole dataset (not needed for this project)
         return dataset
 
@@ -35,7 +66,7 @@ def food101dataset(
 
     if train:  # few-shot training samples
         sample_ids = get_few_shot_samples_indices_per_class(
-            "food101",
+            args.dataset,
             classes_at_current_session,
             args.shot,
         )
