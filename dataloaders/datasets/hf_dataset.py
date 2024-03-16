@@ -31,7 +31,13 @@ def hf_dataset_name_map(dataset_name: str) -> str:
 
 def get_hf_data(dataset_name: str, split: str) -> Any:
     """Get data from Hugging Face dataset."""
-    dataset = load_dataset(hf_dataset_name_map(dataset_name))[split]
+    dataset = load_dataset(hf_dataset_name_map(dataset_name))
+    if split == "validation" and split not in dataset:
+        if "test" in dataset:
+            split = "test"
+        elif "valid" in dataset:
+            split = "valid"
+    dataset = dataset[split]
 
     if dataset_name == "caltech101":
         dataset = dataset.remove_columns(["__key__", "__url__"])
