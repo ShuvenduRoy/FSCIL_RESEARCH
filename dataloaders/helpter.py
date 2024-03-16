@@ -66,6 +66,7 @@ def get_transform(args: argparse.Namespace) -> Tuple[Any, Any]:
     val_transforms = transforms.Compose(
         [
             transforms.Resize(args.size_crops[0]),
+            transforms.CenterCrop(args.size_crops[0]),
             transforms.ToTensor(),
             normalize,
         ],

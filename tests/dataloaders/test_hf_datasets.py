@@ -16,8 +16,8 @@ torch.manual_seed(42)
 @pytest.mark.parametrize(
     "args",
     [
-        (get_food101_dataset_args()),
         (get_caltech101_dataset_args()),
+        (get_food101_dataset_args()),
     ],
 )
 def test_hf_dataset(args: Any) -> None:
@@ -49,4 +49,4 @@ def test_hf_dataset(args: Any) -> None:
     assert len(train_set) == args.way * args.shot
 
 
-test_hf_dataset(get_food101_dataset_args())
+test_hf_dataset(get_caltech101_dataset_args())

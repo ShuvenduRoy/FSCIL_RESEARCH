@@ -15,9 +15,7 @@ def class_count(labels: list[int]) -> dict[int, int]:
     return counts
 
 
-"""
-FOOD101
-"""
+# Food101
 dataset_name = "food101"
 if not os.path.exists(f"dataloaders/index_list/{dataset_name}_index_list.txt"):
     dataset = load_dataset(dataset_name)
@@ -42,9 +40,7 @@ if not os.path.exists(f"dataloaders/index_list/{dataset_name}_index_list.txt"):
                 file.write(f"{class_index} {index}\n")
 
 
-"""
-Caltech101
-"""
+# Caltech101
 dataset_name = "caltech101"
 if not os.path.exists(f"dataloaders/index_list/{dataset_name}_index_list.txt"):
     dataset = load_dataset("clip-benchmark/wds_vtab-caltech101")
