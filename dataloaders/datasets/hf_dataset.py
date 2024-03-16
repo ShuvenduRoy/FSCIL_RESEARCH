@@ -1,6 +1,7 @@
 """Load food101 dataset."""
 
 import argparse
+import os
 from typing import Any
 
 from datasets import load_dataset
@@ -40,7 +41,11 @@ def get_hf_data(dataset_name: str, split: str) -> Any:
     dataset = load_dataset(
         hf_dataset_name_map.get(dataset_name),
         *additional_hf_configs.get(dataset_name, []),
-        cache_dir="/scratch/a/amiilab/shuvendu/.cache/",  # TODO: remove from release
+        cache_dir=(
+            "/scratch/a/amiilab/shuvendu/.cache/"
+            if os.path.exists("/scratch")
+            else None
+        ),  # TODO: remove from release
     )
     if split == "validation" and split not in dataset:
         if "test" in dataset:
