@@ -11,36 +11,36 @@ from dataloaders.utils import (
 )
 
 
-def hf_dataset_name_map(dataset_name: str) -> str:
-    """Map dataset name to Hugging Face dataset name."""
-    return {
-        "food101": "food101",
-        "caltech101": "clip-benchmark/wds_vtab-caltech101",
-        "country211": "clip-benchmark/wds_country211",
-        "eurosat": "clip-benchmark/wds_vtab-eurosat",
-        "fgvc_aircraft": "clip-benchmark/wds_fgvc_aircraft",
-        "gtsrb": "clip-benchmark/wds_gtsrb",
-        "oxford_flowers": "HuggingFaceM4/Oxford-102-Flower",
-        "oxford_pets": "clip-benchmark/wds_vtab-pets",
-        "resisc45": "clip-benchmark/wds_vtab-resisc45",
-        "stanford_cars": "clip-benchmark/wds_cars",
-        "voc2007": "clip-benchmark/wds_voc2007",
-        "cifar10": "cifar10",
-        "cifar100": "cifar100",
-        "omniglot": "omniglot",
-        "aircraft": "aircraft",
-        "dtd": "dtd",
-        "vgg-flowers": "vgg_flowers",
-        "stanford-cars": "stanford_cars",
-        "svhn": "svhn_cropped",
-        "ucf101": "ucf101",
-        "imagenet2012": "imagenet2012",
-    }[dataset_name]
+hf_dataset_name_map = {
+    "food101": "food101",
+    "caltech101": "clip-benchmark/wds_vtab-caltech101",
+    "country211": "clip-benchmark/wds_country211",
+    "eurosat": "clip-benchmark/wds_vtab-eurosat",
+    "fgvc_aircraft": "clip-benchmark/wds_fgvc_aircraft",
+    "gtsrb": "clip-benchmark/wds_gtsrb",
+    "oxford_flowers": "HuggingFaceM4/Oxford-102-Flower",
+    "oxford_pets": "clip-benchmark/wds_vtab-pets",
+    "resisc45": "clip-benchmark/wds_vtab-resisc45",
+    "stanford_cars": "clip-benchmark/wds_cars",
+    "voc2007": "clip-benchmark/wds_voc2007",
+    "dtd": "HuggingFaceM4/DTD_Describable-Textures-Dataset",
+    "objectnet": "clip-benchmark/wds_objectnet",
+    "sun397": "clip-benchmark/wds_sun397",
+    "cifar100": "cifar100",
+    "omniglot": "omniglot",
+    "vgg-flowers": "vgg_flowers",
+    "ucf101": "ucf101",
+}
+
+additional_hf_configs = {"dtd": ["partition_1"]}
 
 
 def get_hf_data(dataset_name: str, split: str) -> Any:
     """Get data from Hugging Face dataset."""
-    dataset = load_dataset(hf_dataset_name_map(dataset_name))
+    dataset = load_dataset(
+        hf_dataset_name_map.get(dataset_name),
+        *additional_hf_configs.get(dataset_name, []),
+    )
     if split == "validation" and split not in dataset:
         if "test" in dataset:
             split = "test"

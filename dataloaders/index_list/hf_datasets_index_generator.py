@@ -296,3 +296,92 @@ if not os.path.exists(f"dataloaders/index_list/{dataset_name}_index_list.txt"):
         for class_index, indices in selected_samples.items():
             for index in indices:
                 file.write(f"{class_index} {index}\n")
+
+# dtd
+dataset_name = "dtd"
+if not os.path.exists(f"dataloaders/index_list/{dataset_name}_index_list.txt"):
+    dataset = load_dataset(
+        "HuggingFaceM4/DTD_Describable-Textures-Dataset",
+        "partition_1",
+    )
+
+    num_classes = len(set(dataset["train"]["label"]))
+    print("Total classes", num_classes)
+
+    samples_per_class = 32
+    class_counts = class_count(dataset["train"]["label"])
+    samples_per_class = min(*class_counts.values(), samples_per_class)
+    print("Samples per class", samples_per_class)
+
+    selected_samples = {}
+    for class_index in range(num_classes):
+        indices = [
+            i
+            for i, label in enumerate(dataset["train"]["label"])
+            if label == class_index
+        ]
+        selected_samples[class_index] = random.sample(indices, samples_per_class)
+
+    with open(f"dataloaders/index_list/{dataset_name}_index_list.txt", "w") as file:
+        for class_index, indices in selected_samples.items():
+            for index in indices:
+                file.write(f"{class_index} {index}\n")
+
+# objectnet
+dataset_name = "objectnet"
+if not os.path.exists(f"dataloaders/index_list/{dataset_name}_index_list.txt"):
+    dataset = load_dataset(
+        "clip-benchmark/wds_objectnet",
+    )
+
+    num_classes = len(set(dataset["train"]["label"]))
+    print("Total classes", num_classes)
+
+    samples_per_class = 32
+    class_counts = class_count(dataset["train"]["label"])
+    samples_per_class = min(*class_counts.values(), samples_per_class)
+    print("Samples per class", samples_per_class)
+
+    selected_samples = {}
+    for class_index in range(num_classes):
+        indices = [
+            i
+            for i, label in enumerate(dataset["train"]["label"])
+            if label == class_index
+        ]
+        selected_samples[class_index] = random.sample(indices, samples_per_class)
+
+    with open(f"dataloaders/index_list/{dataset_name}_index_list.txt", "w") as file:
+        for class_index, indices in selected_samples.items():
+            for index in indices:
+                file.write(f"{class_index} {index}\n")
+
+
+# sun397
+dataset_name = "sun397"
+if not os.path.exists(f"dataloaders/index_list/{dataset_name}_index_list.txt"):
+    dataset = load_dataset(
+        "clip-benchmark/wds_sun397",
+    )
+
+    num_classes = len(set(dataset["train"]["label"]))
+    print("Total classes", num_classes)
+
+    samples_per_class = 32
+    class_counts = class_count(dataset["train"]["label"])
+    samples_per_class = min(*class_counts.values(), samples_per_class)
+    print("Samples per class", samples_per_class)
+
+    selected_samples = {}
+    for class_index in range(num_classes):
+        indices = [
+            i
+            for i, label in enumerate(dataset["train"]["label"])
+            if label == class_index
+        ]
+        selected_samples[class_index] = random.sample(indices, samples_per_class)
+
+    with open(f"dataloaders/index_list/{dataset_name}_index_list.txt", "w") as file:
+        for class_index, indices in selected_samples.items():
+            for index in indices:
+                file.write(f"{class_index} {index}\n")
