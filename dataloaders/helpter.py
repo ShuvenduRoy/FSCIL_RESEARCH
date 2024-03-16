@@ -17,8 +17,6 @@ from utils import dist_utils
 
 dataset_class_map = {
     "cifar100": Cifar100Dataset,
-    "food101": hf_dataset,
-    "caltech101": hf_dataset,
 }
 
 
@@ -92,7 +90,7 @@ def get_dataloader(args: argparse.Namespace, session: int = 0) -> Tuple[Any, Any
     """
     train_transforms, val_transforms = get_transform(args)
 
-    trainset = dataset_class_map[args.dataset](
+    trainset = dataset_class_map.get(args.dataset, hf_dataset)(
         root=args.dataroot,
         train=True,
         download=True,
@@ -100,7 +98,7 @@ def get_dataloader(args: argparse.Namespace, session: int = 0) -> Tuple[Any, Any
         transformations=train_transforms,
         args=args,
     )
-    testset = dataset_class_map[args.dataset](
+    testset = dataset_class_map.get(args.dataset, hf_dataset)(
         root=args.dataroot,
         train=False,
         download=False,

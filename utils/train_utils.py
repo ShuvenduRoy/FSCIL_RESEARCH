@@ -132,7 +132,14 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
         "--dataset",
         type=str,
         default="cifar100",
-        choices=["mini_imagenet", "cub200", "cifar100", "food101", "caltech101"],
+        choices=[
+            "mini_imagenet",
+            "cub200",
+            "cifar100",
+            "food101",
+            "caltech101",
+            "country211",
+        ],
     )
     parser.add_argument("--dataroot", type=str, default="./data")
     parser.add_argument(

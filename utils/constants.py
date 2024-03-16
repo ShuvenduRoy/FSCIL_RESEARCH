@@ -13,6 +13,7 @@ fscil_ways = {
 }
 
 fscit_base_classes = {
+    "country211": 22,
     "caltech101": 12,
     "food101": 11,
     "cifar100": 10,
@@ -21,6 +22,7 @@ fscit_base_classes = {
 }
 
 fscit_ways = {
+    "country211": 21,
     "caltech101": 10,
     "food101": 10,
     "cifar100": 10,
@@ -29,6 +31,7 @@ fscit_ways = {
 }
 
 num_classes = {
+    "country211": 211,
     "caltech101": 102,
     "cifar100": 100,
     "cub200": 200,

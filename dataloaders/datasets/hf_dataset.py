@@ -16,6 +16,7 @@ def hf_dataset_name_map(dataset_name: str) -> str:
     return {
         "food101": "food101",
         "caltech101": "clip-benchmark/wds_vtab-caltech101",
+        "country211": "clip-benchmark/wds_country211",
         "cifar10": "cifar10",
         "cifar100": "cifar100",
         "omniglot": "omniglot",
@@ -43,6 +44,11 @@ def get_hf_data(dataset_name: str, split: str) -> Any:
         dataset = dataset.remove_columns(["__key__", "__url__"])
         dataset = dataset.rename_column("cls", "label")
         dataset = dataset.rename_column("webp", "image")
+
+    if dataset_name == "country211":
+        dataset = dataset.remove_columns(["__key__", "__url__"])
+        dataset = dataset.rename_column("cls", "label")
+        dataset = dataset.rename_column("jpg", "image")
 
     return dataset
 
