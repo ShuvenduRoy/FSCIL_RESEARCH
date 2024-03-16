@@ -13,6 +13,9 @@ fscil_ways = {
 }
 
 num_classes = {
+    "voc2007": 20,
+    "stanford_cars": 196,
+    "resisc45": 45,
     "oxford_pets": 37,
     "oxford_flowers": 102,
     "gtsrb": 43,
@@ -27,6 +30,9 @@ num_classes = {
 }
 
 fscit_base_classes = {
+    "voc2007": 2,
+    "stanford_cars": 20,
+    "resisc45": 5,
     "oxford_pets": 5,
     "oxford_flowers": 12,
     "gtsrb": 7,
@@ -41,6 +47,9 @@ fscit_base_classes = {
 }
 
 fscit_ways = {
+    "voc2007": 2,
+    "stanford_cars": 20,
+    "resisc45": 5,
     "oxford_pets": 4,
     "oxford_flowers": 10,
     "gtsrb": 4,

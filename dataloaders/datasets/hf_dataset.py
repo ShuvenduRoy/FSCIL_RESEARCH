@@ -22,6 +22,9 @@ def hf_dataset_name_map(dataset_name: str) -> str:
         "gtsrb": "clip-benchmark/wds_gtsrb",
         "oxford_flowers": "HuggingFaceM4/Oxford-102-Flower",
         "oxford_pets": "clip-benchmark/wds_vtab-pets",
+        "resisc45": "clip-benchmark/wds_vtab-resisc45",
+        "stanford_cars": "clip-benchmark/wds_cars",
+        "voc2007": "clip-benchmark/wds_voc2007",
         "cifar10": "cifar10",
         "cifar100": "cifar100",
         "omniglot": "omniglot",
@@ -45,12 +48,19 @@ def get_hf_data(dataset_name: str, split: str) -> Any:
             split = "valid"
     dataset = dataset[split]
 
-    if dataset_name in ["caltech101", "eurosat", "gtsrb", "oxford_pets"]:
+    if dataset_name in [
+        "caltech101",
+        "eurosat",
+        "gtsrb",
+        "oxford_pets",
+        "resisc45",
+        "voc2007",
+    ]:
         dataset = dataset.remove_columns(["__key__", "__url__"])
         dataset = dataset.rename_column("cls", "label")
         dataset = dataset.rename_column("webp", "image")
 
-    if dataset_name in ["country211", "fgvc_aircraft"]:
+    if dataset_name in ["country211", "fgvc_aircraft", "stanford_cars"]:
         dataset = dataset.remove_columns(["__key__", "__url__"])
         dataset = dataset.rename_column("cls", "label")
         dataset = dataset.rename_column("jpg", "image")
