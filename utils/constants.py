@@ -12,7 +12,21 @@ fscil_ways = {
     "mini_imagenet": 5,
 }
 
+num_classes = {
+    "oxford_flowers": 102,
+    "gtsrb": 43,
+    "fgvc_aircraft": 100,
+    "eurosat": 10,
+    "country211": 211,
+    "caltech101": 102,
+    "cifar100": 100,
+    "cub200": 200,
+    "food101": 101,
+    "mini_imagenet": 100,
+}
+
 fscit_base_classes = {
+    "oxford_flowers": 12,
     "gtsrb": 7,
     "fgvc_aircraft": 10,
     "eurosat": 1,
@@ -25,6 +39,7 @@ fscit_base_classes = {
 }
 
 fscit_ways = {
+    "oxford_flowers": 10,
     "gtsrb": 4,
     "fgvc_aircraft": 10,
     "eurosat": 1,
@@ -34,16 +49,4 @@ fscit_ways = {
     "cifar100": 10,
     "cub200": 20,
     "mini_imagenet": 20,
-}
-
-num_classes = {
-    "gtsrb": 43,
-    "fgvc_aircraft": 100,
-    "eurosat": 10,
-    "country211": 211,
-    "caltech101": 102,
-    "cifar100": 100,
-    "cub200": 200,
-    "food101": 101,
-    "mini_imagenet": 100,
 }

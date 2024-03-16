@@ -20,6 +20,7 @@ def hf_dataset_name_map(dataset_name: str) -> str:
         "eurosat": "clip-benchmark/wds_vtab-eurosat",
         "fgvc_aircraft": "clip-benchmark/wds_fgvc_aircraft",
         "gtsrb": "clip-benchmark/wds_gtsrb",
+        "oxford_flowers": "HuggingFaceM4/Oxford-102-Flower",
         "cifar10": "cifar10",
         "cifar100": "cifar100",
         "omniglot": "omniglot",
