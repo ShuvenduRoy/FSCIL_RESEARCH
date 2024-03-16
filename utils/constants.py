@@ -13,6 +13,7 @@ fscil_ways = {
 }
 
 fscit_base_classes = {
+    "eurosat": 1,
     "country211": 22,
     "caltech101": 12,
     "food101": 11,
@@ -22,6 +23,7 @@ fscit_base_classes = {
 }
 
 fscit_ways = {
+    "eurosat": 1,
     "country211": 21,
     "caltech101": 10,
     "food101": 10,
@@ -31,6 +33,7 @@ fscit_ways = {
 }
 
 num_classes = {
+    "eurosat": 10,
     "country211": 211,
     "caltech101": 102,
     "cifar100": 100,
