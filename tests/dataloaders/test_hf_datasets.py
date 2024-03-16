@@ -10,6 +10,7 @@ from dataloaders.helpter import get_dataloader
 from tests.helper import (
     get_caltech101_dataset_args,
     get_eurosat_dataset_args,
+    get_fgvc_aircraft_dataset_args,
     get_food101_dataset_args,
 )
 
@@ -54,4 +55,4 @@ def test_hf_dataset(args: Any) -> None:
     assert len(train_set) == args.way * args.shot
 
 
-test_hf_dataset(get_eurosat_dataset_args())
+test_hf_dataset(get_fgvc_aircraft_dataset_args())

@@ -140,6 +140,7 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
             "caltech101",
             "country211",
             "eurosat",
+            "fgvc_aircraft",
         ],
     )
     parser.add_argument("--dataroot", type=str, default="./data")

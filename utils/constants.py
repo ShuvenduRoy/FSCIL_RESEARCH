@@ -13,6 +13,7 @@ fscil_ways = {
 }
 
 fscit_base_classes = {
+    "fgvc_aircraft": 10,
     "eurosat": 1,
     "country211": 22,
     "caltech101": 12,
@@ -23,6 +24,7 @@ fscit_base_classes = {
 }
 
 fscit_ways = {
+    "fgvc_aircraft": 10,
     "eurosat": 1,
     "country211": 21,
     "caltech101": 10,
@@ -33,6 +35,7 @@ fscit_ways = {
 }
 
 num_classes = {
+    "fgvc_aircraft": 100,
     "eurosat": 10,
     "country211": 211,
     "caltech101": 102,
