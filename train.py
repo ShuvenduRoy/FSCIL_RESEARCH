@@ -12,6 +12,7 @@ from utils.train_utils import (
     get_command_line_parser,
     get_dataset_configs,
     override_training_configs,
+    sanity_check,
     save_results,
 )
 
@@ -66,6 +67,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     args = get_dataset_configs(args)
     args = override_training_configs(args)
+    sanity_check(args)
 
     pprint(vars(args))
     main(args)

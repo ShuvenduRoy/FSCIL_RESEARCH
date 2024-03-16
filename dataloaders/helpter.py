@@ -4,14 +4,21 @@ import argparse
 from functools import partial
 from typing import Any, Optional, Tuple
 
-import numpy as np
 import torch
 from torch.utils.data.distributed import DistributedSampler
 from torchvision import transforms
+from transformers import ViTImageProcessor
 
 from dataloaders.datasets.cifar100 import Cifar100Dataset
+from dataloaders.datasets.food101 import food101dataset
 from dataloaders.sampler import DistributedEvalSampler
 from utils import dist_utils
+
+
+dataset_class_map = {
+    "cifar100": Cifar100Dataset,
+    "food101": food101dataset,
+}
 
 
 def get_transform(args: argparse.Namespace) -> Tuple[Any, Any]:
@@ -27,20 +34,17 @@ def get_transform(args: argparse.Namespace) -> Tuple[Any, Any]:
     Tuple[Any, Any]
         The crop transform and the secondary transform for the dataset.
     """
-    if args.dataset == "cifar100":
+    try:
+        processor = ViTImageProcessor.from_pretrained(args.hf_model_checkpoint)
         normalize = transforms.Normalize(
-            mean=[0.5071, 0.4867, 0.4408],
-            std=[0.2675, 0.2565, 0.2761],
+            mean=processor.image_mean,
+            std=processor.image_std,
         )
-    if args.dataset == "cub200":
+    except Exception as e:
+        print(f"Error with ViTImageProcessor: {e}")
         normalize = transforms.Normalize(
-            mean=[0.485, 0.456, 0.406],
-            std=[0.229, 0.224, 0.225],
-        )
-    if args.dataset == "mini_imagenet":
-        normalize = transforms.Normalize(
-            mean=[0.485, 0.456, 0.406],
-            std=[0.229, 0.224, 0.225],
+            mean=[0.5, 0.5, 0.5],
+            std=[0.25, 0.25, 0.25],
         )
 
     train_transforms = transforms.Compose(
@@ -86,23 +90,22 @@ def get_dataloader(args: argparse.Namespace, session: int = 0) -> Tuple[Any, Any
     """
     train_transforms, val_transforms = get_transform(args)
 
-    if args.dataset == "cifar100":
-        trainset = Cifar100Dataset(
-            root=args.dataroot,
-            train=True,
-            download=True,
-            session=session,
-            transformations=train_transforms,
-            args=args,
-        )
-        testset = Cifar100Dataset(
-            root=args.dataroot,
-            train=False,
-            download=False,
-            session=session,
-            transformations=val_transforms,
-            args=args,
-        )
+    trainset = dataset_class_map[args.dataset](
+        root=args.dataroot,
+        train=True,
+        download=True,
+        session=session,
+        transformations=train_transforms,
+        args=args,
+    )
+    testset = dataset_class_map[args.dataset](
+        root=args.dataroot,
+        train=False,
+        download=False,
+        session=session,
+        transformations=val_transforms,
+        args=args,
+    )
 
     if args.distributed and dist_utils.is_dist_avail_and_initialized():
         train_sampler: Optional[DistributedSampler] = DistributedSampler(
@@ -143,21 +146,3 @@ def get_dataloader(args: argparse.Namespace, session: int = 0) -> Tuple[Any, Any
     )
 
     return trainset, trainloader, testloader
-
-
-def get_session_classes(args: argparse.Namespace, session: int) -> np.ndarray:
-    """Get the classes for the current session.
-
-    Parameters
-    ----------
-    args : argparse.Namespace
-        Arguments passed to the trainer.
-    session : int
-        The current session.
-
-    Returns
-    -------
-    np.ndarray
-        The classes for the current session.
-    """
-    return np.arange(args.base_class + session * args.way)

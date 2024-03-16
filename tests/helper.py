@@ -2,6 +2,12 @@
 
 import argparse
 
+from utils.train_utils import (
+    get_dataset_configs,
+    override_training_configs,
+    sanity_check,
+)
+
 
 def get_default_args() -> argparse.Namespace:
     """Get default arguments for the tests."""
@@ -62,6 +68,7 @@ def get_default_args() -> argparse.Namespace:
         "rank": 5,
         "save_path": "checkpoint/cifar100_baseline",
         "schedule": "Step",
+        "fsl_setup": "FSCIL",
         "seed": 1,
         "sessions": 11,
         "shot": 5,
@@ -78,7 +85,11 @@ def get_default_args() -> argparse.Namespace:
         "pet_on_teacher": False,
     }
 
-    return argparse.Namespace(**args)
+    args_ = argparse.Namespace(**args)
+    args_ = get_dataset_configs(args_)
+    args_ = override_training_configs(args_)
+    sanity_check(args_)
+    return args_
 
 
 def get_lora_args() -> argparse.Namespace:
@@ -92,8 +103,23 @@ def get_lora_args() -> argparse.Namespace:
 def get_10way_10shot_args() -> argparse.Namespace:
     """Get default arguments for the tests."""
     args = get_default_args()
-    args.way = 10
+    args.fsl_setup = "FSCIT"
     args.shot = 10
-    args.base_class = 10
+    args = get_dataset_configs(args)
+    args = override_training_configs(args)
+    sanity_check(args)
+
+    return args
+
+
+def get_food101_dataset_args() -> argparse.Namespace:
+    """Get default arguments for the tests."""
+    args = get_default_args()
+    args.dataset = "food101"
+
+    args.fsl_setup = "FSCIT"
+    args = get_dataset_configs(args)
+    args = override_training_configs(args)
+    sanity_check(args)
 
     return args

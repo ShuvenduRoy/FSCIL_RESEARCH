@@ -293,19 +293,22 @@ def train_one_epoch(
     tqdm_gen = tqdm(trainloader)
 
     for _, batch in enumerate(tqdm_gen, 1):
-        data, labels = batch
+        if isinstance(batch, dict):
+            images, labels = batch["image"], batch["label"]
+        else:
+            images, labels = batch
         labels = labels.long()
         if device_id is not None:
-            for i in range(len(data)):
-                data[i] = data[i].cuda(device_id, non_blocking=True)
+            for i in range(len(images)):
+                images[i] = images[i].cuda(device_id, non_blocking=True)
             labels = labels.cuda(device_id, non_blocking=True)
         elif torch.cuda.is_available():
-            for i in range(len(data)):
-                data[i] = data[i].cuda(non_blocking=True)
+            for i in range(len(images)):
+                images[i] = images[i].cuda(non_blocking=True)
             labels = labels.cuda(non_blocking=True)
 
         # model foward pass
-        logits, embedding_q, embedding_k = model(data[:-1], data[-1], labels)
+        logits, embedding_q, embedding_k = model(images[:-1], images[-1], labels)
         features = torch.cat(
             [embedding_q, embedding_k],
             dim=1,

@@ -10,6 +10,32 @@ import torch
 from matplotlib import pyplot as plt
 from sklearn.metrics.pairwise import cosine_similarity
 
+from utils.constants import (
+    fscil_base_classes,
+    fscil_ways,
+    fscit_base_classes,
+    fscit_ways,
+    num_classes,
+)
+
+
+def sanity_check(args: argparse.Namespace) -> None:
+    """Sanity check for the command-line arguments.
+
+    Parameters
+    ----------
+    args : argparse.Namespace
+        The command-line arguments.
+
+    Returns
+    -------
+    None
+    """
+    if args.dataset not in ["cifar100", "cub200", "mini_imagenet"]:
+        assert (
+            args.fsl_setup == "FSCIT"
+        ), "FSCIL is only supported for CIFAR-100, CUB-200, and miniImageNet"
+
 
 def override_training_configs(args: argparse.Namespace) -> argparse.Namespace:
     """Override the training configurations.
@@ -25,11 +51,12 @@ def override_training_configs(args: argparse.Namespace) -> argparse.Namespace:
     with the overridden training configurations.
     """
     args.exp_name = args.dataset + "_" + args.exp_name
-    if args.adapt_blocks < 0:
-        args.adapt_blocks *= -1
-        args.adapt_blocks = list(range(args.adapt_blocks, 12))
-    else:
-        args.adapt_blocks = list(range(args.adapt_blocks))
+    if isinstance(args.adapt_blocks, int):
+        if args.adapt_blocks < 0:
+            args.adapt_blocks *= -1
+            args.adapt_blocks = list(range(args.adapt_blocks, 12))
+        else:
+            args.adapt_blocks = list(range(args.adapt_blocks))
 
     args.save_path = os.path.join("checkpoint", args.exp_name)
 
@@ -52,32 +79,15 @@ def get_dataset_configs(args: argparse.Namespace) -> argparse.Namespace:
     argparse.Namespace: The command-line arguments
     with the datasets configs.
     """
-    if args.dataset == "cifar100":
-        args.base_class = 60 if args.base_class == -1 else args.base_class
-        args.num_classes = 100
-        args.way = 5 if args.way == -1 else args.way
-        args.shot = 5 if args.shot == -1 else args.shot
-        args.sessions = ((args.num_classes - args.base_class) // args.way) + 1
+    if args.fsl_setup == "FSCIL":
+        args.base_class = fscil_base_classes[args.dataset]
+        args.way = fscil_ways[args.dataset]
+    else:
+        args.base_class = fscit_base_classes[args.dataset]
+        args.way = fscit_ways[args.dataset]
+    args.num_classes = num_classes[args.dataset]
+    args.sessions = ((args.num_classes - args.base_class) // args.way) + 1
 
-    elif args.dataset == "cub200":
-        args.base_class = 100 if args.base_class == -1 else args.base_class
-        args.num_classes = 200
-        args.way = 10 if args.way == -1 else args.way
-        args.shot = 5 if args.shot == -1 else args.shot
-        args.sessions = ((args.num_classes - args.base_class) // args.way) + 1
-        args.min_scale_crops = [0.2, 0.05]
-        args.max_scale_crops = [1, 0.14]
-        args.milestones = [60, 80, 100]
-
-    elif args.dataset == "mini_imagenet":
-        args.base_class = 60 if args.base_class == -1 else args.base_class
-        args.num_classes = 100
-        args.way = 5 if args.way == -1 else args.way
-        args.shot = 5 if args.shot == -1 else args.shot
-        args.sessions = ((args.num_classes - args.base_class) // args.way) + 1
-        args.min_scale_crops = [0.2, 0.05]
-        args.max_scale_crops = [1, 0.14]
-        args.milestones = [40, 70, 100]
     return args
 
 
@@ -122,7 +132,7 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
         "--dataset",
         type=str,
         default="cifar100",
-        choices=["mini_imagenet", "cub200", "cifar100"],
+        choices=["mini_imagenet", "cub200", "cifar100", "food101"],
     )
     parser.add_argument("--dataroot", type=str, default="./data")
     parser.add_argument(
@@ -258,22 +268,11 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
         help="number of shots; -1 means shots taken as the defaults for the dataset",
     )
     parser.add_argument(
-        "--way",
-        type=int,
-        default=-1,
-        help="number of ways; -1 means ways taken as the defaults for the dataset",
-    )
-    parser.add_argument(
-        "--session",
-        type=int,
-        default=-1,
-        help="number of sessions; -1 means sessions taken as the defaults for the dataset",
-    )
-    parser.add_argument(
-        "--base_class",
-        type=int,
-        default=-1,
-        help="number of base classes; -1 means base classes taken as the defaults for the dataset",
+        "--fsl_setup",
+        type=str,
+        default="FSCIT",
+        choices=["FSCIT", "FSCIL"],
+        help="Few-shot learning setup, FSCIL comes with large base, while FSCIT is n-way k-shot base setting; Only 3 datasets support FSCIL that are reported by exising literaure: CIFAR-100, CUB-200, and miniImageNet.",
     )
 
     # incremental fine-tune configs

@@ -172,8 +172,13 @@ python train.py \
   --num_seeds 3 \
   --shot 10 --way 10 --base_class 10 \
   --result_key _baseline_linear \
-  --hf_model_checkpoint "google/vit-base-patch16-224"\
-  --encoder_ft_start_layer 12
+  --hf_model_checkpoint "google/vit-base-patch16-224-in21k"\
+  --encoder_ft_start_layer 12 --lr_base 0.001
+
+
+base: [92.8, 90.4, 83.83, 81.47, 79.67, 79.1, 78.77, 77.67, 77.17, 76.4]
+incremental: [nan, 77.07, 72.72, 71.2, 68.66, 65.91, 64.67, 62.42, 62.47, 61.27]
+all: [92.8, 83.73, 76.42, 73.76, 70.86, 68.11, 66.69, 64.33, 64.1, 62.78]
 ```
 
 ### BASELINE: Start with prototype then finetune linear and LoRA
@@ -184,10 +189,14 @@ python train.py \
   --epochs_base 10 \
   --num_seeds 3 \
   --shot 10 --way 10 --base_class 10 \
-  --result_key _baseline_linear \
-  --hf_model_checkpoint "google/vit-base-patch16-224"\
+  --result_key _baseline_lora \
+  --hf_model_checkpoint "google/vit-base-patch16-224-in21k"\
   --encoder_ft_start_layer 12 \
-  --pet_cls LoRA --adapt_blocks 3
+  --pet_cls LoRA --adapt_blocks 3  --lr_base 0.1 # random param requires higher lr
+
+base: [94.03, 91.4, 85.73, 84.27, 81.2, 80.33, 79.83, 78.1, 77.23, 75.53]
+incremental: [nan, 81.67, 75.63, 74.08, 71.91, 69.89, 69.06, 67.71, 67.52, 66.34]
+all: [94.03, 86.53, 79.0, 76.62, 73.77, 71.63, 70.6, 69.01, 68.6, 67.26]
 ```
 
 ### BASELINE: Tune on base session > Incremental frozen continual session
