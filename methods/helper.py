@@ -149,7 +149,7 @@ def test(  # noqa: PLR0915
     with torch.no_grad():
         tqdm_gen = tqdm(testloader)
         for _, batch in enumerate(tqdm_gen, 1):
-            data, labels = batch
+            data, labels = batch["image"], batch["label"]
             labels = labels.long()
             if device_id is not None:
                 for i in range(len(data)):
@@ -292,10 +292,7 @@ def train_one_epoch(
     tqdm_gen = tqdm(trainloader)
 
     for _, batch in enumerate(tqdm_gen, 1):
-        if isinstance(batch, dict):
-            images, labels = batch["image"], batch["label"]
-        else:
-            images, labels = batch
+        images, labels = batch["image"], batch["label"]
         labels = labels.long()
         if device_id is not None:
             for i in range(len(images)):
@@ -387,7 +384,7 @@ def replace_fc_with_prototypes(
 
     with torch.no_grad():
         for batch in trainloader:
-            data, labels = batch
+            data, labels = batch["image"], batch["label"]
             labels = labels.long()
             if device_id is not None:
                 for i in range(len(data)):

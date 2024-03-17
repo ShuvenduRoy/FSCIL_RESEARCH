@@ -70,6 +70,11 @@ def get_hf_data(dataset_name: str, split: str) -> Any:
         dataset = dataset.rename_column("cls", "label")
         dataset = dataset.rename_column("jpg", "image")
 
+    if dataset_name in ["cifar100"]:
+        dataset = dataset.remove_columns(["coarse_label"])
+        dataset = dataset.rename_column("fine_label", "label")
+        dataset = dataset.rename_column("img", "image")
+
     return dataset
 
 

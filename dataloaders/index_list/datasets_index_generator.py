@@ -450,3 +450,51 @@ if not os.path.exists(f"dataloaders/index_list/{dataset_name}_index_list.txt"):
         for class_index, indices in selected_samples.items():
             for index in indices:
                 file.write(f"{class_index} {index}\n")
+
+# cifar100
+dataset_name = "cifar100"
+if not os.path.exists(f"dataloaders/index_list/{dataset_name}_index_list.txt"):
+    dataset = load_dataset(dataset_name)["train"]
+
+    num_classes = len(set(dataset["fine_label"]))
+    print("Total classes", num_classes)
+
+    samples_per_class = 32
+    class_counts = class_count(dataset["fine_label"])
+    samples_per_class = min(*class_counts.values(), samples_per_class)
+    print("Samples per class", samples_per_class)
+
+    # make sure of include the samples from FSCIL literature
+    fscil_samples = []
+    for i in range(2, 10):
+        txt_path = f"dataloaders/index_list/cifar100/5way5shot/session_{i}.txt"
+        with open(txt_path) as f:
+            fscil_samples.extend(f.read().splitlines())
+    fscil_sample_indices = {int(name) for name in fscil_samples}  # type: ignore
+
+    selected_samples = {}
+    for class_index in range(num_classes):
+        indices = [
+            i for i, label in enumerate(dataset["fine_label"]) if label == class_index
+        ]
+
+        # first 5 samples from FSCIL indices
+        selected_samples[class_index] = list(
+            fscil_sample_indices.intersection(set(indices)),
+        )
+
+        # remove already selected samples
+        indices = list(set(indices) - fscil_sample_indices)
+
+        # select rest of the samples randomly
+        selected_samples[class_index].extend(
+            random.sample(
+                indices,
+                samples_per_class - len(selected_samples[class_index]),
+            ),
+        )
+
+    with open(f"dataloaders/index_list/{dataset_name}_index_list.txt", "w") as file:
+        for class_index, indices in selected_samples.items():
+            for index in indices:
+                file.write(f"{class_index} {index}\n")
