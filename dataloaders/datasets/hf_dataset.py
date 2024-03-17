@@ -120,11 +120,11 @@ def hf_dataset(
             classes_at_current_session,
             args.shot,
         )
-    else:  # validation; all samples of the classes at curr session
+    else:  # validation; all samples of the classes till curr session
         sample_ids = [
             i
             for i, label in enumerate(dataset["label"])
-            if label in classes_at_current_session
+            if label <= max(classes_at_current_session)
         ]
     dataset = dataset.select(sample_ids)
 

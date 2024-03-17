@@ -63,21 +63,20 @@ def get_optimizer_base(model: Any, args: argparse.Namespace) -> Tuple[Any, Any]:
         weight_decay=args.decay,
     )
     if args.schedule == "Step":
-        scheduler: torch.optim.lr_scheduler._LRScheduler = (
-            torch.optim.lr_scheduler.StepLR(
-                optimizer,
-                step_size=args.step,
-                gamma=args.gamma,
-            )
+        scheduler = torch.optim.lr_scheduler.StepLR(
+            optimizer,
+            step_size=args.step,
+            gamma=args.gamma,
         )
+
     elif args.schedule == "Milestone":
-        scheduler = torch.optim.lr_scheduler.MultiStepLR(
+        scheduler = torch.optim.lr_scheduler.MultiStepLR(  # type: ignore
             optimizer,
             milestones=args.milestones,
             gamma=args.gamma,
         )
     elif args.schedule == "Cosine":
-        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(  # type: ignore
             optimizer,
             T_max=args.epochs_base,
         )

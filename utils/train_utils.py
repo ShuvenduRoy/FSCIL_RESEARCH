@@ -11,6 +11,7 @@ from matplotlib import pyplot as plt
 from sklearn.metrics.pairwise import cosine_similarity
 
 from utils.constants import (
+    dataset_roots,
     fscil_base_classes,
     fscil_ways,
     fscit_base_classes,
@@ -85,6 +86,7 @@ def get_dataset_configs(args: argparse.Namespace) -> argparse.Namespace:
     else:
         args.base_class = fscit_base_classes[args.dataset]
         args.way = fscit_ways[args.dataset]
+    args.dataroot = dataset_roots.get(args.dataset, "./data")
     args.num_classes = num_classes[args.dataset]
     args.sessions = ((args.num_classes - args.base_class) // args.way) + 1
 

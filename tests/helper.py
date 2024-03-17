@@ -175,3 +175,16 @@ def get_fgvc_aircraft_dataset_args() -> argparse.Namespace:
     sanity_check(args)
 
     return args
+
+
+def get_cub200_dataset_args() -> argparse.Namespace:
+    """Get default arguments for the tests."""
+    args = get_default_args()
+    args.dataset = "cub200"
+
+    args.fsl_setup = "FSCIT"
+    args = get_dataset_configs(args)
+    args = override_training_configs(args)
+    sanity_check(args)
+
+    return args

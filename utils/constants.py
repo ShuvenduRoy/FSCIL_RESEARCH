@@ -1,5 +1,9 @@
 """Constants used in the code."""
 
+dataset_roots = {
+    "cub200": "data/CUB_200_2011",
+}
+
 fscil_base_classes = {
     "cifar100": 60,
     "cub200": 100,

@@ -10,6 +10,7 @@ from torchvision import transforms
 from transformers import ViTImageProcessor
 
 from dataloaders.datasets.cifar100 import Cifar100Dataset
+from dataloaders.datasets.cub200 import Cub200Dataset
 from dataloaders.datasets.hf_dataset import hf_dataset
 from dataloaders.sampler import DistributedEvalSampler
 from utils import dist_utils
@@ -17,6 +18,7 @@ from utils import dist_utils
 
 dataset_class_map = {
     "cifar100": Cifar100Dataset,
+    "cub200": Cub200Dataset,
 }
 
 
@@ -109,7 +111,7 @@ def get_dataloader(args: argparse.Namespace, session: int = 0) -> Tuple[Any, Any
 
     if args.distributed and dist_utils.is_dist_avail_and_initialized():
         train_sampler: Optional[DistributedSampler] = DistributedSampler(
-            trainset,
+            trainset,  # type: ignore
             seed=args.seed,
             drop_last=True,
         )
@@ -129,7 +131,7 @@ def get_dataloader(args: argparse.Namespace, session: int = 0) -> Tuple[Any, Any
         init_fn, train_sampler, test_sampler = None, None, None
 
     trainloader: torch.utils.data.DataLoader = torch.utils.data.DataLoader(
-        dataset=trainset,
+        dataset=trainset,  # type: ignore
         batch_size=args.batch_size_base,
         shuffle=(train_sampler is None),
         num_workers=args.num_workers,
@@ -137,7 +139,7 @@ def get_dataloader(args: argparse.Namespace, session: int = 0) -> Tuple[Any, Any
         worker_init_fn=init_fn,
     )
     testloader: torch.utils.data.DataLoader = torch.utils.data.DataLoader(
-        dataset=testset,
+        dataset=testset,  # type: ignore
         batch_size=args.test_batch_size,
         shuffle=False,
         num_workers=args.num_workers,
