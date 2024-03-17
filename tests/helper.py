@@ -188,3 +188,16 @@ def get_cub200_dataset_args() -> argparse.Namespace:
     sanity_check(args)
 
     return args
+
+
+def get_mini_imagenet_dataset_args() -> argparse.Namespace:
+    """Get default arguments for the tests."""
+    args = get_default_args()
+    args.dataset = "mini_imagenet"
+
+    args.fsl_setup = "FSCIT"
+    args = get_dataset_configs(args)
+    args = override_training_configs(args)
+    sanity_check(args)
+
+    return args

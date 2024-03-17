@@ -7,6 +7,7 @@ import random
 from datasets import load_dataset
 
 from dataloaders.datasets.cub200 import Cub200Dataset
+from dataloaders.datasets.miniimagenet import MiniImagenetDataset
 
 
 def class_count(labels: list[int]) -> dict[int, int]:
@@ -365,13 +366,13 @@ if not os.path.exists(f"dataloaders/index_list/{dataset_name}_index_list.txt"):
 dataset_name = "cub200"
 if not os.path.exists(f"dataloaders/index_list/{dataset_name}_index_list.txt"):
     args = argparse.Namespace()
-    cub200 = Cub200Dataset("data/CUB_200_2011", args)
+    dataset = Cub200Dataset("data/CUB_200_2011", args)
 
-    num_classes = len(set(cub200.labels))
+    num_classes = len(set(dataset.labels))
     print("Total classes", num_classes)
 
     samples_per_class = 32
-    class_counts = class_count(cub200.labels)
+    class_counts = class_count(dataset.labels)
     samples_per_class = min(*class_counts.values(), samples_per_class)
     print("Samples per class", samples_per_class)
 
@@ -381,11 +382,56 @@ if not os.path.exists(f"dataloaders/index_list/{dataset_name}_index_list.txt"):
         txt_path = f"dataloaders/index_list/cub200/session_{i}.txt"
         with open(txt_path) as f:
             fscil_samples.extend(f.read().splitlines())
-    fscil_sample_indices = {cub200.images.index(i) for i in fscil_samples}
+    fscil_sample_indices = {dataset.images.index(i) for i in fscil_samples}
 
     selected_samples = {}
     for class_index in range(num_classes):
-        indices = [i for i, label in enumerate(cub200.labels) if label == class_index]
+        indices = [i for i, label in enumerate(dataset.labels) if label == class_index]
+        # first 5 samples from FSCIL indices
+        selected_samples[class_index] = list(
+            fscil_sample_indices.intersection(set(indices)),
+        )
+        # remove already selected samples
+        indices = list(set(indices) - fscil_sample_indices)
+        # select rest of the samples randomly
+        selected_samples[class_index].extend(
+            random.sample(
+                indices,
+                samples_per_class - len(selected_samples[class_index]),
+            ),
+        )
+
+    with open(f"dataloaders/index_list/{dataset_name}_index_list.txt", "w") as file:
+        for class_index, indices in selected_samples.items():
+            for index in indices:
+                file.write(f"{class_index} {index}\n")
+
+# mini_imagenet
+dataset_name = "mini_imagenet"
+if not os.path.exists(f"dataloaders/index_list/{dataset_name}_index_list.txt"):
+    args = argparse.Namespace()
+    dataset = MiniImagenetDataset("data/miniimagenet", args)
+
+    num_classes = len(set(dataset.labels))
+    print("Total classes", num_classes)
+
+    samples_per_class = 32
+    class_counts = class_count(dataset.labels)
+    samples_per_class = min(*class_counts.values(), samples_per_class)
+    print("Samples per class", samples_per_class)
+
+    # make sure of include the samples from FSCIL literature
+    fscil_samples = []
+    for i in range(2, 10):
+        txt_path = f"dataloaders/index_list/mini_imagenet/session_{i}.txt"
+        with open(txt_path) as f:
+            fscil_samples.extend(f.read().splitlines())
+    fscil_samples = [name.split("/")[-1] for name in fscil_samples]
+    fscil_sample_indices = {dataset.images.index(i) for i in fscil_samples}
+
+    selected_samples = {}
+    for class_index in range(num_classes):
+        indices = [i for i, label in enumerate(dataset.labels) if label == class_index]
         # first 5 samples from FSCIL indices
         selected_samples[class_index] = list(
             fscil_sample_indices.intersection(set(indices)),

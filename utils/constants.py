@@ -2,6 +2,7 @@
 
 dataset_roots = {
     "cub200": "data/CUB_200_2011",
+    "mini_imagenet": "data/miniimagenet",
 }
 
 fscil_base_classes = {

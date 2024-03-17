@@ -12,6 +12,7 @@ from transformers import ViTImageProcessor
 from dataloaders.datasets.cifar100 import Cifar100Dataset
 from dataloaders.datasets.cub200 import Cub200Dataset
 from dataloaders.datasets.hf_dataset import hf_dataset
+from dataloaders.datasets.miniimagenet import MiniImagenetDataset
 from dataloaders.sampler import DistributedEvalSampler
 from utils import dist_utils
 
@@ -19,6 +20,7 @@ from utils import dist_utils
 dataset_class_map = {
     "cifar100": Cifar100Dataset,
     "cub200": Cub200Dataset,
+    "mini_imagenet": MiniImagenetDataset,
 }
 
 
