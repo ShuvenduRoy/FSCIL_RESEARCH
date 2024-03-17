@@ -44,9 +44,9 @@ def main(args: argparse.Namespace) -> None:
             results_dict[key] = results_dict.get(key, []) + [val]
 
     # averae across seeds
+    results_dict["last" + "_std"] = np.array(results_dict["last"]).std(axis=0)
+    results_dict["last" + "_std"] = [round(v, 2) for v in results_dict["last" + "_std"]]
     for key in results_dict:
-        results_dict[key + "_std"] = np.array(results_dict[key]).std(axis=0)
-        results_dict[key + "_std"] = [round(v, 2) for v in results_dict[key + "_std"]]
         results_dict[key] = np.array(results_dict[key]).mean(axis=0)
         results_dict[key] = [round(v, 2) for v in results_dict[key]]
 
