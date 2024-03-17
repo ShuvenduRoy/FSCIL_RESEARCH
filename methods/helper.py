@@ -242,7 +242,7 @@ def test(  # noqa: PLR0915
         round(base_acc * 100, 2),
         round(new_acc * 100, 2),
         round(va.item() * 100, 2),
-    )  # TODO add all reduce for distributed training
+    )
 
 
 def train_one_epoch(
@@ -370,10 +370,7 @@ def replace_fc_with_prototypes(
         for batch in prototype_loader:
             data, labels = batch["image"], batch["label"]
             labels = labels.long()
-            if device_id is not None:
-                for i in range(len(data)):
-                    data[i] = data[i].cuda(device_id, non_blocking=True)
-            elif torch.cuda.is_available():
+            if torch.cuda.is_available():
                 for i in range(len(data)):
                     data[i] = data[i].cuda(non_blocking=True)
             embedding, _ = model(data[0])

@@ -5,7 +5,6 @@ from copy import deepcopy
 from typing import Tuple
 
 import torch
-from torch.nn.parallel import DistributedDataParallel
 
 from dataloaders.helpter import get_dataloader
 from losses.contrastive import SupConLoss
@@ -16,8 +15,6 @@ from methods.helper import (
     train_one_epoch,
 )
 from models.encoder import FSCILencoder, print_trainable_parameters
-from utils import dist_utils
-from utils.dist_utils import is_main_process
 from utils.train_utils import ensure_path
 
 
@@ -51,8 +48,7 @@ class FSCITTrainer:
             "max_acc": [0.0] * args.sessions,
             "max_base_acc": [0.0] * args.sessions,
         }
-        if is_main_process():
-            ensure_path(args.save_path)
+        ensure_path(args.save_path)
 
         # initialize model
         self.model = FSCILencoder(args)
@@ -60,23 +56,7 @@ class FSCITTrainer:
         self.optimizer, self.scheduler = get_optimizer_base(self.model, self.args)
         self.device_id = None
 
-        # distributed training setup
-        self.model_without_ddp = self.model
-        self.best_model_dict = deepcopy(self.model_without_ddp.state_dict())
-        if args.distributed and dist_utils.is_dist_avail_and_initialized():
-            self.device_id = torch.cuda.current_device()
-            torch.cuda.set_device(self.device_id)
-
-            self.model = self.model.cuda(self.device_id)
-            self.criterion = self.criterion.cuda(self.device_id)
-
-            self.model = DistributedDataParallel(  # type: ignore
-                self.model,
-                device_ids=[self.device_id],
-            )
-            self.model_without_ddp = self.model.module  # type: ignore
-
-        elif torch.cuda.is_available():
+        if torch.cuda.is_available():
             self.model = self.model.cuda()
             self.criterion = self.criterion.cuda()
 
@@ -96,13 +76,13 @@ class FSCITTrainer:
             if (
                 epoch == self.args.encoder_ft_start_epoch
             ):  # current epoch is ft start epoch
-                print_trainable_parameters(self.model_without_ddp.encoder_q)
+                print_trainable_parameters(self.model.encoder_q)
 
                 status = self.args.encoder_ft_start_layer == -1  # full fine-tune
                 for (
                     name,
                     param,
-                ) in self.model_without_ddp.encoder_q.named_parameters():
+                ) in self.model.encoder_q.named_parameters():
                     if "layer." in name:
                         # find number in name with regex
                         layer_num = int("".join(filter(str.isdigit, name)))
@@ -116,14 +96,14 @@ class FSCITTrainer:
                 for (
                     name,
                     param,
-                ) in self.model_without_ddp.encoder_q.named_parameters():
+                ) in self.model.encoder_q.named_parameters():
                     print(
                         "ecnoder_q @session {} @epoch {},".format(session, epoch),
                         name,
                         param.requires_grad,
                     )
 
-                print_trainable_parameters(self.model_without_ddp.encoder_q)
+                print_trainable_parameters(self.model.encoder_q)
 
             if epoch == self.args.pet_tuning_start_epoch:
                 # Fine-tune the PET layer
@@ -185,15 +165,11 @@ class FSCITTrainer:
                     print("Replacing base classifier weight with prototypes...")
                     replace_fc_with_prototypes(
                         prototype_loader,
-                        self.model_without_ddp,
+                        self.model,
                         self.args,
                         self.device_id,
                     )
                 for epoch in range(self.args.epochs_base):
-                    if dist_utils.is_dist_avail_and_initialized():
-                        trainloader.sampler.set_epoch(epoch)
-                        testloader.sampler.set_epoch(epoch)
-
                     # adjust learnable params
                     self.adjust_learnable_parameters(session, epoch)
 
@@ -220,20 +196,20 @@ class FSCITTrainer:
 
                     if all_acc > self.session_accuracies["all"][session]:
                         self.best_model_dict = deepcopy(
-                            self.model_without_ddp.state_dict(),
+                            self.model.state_dict(),
                         )
 
                     self.update_matrix((base_acc, inc_acc, all_acc), session)
 
                 # load the best saved model for the base session
-                self.model_without_ddp.load_state_dict(self.best_model_dict)
+                self.model.load_state_dict(self.best_model_dict)
 
                 if self.args.update_base_classifier_with_prototypes:
                     # replace base classifier weight with prototypes
                     print("Replacing base classifier weight with prototypes...")
                     replace_fc_with_prototypes(
                         prototype_loader,
-                        self.model_without_ddp,
+                        self.model,
                         self.args,
                         self.device_id,
                     )
@@ -252,7 +228,7 @@ class FSCITTrainer:
                 print("Replacing inc. classifier weight with prototypes...")
                 replace_fc_with_prototypes(
                     prototype_loader,
-                    self.model_without_ddp,
+                    self.model,
                     self.args,
                     self.device_id,
                 )

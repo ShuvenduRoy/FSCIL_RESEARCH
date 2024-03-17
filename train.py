@@ -7,7 +7,6 @@ from pprint import pprint
 import numpy as np
 
 from methods.fscit import FSCITTrainer
-from utils import dist_utils
 from utils.train_utils import (
     get_command_line_parser,
     get_dataset_configs,
@@ -32,12 +31,6 @@ def main(args: argparse.Namespace) -> None:
     -------
     None
     """
-    if args.distributed:
-        dist_utils.init_distributed_mode(
-            launcher=args.distributed_launcher,
-            backend=args.distributed_backend,
-        )
-
     results_dict: dict = {}
     # Loop over seeds
     for i in range(args.num_seeds):
@@ -52,6 +45,8 @@ def main(args: argparse.Namespace) -> None:
 
     # averae across seeds
     for key in results_dict:
+        results_dict[key + "_std"] = np.array(results_dict[key]).std(axis=0)
+        results_dict[key + "_std"] = [round(v, 2) for v in results_dict[key + "_std"]]
         results_dict[key] = np.array(results_dict[key]).mean(axis=0)
         results_dict[key] = [round(v, 2) for v in results_dict[key]]
 

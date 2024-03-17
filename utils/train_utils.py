@@ -321,26 +321,7 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
         help="number of random seeds",
     )
 
-    # distributed training
     parser.add_argument("--gpu", default="0")
-    parser.add_argument(
-        "--distributed",
-        type=str2bool,
-        default=False,
-        help="distributed training",
-    )
-    parser.add_argument(
-        "--distributed_launcher",
-        type=str,
-        default="pytorch",
-        choices=["pytorch", "slurm"],
-    )
-    parser.add_argument(
-        "--distributed_backend",
-        type=str,
-        default="nccl",
-        choices=["nccl", "gloo", "mpi"],
-    )
 
     # PET specific configs
     parser.add_argument(

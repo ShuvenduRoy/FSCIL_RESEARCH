@@ -29,7 +29,7 @@ def test_facil_encoder(args: Any) -> None:
     old_fc_weight = trainer.model.encoder_q.classifier.weight.clone()
     replace_fc_with_prototypes(
         train_set,
-        trainer.model_without_ddp,
+        trainer.model,
         args,
         device_id=None,
     )
