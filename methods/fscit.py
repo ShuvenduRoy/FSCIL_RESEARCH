@@ -55,6 +55,7 @@ class FSCITTrainer:
         self.criterion = SupConLoss()
         self.optimizer, self.scheduler = get_optimizer_base(self.model, self.args)
         self.device_id = None
+        self.best_model_dict = deepcopy(self.model.state_dict())
 
         if torch.cuda.is_available():
             self.model = self.model.cuda()
