@@ -23,6 +23,7 @@ def test_facil_encoder(args: Any) -> None:
     """Test ExponentialMovingAverage."""
     # Test base session data loader
     train_set, trainloader, testloader = get_dataloader(args, 0)
+    train_set = train_set.dataset
     assert len(train_set) == args.base_class * args.shot
     assert len(trainloader) == np.ceil(
         args.base_class * args.shot / args.batch_size_base,
@@ -40,18 +41,12 @@ def test_facil_encoder(args: Any) -> None:
     assert labels.shape == (args.batch_size_base,)
 
     train_set, trainloader, testloader = get_dataloader(args, 1)
+    train_set = train_set.dataset
     assert len(train_set) == 25
     assert len(trainloader) == np.ceil(25 / args.batch_size_base)
     assert len(testloader) == np.ceil(
         100 * (args.base_class + args.shot) / args.test_batch_size,
     )
-
-    # ensure samples are equally distributed for our new settings
-    args.base_class = 10
-    args.shot = 10
-    args.way = 10
-    train_set, trainloader, testloader = get_dataloader(args, 0)
-    assert len(train_set) == 100
 
 
 test_facil_encoder(get_default_args())

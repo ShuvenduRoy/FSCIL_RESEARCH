@@ -26,6 +26,7 @@ def test_hf_dataset(args: Any) -> None:
     """Test ExponentialMovingAverage."""
     # Test base session data loader
     train_set, trainloader, testloader = get_dataloader(args, 0)
+    train_set = train_set.dataset
     assert len(train_set) == args.base_class * args.shot
     assert len(trainloader) == np.ceil(len(train_set) / args.batch_size_base)
 
@@ -48,6 +49,7 @@ def test_hf_dataset(args: Any) -> None:
     assert data["label"].shape == (args.test_batch_size,)
 
     train_set, trainloader, testloader = get_dataloader(args, 1)
+    train_set = train_set.dataset
     assert len(train_set) == args.way * args.shot
 
 

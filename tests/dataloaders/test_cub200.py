@@ -25,6 +25,7 @@ def test_facil_encoder(args: Any) -> None:
     # Test base session data loader
     if os.path.exists("data/CUB_200_2011"):
         train_set, trainloader, testloader = get_dataloader(args, 0)
+        train_set = train_set.dataset
         assert len(train_set) == args.base_class * args.shot
         assert len(trainloader) == np.ceil(len(train_set) / args.batch_size_base)
 
@@ -47,6 +48,7 @@ def test_facil_encoder(args: Any) -> None:
         assert data["label"].shape == (args.test_batch_size,)
 
         train_set, trainloader, testloader = get_dataloader(args, 1)
+        train_set = train_set.dataset
         assert len(train_set) == args.way * args.shot
 
 
