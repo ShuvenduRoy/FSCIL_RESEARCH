@@ -25,7 +25,6 @@ hf_dataset_name_map = {
     "stanford_cars": "clip-benchmark/wds_cars",
     "voc2007": "clip-benchmark/wds_voc2007",
     "dtd": "HuggingFaceM4/DTD_Describable-Textures-Dataset",
-    "objectnet": "clip-benchmark/wds_objectnet",
     "sun397": "clip-benchmark/wds_sun397",
     "cifar100": "cifar100",
     "omniglot": "omniglot",
@@ -87,7 +86,25 @@ def hf_dataset(
     Parameters
     ----------
     root : str
-        Root directory of the dataset.
+        Root directory of dataset where directory ``cifar-10-batches-py`` exists or
+        will be saved to if download is set to True.
+    train : bool, optional
+        If True, creates dataset from training set, otherwise creates from test set.
+    target_transform : callable, optional
+        A function/transform that takes in the target and transforms it.
+    download : bool, optional
+        If true, downloads the dataset from the internet and puts it in root directory.
+        If dataset is already downloaded, it is not downloaded again.
+    session : int, optional
+        Current session.
+    transformations : optional
+        transformations.
+    args : argparse.ArgumentParser, optional
+        Arguments passed to the trainer.
+
+    Returns
+    -------
+    None
     """
     split = "train" if train else "validation"
     dataset = get_hf_data(args.dataset, split)

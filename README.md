@@ -24,7 +24,10 @@ pip install -r requirements.txt
 
 ## Prepare Data
 
-- CIFAR100 - Will be downloaded automatically
+CIFAR100, and all Hugging face datasets will be downloaded automatically.
+For CUB-200, and miniImageNet please refer to [CEC](https://github.com/icoz69/CEC-CVPR2021) and downlaod it from [here](https://drive.google.com/drive/folders/11LxZCQj2FRCs0JTsf_dafvTHqFn2yGSN).
+
+Extract the datasets to `./data` folder.
 
 ## Download pre-trained models
 
