@@ -1,15 +1,12 @@
 """Traing helper module."""
 
 import argparse
-import copy
 from typing import Any, Tuple
 
 import torch
 from torch import nn
 from torch.nn import functional as F  # noqa
 from tqdm import tqdm
-
-from dataloaders.helpter import get_transform
 
 
 class Averager:
@@ -342,7 +339,7 @@ def train_one_epoch(
 
 
 def replace_fc_with_prototypes(
-    trainset: Any,
+    prototype_loader: Any,
     model: Any,
     args: argparse.Namespace,
     device_id: Any,
@@ -351,8 +348,8 @@ def replace_fc_with_prototypes(
 
     Parameters
     ----------
-    trainset: Any
-        The training dataset
+    prototype_loader: Any
+        The training loader with validation transformations
     model: Any
         The model to train
     args: argparse.Namespace
@@ -364,26 +361,13 @@ def replace_fc_with_prototypes(
     -------
     None
     """
-    # make a copy of the dataset
-    new_train_set = copy.deepcopy(trainset)
-
     model = model.eval()
-    _, val_transforms = get_transform(args)
-    new_train_set.transform = val_transforms
-
-    trainloader = torch.utils.data.DataLoader(
-        dataset=new_train_set,
-        batch_size=args.batch_size_base,
-        num_workers=args.num_workers,
-        pin_memory=False,
-        shuffle=False,
-    )
 
     embedding_list = []
     label_list = []
 
     with torch.no_grad():
-        for batch in trainloader:
+        for batch in prototype_loader:
             data, labels = batch["image"], batch["label"]
             labels = labels.long()
             if device_id is not None:

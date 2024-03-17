@@ -29,20 +29,11 @@ For CUB-200, and miniImageNet please refer to [CEC](https://github.com/icoz69/CE
 
 Extract the datasets to `./data` folder.
 
-## Download pre-trained models
+## Pre-trained models
 
-- SAM: https://storage.googleapis.com/vit_models/sam/ViT-B_16.npz
-- DeiT: https://dl.fbaipublicfiles.com/deit/deit_base_patch16_224-b5f2ef4d.pth
-- CLIP: vit_base_patch16_clip_224.laion2b_ft_in12k_in1k
-- MAE: https://dl.fbaipublicfiles.com/mae/pretrain/mae_pretrain_vit_base.pth
-- https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz
-- ./checkpoint/moco_v3.pth
-- ./checkpoint/ibot_student.pth
-- ./checkpoint/ibot_1k.pth
-- ./checkpoint/clip_vit_b16.pth # clip
-- https://storage.googleapis.com/vit_models/sam/ViT-B_16.npz
-- https://dl.fbaipublicfiles.com/mae/pretrain/mae_pretrain_vit_base.pth
-- https://dl.fbaipublicfiles.com/dino/dino_vitbase16_pretrain/dino_vitbase16_pretrain.pth
+Pre-trained models will be downloaded from hugging face. Here is the list of models that we tried.
+
+- google/vit-base-patch16-224
 
 ## Experiments
 
@@ -56,114 +47,18 @@ Extract the datasets to `./data` folder.
 ### BASELINE: No training (Prototype-based FSCIT)
 
 ```bash
-# Supervised ViT-B16
-python train.py \
-  --update_base_classifier_with_prototypes True \
-  --epochs_base 0 \
-  --num_seeds 3 \
-  --shot 10 --way 10 --base_class 10 \
-  --pre_trained_url https://storage.googleapis.com/vit_models/imagenet21k/ViT-B_16.npz
-
-# Expected output
-base: [94.1, 91.2, 85.4, 83.3, 81.4, 80.1, 79.6, 78.4, 77.4, 77.0]
-incremental: [nan, 82.9, 79.25, 78.23, 75.28, 73.2, 72.1, 70.2, 70.29, 68.86]
-all: [94.1, 87.05, 81.3, 79.5, 76.5, 74.35, 73.17, 71.22, 71.08, 69.67]
-```
-
-```bash
-# DeiT
-... --pre_trained_url https://dl.fbaipublicfiles.com/deit/deit_base_patch16_224-b5f2ef4d.pth
-
-base: [90.7, 81.5, 72.2, 68.7, 67.3, 61.6, 60.4, 59.8, 59.4]
-incremental: [nan, 73.7, 72.85, 69.2, 66.05, 60.7, 58.78, 56.39, 56.55]
-all: [90.7, 77.6, 72.63, 69.07, 66.3, 60.85, 59.01, 56.81, 56.87]
-```
-
-```bash
-# SSL MoCo v3
-...  --pre_trained_url ./checkpoint/moco_v3.pth
-
-# Expected output
-base: [51.1 50.5 37.3 36.7 33.7 33.7 32.2 32.2 31.5]
-incremental: [  nan 23.1  28.55 27.63 22.43 20.82 20.47 20.2  19.65]
-all: [51.1  36.8  31.47 29.9  24.68 22.97 22.14 21.7  20.97]
-```
-
-```bash
-# iBOT 21K
-...  --pre_trained_url ./checkpoint/ibot_student.pth
-
-# Expected output
-Base acc:  [87.3, 80.7, 72.6, 66.4, 60.9, 58.7, 57.2, 54.0, 53.7]
-Inc. acc:  [nan, 69.4, 66.5, 61.3, 56.53, 54.52, 52.5, 50.93, 50.08]
-Overall :  [87.3, 75.05, 68.53, 62.57, 57.4, 55.22, 53.17, 51.31, 50.48]
-```
-
-```bash
-# iBOT 1K
-...  --pre_trained_url ./checkpoint/ibot_1k.pth
-
-# Expected output
-base: [64.8 60.  45.8 39.6 38.4 33.1 29.6 26.8 26.3]
-incremental: [  nan 45.6  33.3  33.1  31.5  28.26 25.7  23.97 22.88]
-all: [64.8  52.8  37.47 34.72 32.88 29.07 26.26 24.32 23.26]
-```
-
-```bash
-# DINO
-... --pre_trained_url https://dl.fbaipublicfiles.com/dino/dino_vitbase16_pretrain/dino_vitbase16_pretrain.pth
-
-# Expected output
-base: [38.  20.1 14.1  7.3  7.3  7.3  7.1  6.5  6.5]
-incremental: [  nan 22.6  16.65 11.07 10.25  9.08  9.08  8.79  8.  ]
-all: [38.   21.35 15.8  10.12  9.66  8.78  8.8   8.5   7.83]
-```
-
-```bash
-# MAE
-...  --pre_trained_url https://dl.fbaipublicfiles.com/mae/pretrain/mae_pretrain_vit_base.pth
-
-# Expected output
-base: [22.2 12.4 11.3 10.7 10.4  3.   2.8  2.5  2.5]
-incremental: [  nan 11.4   8.45  5.2   4.    5.08  4.3   3.93  3.45]
-all: [22.2  11.9   9.4   6.57  5.28  4.73  4.09  3.75  3.34]
-```
-
-```bash
 # HF google/vit-base-patch16-224-in21k
 python train.py \
   --update_base_classifier_with_prototypes True \
   --epochs_base 0 \
   --num_seeds 1 \
-  --shot 10 --way 10 --base_class 10 \
+  --shot 10 \
   --result_key _baseline \
   --hf_model_checkpoint "google/vit-base-patch16-224"
 
 base: [92.5, 90.0, 83.4, 81.2, 78.8, 78.0, 77.4, 76.1, 75.8, 75.0]
 incremental: [nan, 76.5, 73.35, 71.8, 69.0, 65.72, 64.52, 62.4, 62.59, 61.56]
 all: [92.5, 83.25, 76.7, 74.15, 70.96, 67.77, 66.36, 64.11, 64.06, 62.9]
-```
-
-```bash
-# google/vit-large-patch16-224-in21k
-base: [95.2, 92.4, 88.5, 87.5, 86.8, 86.2, 85.7, 83.8, 83.0, 82.5]
-incremental: [nan, 84.0, 80.75, 79.63, 77.23, 76.08, 75.37, 74.47, 74.66, 73.89]
-all: [95.2, 88.2, 83.33, 81.6, 79.14, 77.77, 76.84, 75.64, 75.59, 74.75]
-```
-
-```bash
-# HF google/vit-base-patch16-224-in21k
-python train.py \
-  --update_base_classifier_with_prototypes True \
-  --epochs_base 0 \
-  --num_seeds 1 \
-  --shot 10 --way 10 --base_class 10 \
-  --result_key _baseline \
-  --hf_model_checkpoint "google/vit-base-patch16-224-in21k"
-
-Base acc:  [92.9, 90.1, 83.9, 82.6, 79.3, 78.6, 77.9, 76.7, 75.8, 75.0]
-Inc. acc:  [nan, 79.4, 74.3, 73.1, 70.95, 69.1, 68.37, 67.03, 66.86, 65.73]
-Overall :  [92.9, 84.75, 77.5, 75.47, 72.62, 70.68, 69.73, 68.24, 67.86, 66.66]
 ```
 
 ### BASELINE: Start with prototype then finetune linear only

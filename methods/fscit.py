@@ -169,11 +169,14 @@ class FSCITTrainer:
         }
         for session in range(self.args.sessions):
             # initialize dataset
-            train_set, trainloader, testloader = get_dataloader(self.args, session)
+            prototype_loader, trainloader, testloader = get_dataloader(
+                self.args,
+                session,
+            )
 
             # train session
             print(f"Training session {session}...")
-            print(f"Train set size: {len(train_set)}")
+            print(f"Train set size: {len(trainloader.dataset)}")
             print(f"Test set size: {len(testloader.dataset)}")
 
             if session == 0:  # base session
@@ -181,7 +184,7 @@ class FSCITTrainer:
                     # replace base classifier weight with prototypes
                     print("Replacing base classifier weight with prototypes...")
                     replace_fc_with_prototypes(
-                        train_set,
+                        prototype_loader,
                         self.model_without_ddp,
                         self.args,
                         self.device_id,
@@ -229,7 +232,7 @@ class FSCITTrainer:
                     # replace base classifier weight with prototypes
                     print("Replacing base classifier weight with prototypes...")
                     replace_fc_with_prototypes(
-                        train_set,
+                        prototype_loader,
                         self.model_without_ddp,
                         self.args,
                         self.device_id,
@@ -248,7 +251,7 @@ class FSCITTrainer:
             else:
                 print("Replacing inc. classifier weight with prototypes...")
                 replace_fc_with_prototypes(
-                    train_set,
+                    prototype_loader,
                     self.model_without_ddp,
                     self.args,
                     self.device_id,

@@ -1,19 +1,15 @@
 """Helper functions for the methods."""
 
 import argparse
-from functools import partial
-from typing import Any, Optional, Tuple
+from typing import Any, Tuple
 
 import torch
-from torch.utils.data.distributed import DistributedSampler
 from torchvision import transforms
 from transformers import ViTImageProcessor
 
 from dataloaders.datasets.cub200 import Cub200Dataset
 from dataloaders.datasets.hf_dataset import hf_dataset
 from dataloaders.datasets.miniimagenet import MiniImagenetDataset
-from dataloaders.sampler import DistributedEvalSampler
-from utils import dist_utils
 
 
 dataset_class_map = {
@@ -100,6 +96,14 @@ def get_dataloader(args: argparse.Namespace, session: int = 0) -> Tuple[Any, Any
         transformations=train_transforms,
         args=args,
     )
+    prototypeset = dataset_class_map.get(args.dataset, hf_dataset)(
+        root=args.dataroot,
+        train=True,
+        download=True,
+        session=session,
+        transformations=val_transforms,
+        args=args,
+    )
     testset = dataset_class_map.get(args.dataset, hf_dataset)(
         root=args.dataroot,
         train=False,
@@ -109,42 +113,29 @@ def get_dataloader(args: argparse.Namespace, session: int = 0) -> Tuple[Any, Any
         args=args,
     )
 
-    if args.distributed and dist_utils.is_dist_avail_and_initialized():
-        train_sampler: Optional[DistributedSampler] = DistributedSampler(
-            trainset,  # type: ignore
-            seed=args.seed,
-            drop_last=True,
-        )
-        test_sampler = DistributedEvalSampler(testset, seed=args.seed)
-
-        init_fn = (
-            partial(
-                dist_utils.worker_init_fn,
-                num_workers=args.num_workers,
-                rank=dist_utils.get_rank(),
-                seed=args.seed,
-            )
-            if args.seed is not None
-            else None
-        )
-    else:
-        init_fn, train_sampler, test_sampler = None, None, None
-
     trainloader: torch.utils.data.DataLoader = torch.utils.data.DataLoader(
         dataset=trainset,  # type: ignore
         batch_size=args.batch_size_base,
-        shuffle=(train_sampler is None),
+        shuffle=True,
         num_workers=args.num_workers,
-        sampler=train_sampler,
-        worker_init_fn=init_fn,
+        sampler=None,
+        worker_init_fn=None,
+    )
+    prototype_loader: torch.utils.data.DataLoader = torch.utils.data.DataLoader(
+        dataset=prototypeset,  # type: ignore
+        batch_size=args.test_batch_size,
+        shuffle=False,
+        num_workers=args.num_workers,
+        sampler=None,
+        worker_init_fn=None,
     )
     testloader: torch.utils.data.DataLoader = torch.utils.data.DataLoader(
         dataset=testset,  # type: ignore
         batch_size=args.test_batch_size,
         shuffle=False,
         num_workers=args.num_workers,
-        sampler=test_sampler,
-        worker_init_fn=init_fn,
+        sampler=None,
+        worker_init_fn=None,
     )
 
-    return trainset, trainloader, testloader
+    return prototype_loader, trainloader, testloader
