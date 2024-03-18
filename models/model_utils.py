@@ -12,6 +12,6 @@ def get_model_args(model: str) -> dict:
 
     if "huge" in model:
         args["embedding_dim"] = 1280
-    elif "large" in model:
+    elif "large" in model or "hybrid" in model:
         args["embedding_dim"] = 1024
     return args
