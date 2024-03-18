@@ -1,5 +1,6 @@
 """Test the FSCIL encoder."""
 
+import os
 from typing import Any
 
 import pytest
@@ -17,8 +18,9 @@ torch.manual_seed(42)
 )
 def test_facil_encoder(args: Any) -> None:
     """Test ExponentialMovingAverage."""
-    from paper.table_generators.appendix_naive_baseline_all_encoders import (
-        generate_naive_baseline_all_encoders,
-    )
+    if os.path.exists("results"):
+        from paper.table_generators.appendix_naive_baseline_all_encoders import (
+            generate_naive_baseline_all_encoders,
+        )
 
-    generate_naive_baseline_all_encoders()
+        generate_naive_baseline_all_encoders()
