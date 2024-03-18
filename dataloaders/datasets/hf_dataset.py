@@ -25,7 +25,7 @@ hf_dataset_name_map = {
     "stanford_cars": "clip-benchmark/wds_cars",
     "voc2007": "clip-benchmark/wds_voc2007",
     "dtd": "HuggingFaceM4/DTD_Describable-Textures-Dataset",
-    "sun397": "clip-benchmark/wds_sun397",
+    "sun397": "HuggingFaceM4/sun397",
     "cifar100": "cifar100",
     "omniglot": "omniglot",
     "vgg-flowers": "vgg_flowers",
