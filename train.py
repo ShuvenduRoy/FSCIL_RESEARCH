@@ -43,10 +43,11 @@ def main(args: argparse.Namespace) -> None:
         for key, val in trainer.session_accuracies.items():
             results_dict[key] = results_dict.get(key, []) + [val]
 
+    res_keys = list(results_dict.keys())
     # averae across seeds
     results_dict["all" + "_std"] = np.array(results_dict["all"]).std(axis=0)
     results_dict["all" + "_std"] = [round(v, 2) for v in results_dict["all" + "_std"]]
-    for key in results_dict:
+    for key in res_keys:
         results_dict[key] = np.array(results_dict[key]).mean(axis=0)
         results_dict[key] = [round(v, 2) for v in results_dict[key]]
 
