@@ -17,7 +17,7 @@ echo "FSCIT"
 module load MistEnv/2020a cuda gcc anaconda3 cmake cudnn swig sox/14.4.2
 # trunk-ignore(shellcheck/SC1091)
 # trunk-ignore(shellcheck/SC3046)
-source activate detect_env
+source activate pytorch_env
 
 COMMAND="python -W ignore train.py"
 echo "${COMMAND}"
