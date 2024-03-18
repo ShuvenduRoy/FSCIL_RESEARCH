@@ -39,7 +39,7 @@ additional_hf_configs = {"dtd": ["partition_1"], "sun397": ["standard-part1-120k
 def get_hf_data(dataset_name: str, split: str) -> Any:
     """Get data from Hugging Face dataset."""
     # check if dataset_cache in global # TODO:RELEASE this is just to speed up
-    if "dataset_cache" in globals():
+    if "dataset_cache" in globals() and os.path.exists("/scratch"):
         print("!!!Using cached dataset")
         dataset = copy.deepcopy(globals()["dataset_cache"])
     else:
