@@ -64,7 +64,7 @@ class EncoderWrapper(nn.Module):
             print("Adding PET moduels.")
             self.model = get_peft_model(self.model, pet_config)
 
-        if args.num_mlp == 2:
+        if args.num_mlp == 2:  # TODO:BUG remove mlp or support no MLP for moco
             self.mlp = nn.Sequential(
                 nn.Linear(self.num_features, self.num_features),
                 nn.ReLU(),

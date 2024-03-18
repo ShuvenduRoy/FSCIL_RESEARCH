@@ -44,7 +44,7 @@ def get_hf_data(dataset_name: str, split: str) -> Any:
             "/scratch/a/amiilab/shuvendu/.cache/"
             if os.path.exists("/scratch")
             else None
-        ),  # TODO: remove from release
+        ),  # TODO: remove hard coded cache dir from release
     )
     if split == "validation" and split not in dataset:
         if "test" in dataset:

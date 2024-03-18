@@ -148,11 +148,7 @@ def test(  # noqa: PLR0915
         for _, batch in enumerate(tqdm_gen, 1):
             data, labels = batch["image"], batch["label"]
             labels = labels.long()
-            if device_id is not None:
-                for i in range(len(data)):
-                    data[i] = data[i].cuda(device_id, non_blocking=True)
-                labels = labels.cuda(device_id, non_blocking=True)
-            elif torch.cuda.is_available():
+            if torch.cuda.is_available():
                 for i in range(len(data)):
                     data[i] = data[i].cuda(non_blocking=True)
                 labels = labels.cuda(non_blocking=True)
@@ -291,11 +287,7 @@ def train_one_epoch(
     for _, batch in enumerate(tqdm_gen, 1):
         images, labels = batch["image"], batch["label"]
         labels = labels.long()
-        if device_id is not None:
-            for i in range(len(images)):
-                images[i] = images[i].cuda(device_id, non_blocking=True)
-            labels = labels.cuda(device_id, non_blocking=True)
-        elif torch.cuda.is_available():
+        if torch.cuda.is_available():
             for i in range(len(images)):
                 images[i] = images[i].cuda(non_blocking=True)
             labels = labels.cuda(non_blocking=True)
@@ -384,12 +376,7 @@ def replace_fc_with_prototypes(
         data_index = (label_list == class_index).nonzero()
         embedding_this = embedding_list[data_index.squeeze(-1)]
         embedding_this = embedding_this.mean(0)
-        if device_id is not None:
-            model.encoder_q.classifier.weight.data[class_index] = embedding_this.cuda(
-                device_id,
-                non_blocking=True,
-            )
-        elif torch.cuda.is_available():
+        if torch.cuda.is_available():
             model.encoder_q.classifier.weight.data[class_index] = embedding_this.cuda()
         else:
             model.encoder_q.classifier.weight.data[class_index] = embedding_this

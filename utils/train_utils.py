@@ -321,8 +321,6 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
         help="number of random seeds",
     )
 
-    parser.add_argument("--gpu", default="0")
-
     # PET specific configs
     parser.add_argument(
         "--pet_cls",
@@ -498,25 +496,6 @@ def set_seed(seed: int) -> None:
         torch.cuda.manual_seed_all(seed)
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
-
-
-def set_gpu(args: argparse.Namespace) -> int:
-    """Set the GPU to use.
-
-    Parameters
-    ----------
-    args : argparse.Namespace
-        The command-line arguments.
-
-    Returns
-    -------
-    int: The number of GPUs to use.
-    """
-    gpu_list = [int(x) for x in args.gpu.split(",")]
-    print("use gpu:", gpu_list)
-    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
-    return gpu_list.__len__()
 
 
 def ensure_path(path: str) -> None:

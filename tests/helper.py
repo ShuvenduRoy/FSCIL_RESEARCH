@@ -35,7 +35,6 @@ def get_default_args() -> argparse.Namespace:
         "encoder_ft_start_layer": 500,
         "freeze_vit": True,
         "gamma": 0.1,
-        "gpu": "0",
         "incft": False,
         "limited_base_class": -1,
         "limited_base_samples": 1,
