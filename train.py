@@ -17,6 +17,7 @@ from utils.train_utils import (
 
 
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+os.environ["HF_DATASETS_OFFLINE"] = "1"
 
 
 def main(args: argparse.Namespace) -> None:
