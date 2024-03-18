@@ -46,13 +46,3 @@ def load_results(
                 results[dataset][name][result_key] = group[result_key].max()
 
     return results
-
-
-if __name__ == "__main__":
-    # load the results
-    results = load_results(
-        "facit_baseline",
-        search_key="hf_model_checkpoint",
-        datsets=["caltech101", "cifar100"],
-    )
-    print(results)
