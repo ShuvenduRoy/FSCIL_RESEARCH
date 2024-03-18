@@ -24,7 +24,6 @@ def generate_scirpts(args: argparse.Namespace) -> None:
         except yaml.YAMLError as exc:
             print(exc)
     configs = configs["parameters"]
-    configs["dataset"] = {"value": args.dataset}
 
     # loop over combinations of hyperparameters
     train_args = ""
@@ -53,16 +52,14 @@ def generate_scirpts(args: argparse.Namespace) -> None:
             run[20] = "cd ../..\n"
             run[21] = command
             run[7] = (
-                "#SBATCH --error=/scratch/a/amiilab/shuvendu/OUTPUTS/logs/{}_{}_exp{}.out\n".format(
+                "#SBATCH --error=/scratch/a/amiilab/shuvendu/OUTPUTS/logs/{}_exp{}.out\n".format(
                     args.config,
-                    args.dataset,
                     args.exp_counter,
                 )
             )
             run[8] = (
-                "#SBATCH --output=/scratch/a/amiilab/shuvendu/OUTPUTS/logs/{}_{}_exp{}.out\n".format(
+                "#SBATCH --output=/scratch/a/amiilab/shuvendu/OUTPUTS/logs/{}_exp{}.out\n".format(
                     args.config,
-                    args.dataset,
                     args.exp_counter,
                 )
             )
@@ -87,12 +84,6 @@ if __name__ == "__main__":
         type=str,
         default="baseline_10way10shot_finetune_base_inc_frozen",
         help="The config file to use.",
-    )
-    parser.add_argument(
-        "--dataset",
-        type=str,
-        default="cifar100",
-        help="The dataset to use.",
     )
     parser.add_argument(
         "--exp_counter",
