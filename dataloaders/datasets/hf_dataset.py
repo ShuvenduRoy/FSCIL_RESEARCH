@@ -1,6 +1,7 @@
 """Load food101 dataset."""
 
 import argparse
+import copy
 import os
 from typing import Any
 
@@ -37,15 +38,22 @@ additional_hf_configs = {"dtd": ["partition_1"], "sun397": ["standard-part1-120k
 
 def get_hf_data(dataset_name: str, split: str) -> Any:
     """Get data from Hugging Face dataset."""
-    dataset = load_dataset(
-        hf_dataset_name_map.get(dataset_name),
-        *additional_hf_configs.get(dataset_name, []),
-        cache_dir=(
-            "/scratch/a/amiilab/shuvendu/.cache/"
-            if os.path.exists("/scratch")
-            else None
-        ),  # TODO: remove hard coded cache dir from release
-    )
+    # check if dataset_cache in global # TODO:RELEASE this is just to speed up
+    if "dataset_cache" in globals():
+        print("!!!Using cached dataset")
+        dataset = copy.deepcopy(globals()["dataset_cache"])
+    else:
+        dataset = load_dataset(
+            hf_dataset_name_map.get(dataset_name),
+            *additional_hf_configs.get(dataset_name, []),
+            cache_dir=(
+                "/scratch/a/amiilab/shuvendu/.cache/"
+                if os.path.exists("/scratch")
+                else None
+            ),  # TODO:RELEASE remove hard coded cache dir from release
+        )
+        globals()["dataset_cache"] = copy.deepcopy(dataset)
+
     if split == "validation" and split not in dataset:
         if "test" in dataset:
             split = "test"

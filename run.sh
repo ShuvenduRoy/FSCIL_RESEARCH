@@ -5,8 +5,8 @@
 #SBATCH --gpus-per-node=1                       # 1/4
 # SBATCH --mail-user=bikash11roy@gmail.com
 # SBATCH --mail-type=END,FAIL
-#SBATCH --error=/scratch/a/amiilab/shuvendu/OUTPUTS/logs/%A.out
-#SBATCH --output=/scratch/a/amiilab/shuvendu/OUTPUTS/logs/%A.out
+#SBATCH --error=/scratch/a/amiilab/shuvendu/OUTPUTS/FSCIT/%A.out
+#SBATCH --output=/scratch/a/amiilab/shuvendu/OUTPUTS/FSCIT/%A.out
 #SBATCH --open-mode=append                      # Append is important because otherwise preemption resets the file
 # SBATCH --array=0-2%1                           # auto submit 2 times
 #SBATCH --job-name=main

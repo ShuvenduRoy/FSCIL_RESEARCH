@@ -52,13 +52,13 @@ def generate_scirpts(args: argparse.Namespace) -> None:
             run[20] = "cd ../..\n"
             run[21] = command
             run[7] = (
-                "#SBATCH --error=/scratch/a/amiilab/shuvendu/OUTPUTS/logs/{}_exp{}.out\n".format(
+                "#SBATCH --error=/scratch/a/amiilab/shuvendu/OUTPUTS/FSCIT/{}_exp{}.out\n".format(
                     args.config,
                     args.exp_counter,
                 )
             )
             run[8] = (
-                "#SBATCH --output=/scratch/a/amiilab/shuvendu/OUTPUTS/logs/{}_exp{}.out\n".format(
+                "#SBATCH --output=/scratch/a/amiilab/shuvendu/OUTPUTS/FSCIT/{}_exp{}.out\n".format(
                     args.config,
                     args.exp_counter,
                 )
