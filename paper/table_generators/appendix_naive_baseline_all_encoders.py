@@ -10,8 +10,8 @@ def generate_naive_baseline_all_encoders() -> None:
         search_key="hf_model_checkpoint",
         datsets=["caltech101", "cifar100"],
     )
-    all_datasets = results.keys()
-    all_encoders = results["caltech101"].keys()
+    all_datasets = sorted(results.keys())
+    all_encoders = sorted(results["caltech101"].keys())
 
     with open("paper/tables/naive_baseline_all_encoders.tex", "r") as f:
         lines = f.readlines()

@@ -29,16 +29,15 @@ parameters:
       [
         google/vit-base-patch16-224,
         google/vit-base-patch16-224-in21k,
-        google/vit-large-patch16-224,
         google/vit-base-patch16-384,
-        google/vit-large-patch16-384,
         google/vit-base-patch32-224-in21k,
-        google/vit-huge-patch14-224-in21k,
         google/vit-base-patch32-384,
+        google/vit-large-patch16-224,
         google/vit-large-patch16-224-in21k,
+        google/vit-large-patch16-384,
         google/vit-large-patch32-224-in21k,
         google/vit-large-patch32-384,
-        google/vit-hybrid-base-bit-384,
+        google/vit-huge-patch14-224-in21k,
       ]
   dataset:
     values:
