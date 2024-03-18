@@ -134,24 +134,7 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
         "--dataset",
         type=str,
         default="cifar100",
-        choices=[
-            "caltech101",
-            "cifar100",
-            "country211",
-            "cub200",
-            "dtd",
-            "eurosat",
-            "fgvc_aircraft",
-            "food101",
-            "gtsrb",
-            "mini_imagenet",
-            "oxford_flowers",
-            "oxford_pets",
-            "resisc45",
-            "stanford_cars",
-            "voc2007",
-            "sun397",
-        ],
+        choices=num_classes.keys(),
     )
     parser.add_argument("--dataroot", type=str, default="./data")
     parser.add_argument(
@@ -579,10 +562,9 @@ def save_results(results_dict: dict, args: argparse.Namespace) -> None:
     None
     """
     ensure_path("results")
-    path = "results/{}_{}way{}shot{}.tsv".format(
+    path = "results/{}_{}_{}.tsv".format(
         args.dataset,
-        args.shot,
-        args.way,
+        args.fsl_setup,
         args.result_key,
     )
     args_dict = dict(args.__dict__)  # type: ignore
