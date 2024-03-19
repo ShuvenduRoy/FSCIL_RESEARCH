@@ -24,3 +24,6 @@ def test_facil_encoder(args: Any) -> None:
         )
 
         generate_naive_baseline_all_encoders()
+
+
+test_facil_encoder(None)

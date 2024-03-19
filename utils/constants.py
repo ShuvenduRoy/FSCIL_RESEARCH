@@ -1,5 +1,39 @@
 """Constants used in the code."""
 
+dataset_name_acronym = {
+    "caltech101": "CAL101",
+    "cifar100": "CI100",
+    "country211": "CO211",
+    "cub200": "CUB200",
+    "dtd": "DTD",
+    "eurosat": "EUSAT",
+    "fgvc_aircraft": "AirCr.",
+    "food101": "Food101",
+    "gtsrb": "GTSRB",
+    "mini_imagenet": "MiniIN",
+    "oxford_flowers": "FLO102",
+    "oxford_pets": "Pets",
+    "resisc45": "RES45",
+    "stanford_cars": "Cars",
+    "sun397": "SUN397",
+    "voc2007": "VOC",
+}
+
+encoder_name_acronym = {
+    "google/vit-base-patch16-224": "ViT-B16-224",
+    "google/vit-base-patch16-224-in21k": "ViT-B16-224-21k",
+    "google/vit-base-patch16-384": "ViT-B16-384",
+    "google/vit-base-patch32-224-in21k": "ViT-B32-224-21k",
+    "google/vit-base-patch32-384": "ViT-B32-384",
+    "google/vit-large-patch16-224": "ViT-L16-224",
+    "google/vit-large-patch16-224-in21k": "ViT-L16-224-21k",
+    "google/vit-large-patch16-384": "ViT-L16-384",
+    "google/vit-large-patch32-224-in21k": "ViT-L32-224-21k",
+    "google/vit-large-patch32-384": "ViT-L32-384",
+    "google/vit-huge-patch14-224-in21k": "ViT-H14-224-21k",
+}
+
+
 dataset_roots = {
     "cub200": "data/CUB_200_2011",
     "mini_imagenet": "data/miniimagenet",

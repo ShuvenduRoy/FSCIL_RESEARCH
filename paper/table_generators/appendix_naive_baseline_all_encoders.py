@@ -1,6 +1,7 @@
 """Appendix Table: Naive Baseline Performance for All Encoders."""
 
-from paper.results_extractor import dataset_name_acronym, load_results
+from paper.results_extractor import load_results
+from utils.constants import dataset_name_acronym, encoder_name_acronym
 
 
 def generate_naive_baseline_all_encoders() -> None:
@@ -10,8 +11,22 @@ def generate_naive_baseline_all_encoders() -> None:
         search_key="hf_model_checkpoint",
     )
     all_datasets = sorted(results.keys())
-    all_encoders = sorted(results["caltech101"].keys())
-    dataset_shot_names = [dataset_name_acronym[dataset] for dataset in all_datasets]
+    all_encoders = sorted(
+        results["caltech101"].keys(),
+        key=lambda x: list(encoder_name_acronym.keys()).index(x),
+    )
+    dataset_shot_names = [dataset_name_acronym[dataset] for dataset in all_datasets] + [
+        "Avg.",
+    ]
+
+    results["Avg."] = {}
+    # calculate avg across datasets
+    for encoder in all_encoders:
+        total = 0
+        results["Avg."][encoder] = {}
+        for dataset in all_datasets:
+            total += results[dataset][encoder]["all_last"]
+        results["Avg."][encoder]["all_last"] = total / len(all_datasets)
 
     with open("paper/tables/naive_baseline_all_encoders.tex", "r") as f:
         lines = f.readlines()
@@ -21,13 +36,14 @@ def generate_naive_baseline_all_encoders() -> None:
     )
 
     for encoder in all_encoders:
-        line = encoder.split("/")[1]  # "google/vit-base-patch16-224"
+        line = encoder_name_acronym[encoder]  # "google/vit-base-patch16-224"
         for dataset in all_datasets:
             if encoder in results[dataset]:  # exp might be in progress
                 res = results[dataset][encoder].get("all_last", 0)
             else:
                 res = 0
             line += f" & {res:.2f}"
+        line += f" & {results['Avg.'][encoder]['all_last']:.2f}"
         result_lines.append(line + "\\\\\n")
 
     result_lines.append("\\bottomrule\n")

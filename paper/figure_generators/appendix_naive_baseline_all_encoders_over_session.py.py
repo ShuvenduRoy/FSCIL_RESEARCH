@@ -2,7 +2,8 @@
 
 import matplotlib.pyplot as plt
 
-from paper.results_extractor import dataset_name_acronym, load_results
+from paper.results_extractor import load_results
+from utils.constants import dataset_name_acronym, encoder_name_acronym
 
 
 def generate_naive_baseline_all_encoders() -> None:
@@ -29,7 +30,7 @@ def generate_naive_baseline_all_encoders() -> None:
                 accs = results[dataset][encoder]["all"][1:-1]
                 accs = [float(acc) for acc in accs.split(", ")]
                 if i == 0:
-                    axs[row, col].plot(accs, label=encoder.split("/")[1])
+                    axs[row, col].plot(accs, label=encoder_name_acronym[encoder])
                 else:
                     axs[row, col].plot(accs)
                 axs[row, col].set_title(f"{dataset_shot_names[i]}")

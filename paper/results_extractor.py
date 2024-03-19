@@ -7,26 +7,6 @@ import pandas as pd
 from utils.constants import num_classes
 
 
-dataset_name_acronym = {
-    "caltech101": "CAL101",
-    "cifar100": "CIF100",
-    "country211": "COU211",
-    "cub200": "CUB200",
-    "dtd": "DTD",
-    "eurosat": "EUSAT",
-    "fgvc_aircraft": "AirCr.",
-    "food101": "Food101",
-    "gtsrb": "GTSRB",
-    "mini_imagenet": "MiniIN",
-    "oxford_flowers": "FLO102",
-    "oxford_pets": "Pets",
-    "resisc45": "RES45",
-    "stanford_cars": "Cars",
-    "sun397": "SUN397",
-    "voc2007": "VOC",
-}
-
-
 def load_tsv(file_path: str) -> pd.DataFrame:
     """Load a tsv file and return a pandas dataframe."""
     # load the tsv file
