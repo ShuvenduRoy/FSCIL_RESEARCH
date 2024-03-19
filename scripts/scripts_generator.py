@@ -47,8 +47,9 @@ def generate_scirpts(args: argparse.Namespace) -> None:
         command = ""
         for j in range(len(sweep_params)):
             command += " --{} {}".format(sweep_params[j], sweep[i][j])
+        print("python -W ignore train.py " + train_args + command)
         command = 'COMMAND="python -W ignore train.py ' + train_args + command + '"\n'
-        print(command)
+
         if i % args.jobs_per_run == 0 or i == len(sweep) - 1:
             run[20] = "cd ../..\n"
             run[21] = command
@@ -83,7 +84,6 @@ if __name__ == "__main__":
     parser.add_argument(
         "--config",
         type=str,
-        default="baseline_10way10shot_finetune_base_inc_frozen",
         help="The config file to use.",
     )
     parser.add_argument(
