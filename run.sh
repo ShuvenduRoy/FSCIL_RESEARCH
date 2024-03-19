@@ -10,7 +10,7 @@
 #SBATCH --open-mode=append                      # Append is important because otherwise preemption resets the file
 # SBATCH --array=0-2%1                           # auto submit 2 times
 #SBATCH --job-name=main
-#SBATCH --time=24:00:00
+#SBATCH --time=12:00:00
 
 echo "FSCIT"
 

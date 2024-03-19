@@ -47,18 +47,18 @@ Pre-trained models will be downloaded from hugging face. Here is the list of mod
 ### BASELINE: No training (Prototype-based FSCIT)
 
 ```bash
-# HF google/vit-base-patch16-224-in21k
-python train.py \
+for dataset_name in sun397 dtd voc2007 stanford_cars resisc45 oxford_pets oxford_flowers gtsrb fgvc_aircraft eurosat country211 caltech101 cifar100 cub200 food101 mini_imagenet; do #
+
+CUDA_VISIBLE_DEVICES=2 python train.py \
   --update_base_classifier_with_prototypes True \
   --epochs_base 0 \
-  --num_seeds 1 \
+  --num_seeds 3 \
   --shot 10 \
-  --result_key _baseline \
-  --hf_model_checkpoint "google/vit-base-patch16-224"
+  --result_key baseline \
+  --hf_model_checkpoint "google/vit-base-patch16-224-in21k" \
+  --dataset "${dataset_name}"
+done
 
-base: [92.5, 90.0, 83.4, 81.2, 78.8, 78.0, 77.4, 76.1, 75.8, 75.0]
-incremental: [nan, 76.5, 73.35, 71.8, 69.0, 65.72, 64.52, 62.4, 62.59, 61.56]
-all: [92.5, 83.25, 76.7, 74.15, 70.96, 67.77, 66.36, 64.11, 64.06, 62.9]
 ```
 
 ### BASELINE: Start with prototype then finetune linear only
@@ -68,8 +68,8 @@ python train.py \
   --start_training_with_prototypes True \
   --epochs_base 10 \
   --num_seeds 3 \
-  --shot 10 --way 10 --base_class 10 \
-  --result_key _baseline_linear \
+  --shot 10 \
+  --result_key baseline_linear \
   --hf_model_checkpoint "google/vit-base-patch16-224-in21k"\
   --encoder_ft_start_layer 12 --lr_base 0.001
 

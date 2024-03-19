@@ -562,10 +562,11 @@ def save_results(results_dict: dict, args: argparse.Namespace) -> None:
     None
     """
     ensure_path("results")
-    path = "results/{}_{}_{}.tsv".format(
+    path = "results/{}_{}_{}_{}.tsv".format(
         args.dataset,
         args.fsl_setup,
         args.result_key,
+        args.num_seeds,
     )
     args_dict = dict(args.__dict__)  # type: ignore
     if not os.path.exists(path):
