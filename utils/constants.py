@@ -33,6 +33,20 @@ encoder_name_acronym = {
     "google/vit-huge-patch14-224-in21k": "ViT-H14-224-21k",
 }
 
+encoder_params = {
+    "google/vit-base-patch16-224": 86.6,
+    "google/vit-base-patch16-224-in21k": 86.6,
+    "google/vit-base-patch16-384": 86.9,
+    "google/vit-base-patch32-224-in21k": 88.0,
+    "google/vit-base-patch32-384": 88.3,
+    "google/vit-large-patch16-224": 304,
+    "google/vit-large-patch16-224-in21k": 304,
+    "google/vit-large-patch16-384": 305,
+    "google/vit-large-patch32-224-in21k": 306,
+    "google/vit-large-patch32-384": 307,
+    "google/vit-huge-patch14-224-in21k": 632,
+}
+
 
 dataset_roots = {
     "cub200": "data/CUB_200_2011",

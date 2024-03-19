@@ -19,6 +19,12 @@ torch.manual_seed(42)
 def test_facil_encoder(args: Any) -> None:
     """Test ExponentialMovingAverage."""
     if os.path.exists("results"):
+        from paper.table_generators.main_naive_baseline_all_encoders import (
+            main_generate_naive_baseline_all_encoders,
+        )
+
+        main_generate_naive_baseline_all_encoders()
+
         from paper.table_generators.appendix_naive_baseline_all_encoders import (
             generate_naive_baseline_all_encoders,
         )
