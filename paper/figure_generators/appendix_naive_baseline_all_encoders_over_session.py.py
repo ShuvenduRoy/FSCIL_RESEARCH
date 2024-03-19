@@ -38,7 +38,7 @@ def generate_naive_baseline_all_encoders() -> None:
     plt.tight_layout()
 
     fig.subplots_adjust(bottom=0.1)
-
+    plt.savefig("paper/figures/appendix_naive_baseline_all_encoders_over_session.pdf")
     plt.show()
 
 

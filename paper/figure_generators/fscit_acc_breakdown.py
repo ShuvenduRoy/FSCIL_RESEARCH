@@ -79,7 +79,7 @@ def plot_fscit_acc_breakdown(accuracies: dict, methods_on_x: bool = False) -> No
     plt.subplots_adjust(bottom=0.25)
     ax.legend(loc="lower right", ncols=1, fontsize=fontsize - 3)
     ax.get_legend().get_frame().set_linewidth(0.0)
-    plt.savefig("scripts/output/fscit_acc_breakdown.pdf")
+    plt.savefig("paper/figures/fscit_acc_breakdown.pdf")
     plt.show()
 
 
