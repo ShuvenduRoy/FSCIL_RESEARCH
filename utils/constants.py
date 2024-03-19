@@ -18,22 +18,22 @@ fscil_ways = {
 }
 
 num_classes = {
-    "sun397": 397,
-    "dtd": 47,
-    "voc2007": 20,
-    "stanford_cars": 196,
-    "resisc45": 45,
-    "oxford_pets": 37,
-    "oxford_flowers": 102,
-    "gtsrb": 43,
-    "fgvc_aircraft": 100,
-    "eurosat": 10,
-    "country211": 211,
     "caltech101": 102,
     "cifar100": 100,
+    "country211": 211,
     "cub200": 200,
+    "dtd": 47,
+    "eurosat": 10,
+    "fgvc_aircraft": 100,
     "food101": 101,
+    "gtsrb": 43,
     "mini_imagenet": 100,
+    "oxford_flowers": 102,
+    "oxford_pets": 37,
+    "resisc45": 45,
+    "stanford_cars": 196,
+    "sun397": 397,
+    "voc2007": 20,
 }
 
 fscit_base_classes = {
