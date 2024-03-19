@@ -25,7 +25,7 @@ parameters:
   result_key:
     value: baseline_linear
   encoder_ft_start_layer:
-    values: 100
+    value: 100
   hf_model_checkpoint:
     values: [google/vit-base-patch16-224-in21k, google/vit-large-patch16-384]
   dataset:
