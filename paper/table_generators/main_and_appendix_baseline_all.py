@@ -4,7 +4,7 @@ from paper.results_extractor import load_results
 from utils.constants import dataset_name_acronym
 
 
-def main_generate_naive_baseline_all_encoders() -> None:
+def main_generate_all_baselines() -> None:
     """Generate naive baseline performance for all encoders."""
     with open("paper/tables/baseline_all.tex", "r") as f:
         lines = f.readlines()
@@ -82,4 +82,4 @@ def main_generate_naive_baseline_all_encoders() -> None:
 
 
 if __name__ == "__main__":
-    main_generate_naive_baseline_all_encoders()
+    main_generate_all_baselines()

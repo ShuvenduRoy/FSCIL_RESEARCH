@@ -31,5 +31,11 @@ def test_facil_encoder(args: Any) -> None:
 
         generate_naive_baseline_all_encoders()
 
+        from paper.table_generators.main_and_appendix_baseline_all import (
+            main_generate_all_baselines,
+        )
+
+        main_generate_all_baselines()
+
 
 test_facil_encoder(None)

@@ -258,8 +258,8 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
     parser.add_argument(
         "--num_mlp",
         type=int,
-        default=1,
-        help="number of mlp layers in projection head",
+        default=0,
+        help="number of mlp layers in projection head, no mlp by default",
     )
 
     # few-shot configs

@@ -64,13 +64,14 @@ class EncoderWrapper(nn.Module):
             print("Adding PET moduels.")
             self.model = get_peft_model(self.model, pet_config)
 
-        if args.num_mlp == 2:  # TODO:BUG remove mlp or support no MLP for moco
+        if args.num_mlp == 1:
+            self.mlp = nn.Sequential(nn.Linear(self.num_features, self.args.moco_dim))
+        elif args.num_mlp == 2:
             self.mlp = nn.Sequential(
                 nn.Linear(self.num_features, self.num_features),
                 nn.ReLU(),
                 nn.Linear(self.num_features, self.args.moco_dim),
             )
-
         elif args.num_mlp == 3:
             self.mlp = nn.Sequential(
                 nn.Linear(self.num_features, self.num_features),
@@ -80,7 +81,7 @@ class EncoderWrapper(nn.Module):
                 nn.Linear(self.num_features, self.args.moco_dim),
             )
         else:
-            self.mlp = nn.Sequential(nn.Linear(self.num_features, self.args.moco_dim))
+            self.mlp = nn.Sequential(nn.Identity())
 
         self.classifier = nn.Linear(
             self.num_features,
@@ -110,7 +111,7 @@ class EncoderWrapper(nn.Module):
         output = output.pooler_output  # [b, embed_dim]
         return (
             output,  # [b, embed_dim=768]
-            self.mlp(output),  # [b, moco_dim=128]
+            self.mlp(output),  # [b, moco_dim=128] or [b, embed_dim] if no mlp layer
             self.classifier(output),  # [b, n_classes]
         )
 
