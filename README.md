@@ -86,8 +86,8 @@ python train.py \
   --start_training_with_prototypes True \
   --epochs_base 10 \
   --num_seeds 3 \
-  --shot 10 --way 10 --base_class 10 \
-  --result_key _baseline_lora \
+  --shot 10 \
+  --result_key baseline_lora \
   --hf_model_checkpoint "google/vit-base-patch16-224-in21k"\
   --encoder_ft_start_layer 12 \
   --pet_cls LoRA --adapt_blocks 3  --lr_base 0.1 # random param requires higher lr
