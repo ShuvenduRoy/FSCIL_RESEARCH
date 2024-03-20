@@ -51,3 +51,7 @@ def generate_naive_baseline_all_encoders() -> None:
 
     with open("paper/tables/naive_baseline_all_encoders.tex", "w") as f:
         f.writelines(result_lines)
+
+
+if __name__ == "__main__":
+    generate_naive_baseline_all_encoders()

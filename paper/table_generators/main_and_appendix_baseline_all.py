@@ -74,11 +74,12 @@ def main_generate_naive_baseline_all_encoders() -> None:
             )
             result_lines.append(f"{line} & {acc} \\\\\n")
         result_lines.append("\\midrule\n")
-    result_lines.append("\\bottomrule\n")
+    result_lines[-1] = "\\bottomrule\n"
     result_lines.append("\\end{tabular}\n")
 
     with open("paper/tables/baseline_appendix_all.tex", "w") as f:
         f.writelines(result_lines)
 
 
-main_generate_naive_baseline_all_encoders()
+if __name__ == "__main__":
+    main_generate_naive_baseline_all_encoders()
