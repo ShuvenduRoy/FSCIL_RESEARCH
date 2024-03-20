@@ -42,7 +42,8 @@ def load_results(
         groups = result.groupby(search_key)
         for name, group in groups:
             results[dataset][name] = {}
+            select_id = group["all_last"].idxmax()
             for result_key in result_keys:
-                results[dataset][name][result_key] = group[result_key].max()
+                results[dataset][name][result_key] = group[result_key][select_id]
 
     return results

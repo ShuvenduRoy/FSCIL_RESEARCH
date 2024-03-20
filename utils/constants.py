@@ -119,5 +119,5 @@ fscit_ways = {
     "food101": 10,
     "cifar100": 10,
     "cub200": 20,
-    "mini_imagenet": 20,
+    "mini_imagenet": 10,
 }
