@@ -34,7 +34,13 @@ def generate_naive_baseline_all_encoders() -> None:
                 else:
                     axs[row, col].plot(accs)
                 axs[row, col].set_title(f"{dataset_shot_names[i]}")
-                axs[row, col].grid(True)
+                axs[row, col].grid(
+                    True,
+                    color="gray",
+                    linestyle="dashed",
+                    linewidth=0.5,
+                    alpha=0.5,
+                )
     fig.legend(loc="lower center", ncol=4, fontsize=fontsize - 3)
     plt.tight_layout()
 
