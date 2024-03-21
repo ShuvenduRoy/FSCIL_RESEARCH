@@ -1,4 +1,4 @@
-"""Main Table: Baseline all."""
+"""Main Table: Baseline all (Table 2, S4)."""
 
 from paper.results_extractor import load_results
 from utils.constants import dataset_name_acronym

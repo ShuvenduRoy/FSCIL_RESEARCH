@@ -1,4 +1,4 @@
-"""Main Table: Naive Baseline Performance for All Encoders."""
+"""Main Table: Naive Baseline Performance for All Encoders (Table 1)."""
 
 from paper.results_extractor import load_results
 from utils.constants import encoder_name_acronym, encoder_params

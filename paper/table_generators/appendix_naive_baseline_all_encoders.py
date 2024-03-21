@@ -1,4 +1,4 @@
-"""Appendix Table: Naive Baseline Performance for All Encoders."""
+"""Appendix Table: Naive Baseline Performance for All Encoders (Table S3)."""
 
 from paper.results_extractor import load_results
 from utils.constants import dataset_name_acronym, encoder_name_acronym
