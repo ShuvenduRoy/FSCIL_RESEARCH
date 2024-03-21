@@ -1,0 +1,38 @@
+program: train.py
+method: grid
+project: FSCIT
+name: baseline
+metric:
+  goal: maximize
+  name: session_max_acc
+parameters:
+  exp_name:
+    value: cap_contrast_only
+  update_base_classifier_with_prototypes:
+    value: False
+  start_training_with_prototypes:
+    value: True
+  epochs_base:
+    values: [10, 20, 35, 50]
+  moco_loss_factor:
+    values: [1.0, 5.0, 10.0]
+  lr_base:
+    values: [0.5, 0.1, 0.01]
+  num_seeds:
+    value: 1
+  shot:
+    value: 10
+  result_key:
+    value: cap_contrast_only
+  adapt_blocks:
+    values: [3, 6, 12]
+  encoder_ft_start_layer:
+    value: 100
+  num_views:
+    value: 4
+  pet_cls:
+    value: LoRA
+  hf_model_checkpoint:
+    values: [google/vit-base-patch16-224-in21k]
+  dataset:
+    values: [cifar100]
