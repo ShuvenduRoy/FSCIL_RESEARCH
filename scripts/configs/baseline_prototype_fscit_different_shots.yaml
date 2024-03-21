@@ -1,0 +1,48 @@
+program: train.py
+method: grid
+project: FSCIT
+name: baseline
+metric:
+  goal: maximize
+  name: session_max_acc
+parameters:
+  exp_name:
+    value: prototype_fscit_different_shots
+  update_base_classifier_with_prototypes:
+    values: [True]
+  start_training_with_prototypes:
+    values: [True]
+  epochs_base:
+    values: [0]
+  moco_loss_factor:
+    value: 0.0
+  lr_base:
+    values: [0.001]
+  num_seeds:
+    value: 3
+  shot:
+    values: [1, 2, 4, 8, 10, 16]
+  result_key:
+    value: prototype_fscit_differenr_shots
+  hf_model_checkpoint:
+    values: [google/vit-base-patch16-224-in21k, google/vit-large-patch16-384]
+  dataset:
+    values:
+      [
+        caltech101,
+        cifar100,
+        country211,
+        cub200,
+        dtd,
+        eurosat,
+        fgvc_aircraft,
+        food101,
+        gtsrb,
+        mini_imagenet,
+        oxford_flowers,
+        oxford_pets,
+        resisc45,
+        stanford_cars,
+        voc2007,
+        sun397,
+      ]
