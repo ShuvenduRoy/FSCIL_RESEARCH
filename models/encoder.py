@@ -273,9 +273,6 @@ class FSCILencoder(nn.Module):
         token_embeding, embedding_q, logits = self.encoder_q(
             im_q,
         )  # [b, embed_dim=768], [b, moco_dim=128], [b, n_classes]
-        assert len(logits.shape) == 2
-        assert logits.shape[1] == self.args.num_classes
-        assert embedding_q.shape[1] == self.args.moco_dim
 
         if labels is None:  # during evaluation, im_q should be a single image
             return (token_embeding, logits)

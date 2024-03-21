@@ -7,7 +7,7 @@ metric:
   name: session_max_acc
 parameters:
   exp_name:
-    value: baseline_lora_fscit
+    value: cap_contrast_only
   update_base_classifier_with_prototypes:
     value: False
   start_training_with_prototypes:
@@ -23,7 +23,7 @@ parameters:
   shot:
     value: 10
   result_key:
-    value: baseline_lora
+    value: cap_contrast_only
   adapt_blocks:
     value: 3
   encoder_ft_start_layer:
