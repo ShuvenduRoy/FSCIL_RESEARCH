@@ -83,17 +83,20 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate experiment scripts.")
     parser.add_argument(
         "--config",
+        "-c",
         type=str,
         help="The config file to use.",
     )
     parser.add_argument(
         "--exp_counter",
+        "-e",
         type=int,
         default=1000,
         help="The experiment counter.",
     )
     parser.add_argument(
         "--jobs_per_run",
+        "-j",
         type=int,
         default=1,
         help="The number of jobs per run.",
