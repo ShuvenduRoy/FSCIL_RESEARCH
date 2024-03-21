@@ -3,14 +3,14 @@
 #SBATCH --nodes=1                               # number of nodes requested
 #SBATCH --ntasks=1                              # this should be same as number of nodes
 #SBATCH --gpus-per-node=1                       # 1/4
-# SBATCH --mail-user=bikash11roy@gmail.com
-# SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=bikash.shuvendu@gmail.com
+#SBATCH --mail-type=FAIL
 #SBATCH --error=/scratch/a/amiilab/shuvendu/OUTPUTS/FSCIT/%A.out
 #SBATCH --output=/scratch/a/amiilab/shuvendu/OUTPUTS/FSCIT/%A.out
 #SBATCH --open-mode=append                      # Append is important because otherwise preemption resets the file
 # SBATCH --array=0-2%1                           # auto submit 2 times
 #SBATCH --job-name=main
-#SBATCH --time=12:00:00
+#SBATCH --time=23:00:00
 
 echo "FSCIT"
 
