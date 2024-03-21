@@ -46,6 +46,7 @@ def get_hf_data(dataset_name: str, split: str) -> Any:
         dataset = load_dataset(
             hf_dataset_name_map.get(dataset_name),
             *additional_hf_configs.get(dataset_name, []),
+            ignore_verifications=True,
             cache_dir=(
                 "/scratch/a/amiilab/shuvendu/.cache/"
                 if os.path.exists("/scratch")
@@ -99,8 +100,7 @@ def hf_dataset(
     Parameters
     ----------
     root : str
-        Root directory of dataset where directory ``cifar-10-batches-py`` exists or
-        will be saved to if download is set to True.
+        Root directory of dataset
     train : bool, optional
         If True, creates dataset from training set, otherwise creates from test set.
     target_transform : callable, optional
