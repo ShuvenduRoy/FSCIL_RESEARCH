@@ -23,7 +23,7 @@ parameters:
   shot:
     values: [1, 2, 4, 8, 10, 16]
   result_key:
-    value: prototype_fscit_differenr_shots
+    value: prototype_fscit_different_shots
   hf_model_checkpoint:
     values: [google/vit-base-patch16-224-in21k, google/vit-large-patch16-384]
   dataset:
