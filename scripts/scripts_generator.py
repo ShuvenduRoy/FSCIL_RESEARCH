@@ -89,14 +89,14 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--exp_counter",
-        "-e",
+        "-i",
         type=int,
         default=1000,
         help="The experiment counter.",
     )
     parser.add_argument(
         "--jobs_per_run",
-        "-j",
+        "-n",
         type=int,
         default=1,
         help="The number of jobs per run.",
