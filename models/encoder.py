@@ -72,14 +72,6 @@ class EncoderWrapper(nn.Module):
                 nn.ReLU(),
                 nn.Linear(self.num_features, self.args.moco_dim),
             )
-        elif args.num_mlp == 3:
-            self.mlp = nn.Sequential(
-                nn.Linear(self.num_features, self.num_features),
-                nn.ReLU(),
-                nn.Linear(self.num_features, self.num_features),
-                nn.ReLU(),
-                nn.Linear(self.num_features, self.args.moco_dim),
-            )
         else:
             self.mlp = nn.Sequential(nn.Identity())
 
@@ -139,7 +131,6 @@ class FSCILencoder(nn.Module):
         self.num_features = self.encoder_q.num_features
 
         print_trainable_parameters(self.encoder_q)
-
         self.encoder_k = EncoderWrapper(args)
 
         # Handle the case that EMA can be different in terms of parameters
@@ -162,25 +153,42 @@ class FSCILencoder(nn.Module):
 
         pet_name = "none" if self.args.pet_cls is None else self.args.pet_cls.lower()
         self.params_with_lr = [
-            # TODO: this need to be updated
             {
                 "params": [
                     p
                     for n, p in self.encoder_q.named_parameters()
-                    if pet_name in n or n.startswith("fc")
+                    if pet_name in n or n.startswith("classifier")
                 ],
                 "lr": args.lr_base,
             },
-            # (Optional) reduced LR for pre-trained model parameters
             {
                 "params": [
                     p
                     for n, p in self.encoder_q.named_parameters()
-                    if pet_name not in n and not n.startswith("fc")
+                    if pet_name not in n and not n.startswith("classifier")
                 ],
                 "lr": args.lr_base * args.encoder_lr_factor,
             },
         ]
+
+        # print the parameters with learning rate
+        lr_dict = {}
+        lr_dict[args.lr_base] = [
+            n
+            for n, p in self.encoder_q.named_parameters()
+            if pet_name in n or n.startswith("classifier")
+        ]
+        lr_dict[args.lr_base * args.encoder_lr_factor] = [
+            n
+            for n, p in self.encoder_q.named_parameters()
+            if pet_name not in n and not n.startswith("classifier")
+        ]
+        total_layers = 0
+        for key, val in lr_dict.items():
+            total_layers += len(val)
+            for v in val:
+                print(v, key)
+        assert total_layers == len(list(self.encoder_q.parameters())), "Layers mismatch"
 
     def _get_pet_config(self) -> Optional[Any]:
         """Get the PET configuration.
@@ -207,6 +215,11 @@ class FSCILencoder(nn.Module):
 
     def _get_encoder_q_state_dict(self) -> dict:
         """Get the state dictionary of the encoder_q.
+
+        PEFT added additional wrapper, making the parameter
+        names different from the original model.
+        The original names are needed in few places,
+        e.g. when updating the teacher encoder.
 
         Returns
         -------
