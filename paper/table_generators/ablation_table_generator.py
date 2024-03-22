@@ -3,7 +3,7 @@
 from paper.results_extractor import load_results
 
 
-def main_generate_all_baselines() -> None:
+def ablation_table_generator() -> None:
     """Generate naive baseline performance for all encoders."""
     encoder = "google/vit-base-patch16-224-in21k"
     results_dict_list = []
@@ -73,4 +73,4 @@ def main_generate_all_baselines() -> None:
 
 
 if __name__ == "__main__":
-    main_generate_all_baselines()
+    ablation_table_generator()
