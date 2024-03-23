@@ -1,7 +1,7 @@
 """Appendix Table: Naive Baseline Performance for All Encoders (Table S3)."""
 
 from paper.results_extractor import load_results
-from utils.constants import dataset_name_acronym, encoder_name_acronym
+from utils.constants import encoder_name_acronym
 
 
 def generate_naive_baseline_all_encoders() -> None:
@@ -15,9 +15,6 @@ def generate_naive_baseline_all_encoders() -> None:
         results["caltech101"].keys(),
         key=lambda x: list(encoder_name_acronym.keys()).index(x),
     )
-    dataset_shot_names = [dataset_name_acronym[dataset] for dataset in all_datasets] + [
-        "Avg.",
-    ]
 
     results["Avg."] = {}
     # calculate avg across datasets
@@ -30,10 +27,7 @@ def generate_naive_baseline_all_encoders() -> None:
 
     with open("paper/tables/naive_baseline_all_encoders.tex", "r") as f:
         lines = f.readlines()
-    result_lines = lines[:2]
-    result_lines.append(
-        "Encoders & " + " & ".join(dataset_shot_names) + " \\\\ \\hline\n",
-    )
+    result_lines = lines[:3]
 
     for encoder in all_encoders:
         line = encoder_name_acronym[encoder]  # "google/vit-base-patch16-224"
