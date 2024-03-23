@@ -60,9 +60,22 @@ class EncoderWrapper(nn.Module):
         for param in self.model.parameters():
             param.requires_grad = False
 
+        layers = []
+        for name, _ in self.model.named_parameters():
+            layers.append(name)
+        print(f"Layers in the model {args.hf_model_checkpoint}: ", len(layers))
+
         if pet_config is not None:
             print("Adding PET moduels.")
             self.model = get_peft_model(self.model, pet_config)
+
+            layers = []
+            for name, _ in self.model.named_parameters():
+                layers.append(name)
+            print(
+                f"Layers in the model with PETF modules of {args.hf_model_checkpoint}: ",
+                len(layers),
+            )
 
         if args.num_mlp == 1:
             self.mlp = nn.Sequential(nn.Linear(self.num_features, self.args.moco_dim))
@@ -172,23 +185,34 @@ class FSCILencoder(nn.Module):
         ]
 
         # print the parameters with learning rate
-        lr_dict = {}
-        lr_dict[args.lr_base] = [
-            n
-            for n, p in self.encoder_q.named_parameters()
-            if pet_name in n or n.startswith("classifier")
-        ]
-        lr_dict[args.lr_base * args.encoder_lr_factor] = [
+        lr_dict = {
+            args.lr_base: [
+                n
+                for n, p in self.encoder_q.named_parameters()
+                if pet_name in n or n.startswith("classifier")
+            ],
+        }
+        encoder_params = [
             n
             for n, p in self.encoder_q.named_parameters()
             if pet_name not in n and not n.startswith("classifier")
         ]
-        total_layers = 0
+        if args.encoder_lr_factor == 1:
+            lr_dict[args.lr_base].extend(encoder_params)
+        else:
+            lr_dict[args.lr_base * args.encoder_lr_factor] = encoder_params
+
+        layers_in_lr_dict = []
         for key, val in lr_dict.items():
-            total_layers += len(val)
+            layers_in_lr_dict.extend(val)
             for v in val:
                 print(v, key)
-        assert total_layers == len(list(self.encoder_q.parameters())), "Layers mismatch"
+
+        parameter_names = [n for n, p in self.encoder_q.named_parameters()]
+        assert len(layers_in_lr_dict) == len(parameter_names), "Layers mismatch"
+        for n in parameter_names:
+            if n not in layers_in_lr_dict:
+                print(n, args.lr_base)
 
     def _get_pet_config(self) -> Optional[Any]:
         """Get the PET configuration.
