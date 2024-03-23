@@ -327,9 +327,24 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
         help="Encoder fine-tuning start layer; -1 means full-tuning; Use large number of freeze the whole network.",
     )
     parser.add_argument("--adapt_blocks", type=int, default=0)
-    parser.add_argument("--encoder_ft_start_epoch", type=int, default=0)
-    parser.add_argument("--encoder_lr_factor", type=float, default=1)
-    parser.add_argument("--limited_base_class", type=int, default=-1)
+    parser.add_argument(
+        "--encoder_ft_start_epoch",
+        type=int,
+        default=0,
+        help="Epoch at which to start fine-tuning the encoder",
+    )
+    parser.add_argument(
+        "--encoder_lr_factor",
+        type=float,
+        default=1,
+        help="Factor to scale the pre-trained encoder learning rate",
+    )
+    parser.add_argument(
+        "--limited_base_class",
+        type=int,
+        default=-1,
+        help="Number of base classes to use for FSCIT",
+    )
     parser.add_argument(
         "--limited_base_samples",
         type=float,
