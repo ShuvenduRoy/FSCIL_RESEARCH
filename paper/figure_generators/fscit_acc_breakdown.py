@@ -5,6 +5,8 @@ from typing import Any, Dict, List
 import matplotlib.pyplot as plt
 import numpy as np
 
+from utils.constants import colors
+
 
 def plot_fscit_acc_breakdown(accuracies: dict, methods_on_x: bool = False) -> None:
     """Generate plot with base and novel accuracy breakdown for FSCIT."""
@@ -24,15 +26,6 @@ def plot_fscit_acc_breakdown(accuracies: dict, methods_on_x: bool = False) -> No
     for key in accuracies:
         accuracies[key] = [round(x, 1) for x in accuracies[key]]
 
-    colors = [
-        "#91c5da",
-        "#4692c4",
-        "#f2a484",
-        "#ff7f0e",
-        "#ffb347",
-        "#ffbb78",
-        "#ffebd4",
-    ]
     alphas = [1] * len(colors)
 
     x = np.arange(len(class_group))  # the label locations

@@ -1,6 +1,6 @@
 """Script for extracting resullts."""
 
-from typing import List, Optional
+from typing import Any, List, Optional
 
 import pandas as pd
 
@@ -16,8 +16,10 @@ def load_tsv(file_path: str) -> pd.DataFrame:
 def load_results(
     exp_suffix: str,
     search_key: str,
-    datsets: Optional[List] = None,
+    datasets: Optional[List] = None,
     result_keys: List[str] = ["all_last"],  # noqa B006
+    filter_key: Optional[List[Any]] = None,
+    filter_value: Optional[List[Any]] = None,
 ) -> pd.DataFrame:
     """Load results.
 
@@ -33,12 +35,15 @@ def load_results(
         if None, then all the datasets will be loaded.
 
     """
-    datasets = datsets or sorted(num_classes.keys())
+    datasets = datasets or sorted(num_classes.keys())
     results = {}  # type: ignore
     for dataset in datasets:
         results[dataset] = {}
         file_path = f"results/{dataset}_{exp_suffix}.tsv"
         result = load_tsv(file_path)
+        if filter_key is not None:
+            for key, value in zip(filter_key, filter_value):  # type: ignore
+                result = result[result[key] == value]
         groups = result.groupby(search_key)
         for name, group in groups:
             results[dataset][name] = {}

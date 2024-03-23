@@ -1,5 +1,15 @@
 """Constants used in the code."""
 
+colors = [
+    "#91c5da",
+    "#4692c4",
+    "#f2a484",
+    "#ff7f0e",
+    "#ffb347",
+    "#ffbb78",
+    "#ffebd4",
+]
+
 dataset_name_acronym = {
     "caltech101": "CAL101",
     "cifar100": "CI100",
