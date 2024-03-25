@@ -11,6 +11,7 @@ from losses.contrastive import SupConLoss
 from methods.helper import (
     base_train_one_epoch,
     get_optimizer_base,
+    inc_train_one_epoch,
     replace_fc_with_prototypes,
     test,
 )
@@ -253,7 +254,19 @@ class FSCITTrainer:
                     self.args,
                     self.device_id,
                 )
-
+                for epoch in range(self.args.epochs_incremental):
+                    inc_train_one_epoch(
+                        model=self.model,
+                        model_base=self.base_model,
+                        model_pretrained=self.pre_trained_model,
+                        trainloader=trainloader,
+                        criterion=self.criterion,
+                        optimizer=self.optimizer,
+                        scheduler=self.scheduler,
+                        epoch=epoch,
+                        args=self.args,
+                        device_id=self.device_id,
+                    )
                 base_acc, inc_acc, all_acc = test(
                     model=self.model,
                     testloader=testloader,

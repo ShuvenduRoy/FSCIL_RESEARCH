@@ -330,6 +330,108 @@ def base_train_one_epoch(
         ta.add(acc)
 
 
+def inc_train_one_epoch(
+    model: Any,
+    model_base: Any,
+    model_pretrained: Any,
+    trainloader: Any,
+    criterion: nn.Module,
+    optimizer: Any,
+    scheduler: Any,
+    epoch: int,
+    args: argparse.Namespace,
+    device_id: Any,
+) -> None:
+    """One epoch of training of the model.
+
+    Parameters
+    ----------
+    model: nn.Module
+        The model to train
+    model_base: nn.Module
+        The model after training on base classes
+    model_pretrained: nn.Module
+        The original pre-trained model
+    trainloader: Any
+        Dataloader for training
+    criterion: nn.Module
+        Loss function
+    optimizer: Any
+        Model optimizer
+    scheduler: Any
+        LR scheduler
+    epoch: int
+        Current training epoch
+    args: argparse.Namespace
+        Training arguments
+    device_id: Any
+        Device id
+
+    Returns
+    -------
+    None
+    """
+    tl = Averager()
+    tl_ce = Averager()
+    tl_moco = Averager()
+    ta = Averager()
+
+    model = model.train()
+    tqdm_gen = tqdm(trainloader)
+
+    for _, batch in enumerate(tqdm_gen, 1):
+        images, labels = batch["image"], batch["label"]
+        labels = labels.long()
+        if torch.cuda.is_available():
+            for i in range(len(images)):
+                images[i] = images[i].cuda(non_blocking=True)
+            labels = labels.cuda(non_blocking=True)
+
+        # model foward pass
+        logits, embedding_q, _ = model(images[:-1], images[-1], labels)
+        logits_base, _, embedding_k_b = model_base(images[:-1], images[-1], labels)
+        _, _, embedding_k_p = model_pretrained(images[:-1], images[-1], labels)
+        features = torch.cat(
+            [embedding_q, embedding_k_b, embedding_k_p],
+            dim=1,
+        )
+
+        # calculate the loss
+        moco_loss = criterion(features, labels)  # supcon loss
+        ce_loss = F.cross_entropy(logits, labels)
+        consistency_loss = F.mse_loss(logits, logits_base)
+        loss = (
+            args.ce_loss_factor * ce_loss
+            + args.moco_loss_factor * moco_loss
+            + args.consistency_loss_factor * consistency_loss
+        )
+        if torch.isnan(loss):
+            raise Exception("Loss is NaN")
+
+        # update the model
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+        # print the loss and accuracy
+        acc = count_acc(logits.detach(), labels)
+        lrc = scheduler.get_last_lr()[0]
+        tqdm_gen.set_description(
+            "Session 0, epo {}, lrc={:.4f}, total loss={:.4f} moco loss={:.4f} ce loss={:.4f} acc={:.4f}".format(
+                epoch,
+                lrc,
+                loss.item(),
+                moco_loss.item(),
+                ce_loss.item(),
+                acc,
+            ),
+        )
+        tl.add(loss.item())
+        tl_moco.add(moco_loss.item())
+        tl_ce.add(ce_loss.item())
+        ta.add(acc)
+
+
 def replace_fc_with_prototypes(
     prototype_loader: Any,
     model: Any,

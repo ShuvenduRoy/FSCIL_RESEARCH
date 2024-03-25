@@ -287,13 +287,24 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
         default=False,
         help="incrmental finetuning",
     )
-
     parser.add_argument(
         "--incft_layers",
         type=str,
         default="classifier",
         choices=["classifier", "pet", "classifier+pet"],
         help="layers to be fine-tuned in incremental fine-tuning",
+    )
+    parser.add_argument(
+        "--epochs_incremental",
+        type=int,
+        default=1,
+        help="number of epochs for incremental fine-tuning",
+    )
+    parser.add_argument(
+        "--consistency_loss_factor",
+        type=float,
+        default=1.0,
+        help="coefficient of the consistency loss; disabled by default",
     )
 
     # test configs
