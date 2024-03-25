@@ -62,6 +62,7 @@ class FSCITTrainer:
         if torch.cuda.is_available():
             self.model = self.model.cuda()
             self.criterion = self.criterion.cuda()
+            self.pre_trained_model = self.pre_trained_model.cuda()
 
     def adjust_learnable_parameters(  # noqa: PLR0912
         self,
