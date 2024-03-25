@@ -62,3 +62,35 @@ def load_results(
                 results[dataset][name][result_key] = group[result_key][select_id]
 
     return results
+
+
+def extract_best_config(exp_name: str) -> None:
+    """Extract best configuration."""
+    datasets = sorted(num_classes.keys())
+    results = {}  # type: ignore
+
+    for dataset in datasets:
+        file_path = f"results/{dataset}_{exp_name}.tsv"
+        result = load_tsv(file_path)
+        # remove columns that have same values in all rows
+        result = result.loc[:, (result != result.iloc[0]).any()]
+        result = result[result["all_last"] == result["all_last"].max()]
+        result = result.drop(
+            columns=[
+                "base_last",
+                "all_last",
+                "all",
+                "all_std",
+                "incremental_last",
+                "all_std_last",
+                "base",
+                "incremental",
+            ],
+        )
+        # convert to dictionary
+        results[dataset] = result.to_dict("records")[0]
+    print(results)
+
+
+if __name__ == "__main__":
+    extract_best_config("FSCIT_contrast_and_calibration_3")

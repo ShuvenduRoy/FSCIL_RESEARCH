@@ -131,3 +131,102 @@ fscit_ways = {
     "cub200": 20,
     "mini_imagenet": 10,
 }
+
+dataset_specific_configs = {
+    "caltech101": {
+        "lr_base": 0.1,
+        "encoder_ft_start_layer": 6,
+        "encoder_ft_start_epoch": 0,
+        "encoder_lr_factor": 0.1,
+    },
+    "cifar100": {
+        "lr_base": 0.1,
+        "encoder_ft_start_layer": 9,
+        "encoder_ft_start_epoch": 0,
+        "encoder_lr_factor": 0.001,
+    },
+    "country211": {
+        "lr_base": 0.5,
+        "encoder_ft_start_layer": 6,
+        "encoder_ft_start_epoch": 10,
+        "encoder_lr_factor": 0.01,
+    },
+    "cub200": {
+        "lr_base": 0.1,
+        "encoder_ft_start_layer": 6,
+        "encoder_ft_start_epoch": 25,
+        "encoder_lr_factor": 0.1,
+    },
+    "dtd": {
+        "lr_base": 0.5,
+        "encoder_ft_start_layer": -1,
+        "encoder_ft_start_epoch": 10,
+        "encoder_lr_factor": 0.1,
+    },
+    "eurosat": {
+        "lr_base": 0.5,
+        "encoder_ft_start_layer": -1,
+        "encoder_ft_start_epoch": 10,
+        "encoder_lr_factor": 0.01,
+    },
+    "fgvc_aircraft": {
+        "lr_base": 0.1,
+        "encoder_ft_start_layer": 11,
+        "encoder_ft_start_epoch": 0,
+        "encoder_lr_factor": 0.1,
+    },
+    "food101": {
+        "lr_base": 0.5,
+        "encoder_ft_start_layer": 11,
+        "encoder_ft_start_epoch": 10,
+        "encoder_lr_factor": 1.0,
+    },
+    "gtsrb": {
+        "lr_base": 0.1,
+        "encoder_ft_start_layer": 6,
+        "encoder_ft_start_epoch": 0,
+        "encoder_lr_factor": 0.1,
+    },
+    "mini_imagenet": {
+        "lr_base": 0.1,
+        "encoder_ft_start_layer": 3,
+        "encoder_ft_start_epoch": 25,
+        "encoder_lr_factor": 0.5,
+    },
+    "oxford_flowers": {
+        "lr_base": 0.5,
+        "encoder_ft_start_layer": -1,
+        "encoder_ft_start_epoch": 0,
+        "encoder_lr_factor": 0.01,
+    },
+    "oxford_pets": {
+        "lr_base": 0.1,
+        "encoder_ft_start_layer": 11,
+        "encoder_ft_start_epoch": 25,
+        "encoder_lr_factor": 0.5,
+    },
+    "resisc45": {
+        "lr_base": 0.1,
+        "encoder_ft_start_layer": 3,
+        "encoder_ft_start_epoch": 0,
+        "encoder_lr_factor": 0.1,
+    },
+    "stanford_cars": {
+        "lr_base": 0.1,
+        "encoder_ft_start_layer": -1,
+        "encoder_ft_start_epoch": 0,
+        "encoder_lr_factor": 0.01,
+    },
+    "sun397": {
+        "lr_base": 0.1,
+        "encoder_ft_start_layer": 11,
+        "encoder_ft_start_epoch": 10,
+        "encoder_lr_factor": 0.01,
+    },
+    "voc2007": {
+        "lr_base": 0.1,
+        "encoder_ft_start_layer": 3,
+        "encoder_ft_start_epoch": 25,
+        "encoder_lr_factor": 0.1,
+    },
+}

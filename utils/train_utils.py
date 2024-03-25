@@ -12,6 +12,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 from utils.constants import (
     dataset_roots,
+    dataset_specific_configs,
     fscil_base_classes,
     fscil_ways,
     fscit_base_classes,
@@ -89,6 +90,8 @@ def get_dataset_configs(args: argparse.Namespace) -> argparse.Namespace:
     args.dataroot = dataset_roots.get(args.dataset, "./data")
     args.num_classes = num_classes[args.dataset]
     args.sessions = ((args.num_classes - args.base_class) // args.way) + 1
+    for key, value in dataset_specific_configs.get(args.dataset, {}).items():
+        setattr(args, key, value)
 
     return args
 
