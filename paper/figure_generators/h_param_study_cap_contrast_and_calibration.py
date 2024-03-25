@@ -47,7 +47,7 @@ def h_param_study_cap_contrast_and_calibration() -> None:  # noqa: PLR0915, PLR0
             label=attribute,
             color=colors[multiplier],
         )
-        axs[0].bar_label(rects, padding=3, label_type="edge", rotation=60)
+        axs[0].bar_label(rects, padding=3, label_type="edge", rotation=90)
 
     # Add some text for labels, title and custom x-axis tick labels, etc.
     axs[0].set_ylabel("Average Acc.")
@@ -97,7 +97,7 @@ def h_param_study_cap_contrast_and_calibration() -> None:  # noqa: PLR0915, PLR0
             label=attribute,
             color=colors[multiplier],
         )
-        axs[sub_plot].bar_label(rects, padding=3, label_type="edge", rotation=60)
+        axs[sub_plot].bar_label(rects, padding=3, label_type="edge", rotation=90)
 
     # Add some text for labels, title and custom x-axis tick labels, etc.
     axs[sub_plot].set_ylabel("Average Acc.")
@@ -148,7 +148,7 @@ def h_param_study_cap_contrast_and_calibration() -> None:  # noqa: PLR0915, PLR0
             label=attribute,
             color=colors[multiplier],
         )
-        axs[sub_plot].bar_label(rects, padding=3, label_type="edge", rotation=60)
+        axs[sub_plot].bar_label(rects, padding=3, label_type="edge", rotation=90)
 
     # Add some text for labels, title and custom x-axis tick labels, etc.
     axs[sub_plot].set_ylabel("Average Acc.")
@@ -198,7 +198,7 @@ def h_param_study_cap_contrast_and_calibration() -> None:  # noqa: PLR0915, PLR0
             label=attribute,
             color=colors[multiplier],
         )
-        axs[sub_plot].bar_label(rects, padding=3, label_type="edge", rotation=60)
+        axs[sub_plot].bar_label(rects, padding=3, label_type="edge", rotation=90)
 
     # Add some text for labels, title and custom x-axis tick labels, etc.
     axs[sub_plot].set_ylabel("Average Acc.")
