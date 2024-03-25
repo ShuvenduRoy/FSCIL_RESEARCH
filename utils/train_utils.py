@@ -288,6 +288,14 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
         help="incrmental finetuning",
     )
 
+    parser.add_argument(
+        "--incft_layers",
+        type=str,
+        default="classifier",
+        choices=["classifier", "pet", "classifier+pet"],
+        help="layers to be fine-tuned in incremental fine-tuning",
+    )
+
     # test configs
     parser.add_argument("--test_batch_size", type=int, default=100)
     parser.add_argument(
@@ -315,12 +323,6 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
         choices=[None, "Prefix", "Adapter", "LoRA"],
     )
     parser.add_argument("--rank", type=int, default=5)
-    parser.add_argument(
-        "--pet_tuning_start_epoch",
-        type=int,
-        default=0,
-        help="PET tuning start epoch, by defeault (0) starts from the beginning of training.",
-    )
 
     # FSCIT configs
     parser.add_argument(

@@ -241,7 +241,7 @@ def test(  # noqa: PLR0915
     )
 
 
-def train_one_epoch(
+def base_train_one_epoch(
     model: Any,
     trainloader: Any,
     criterion: nn.Module,

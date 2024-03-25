@@ -9,10 +9,10 @@ import torch
 from dataloaders.helpter import get_dataloader
 from losses.contrastive import SupConLoss
 from methods.helper import (
+    base_train_one_epoch,
     get_optimizer_base,
     replace_fc_with_prototypes,
     test,
-    train_one_epoch,
 )
 from models.encoder import FSCILencoder, print_trainable_parameters
 from utils.train_utils import ensure_path
@@ -52,6 +52,7 @@ class FSCITTrainer:
 
         # initialize model
         self.model = FSCILencoder(args)
+        self.pre_trained_model = deepcopy(self.model)
         self.criterion = SupConLoss()
         self.optimizer, self.scheduler = get_optimizer_base(self.model, self.args)
         self.device_id = None
@@ -61,7 +62,11 @@ class FSCITTrainer:
             self.model = self.model.cuda()
             self.criterion = self.criterion.cuda()
 
-    def adjust_learnable_parameters(self, session: int, epoch: int) -> None:
+    def adjust_learnable_parameters(  # noqa: PLR0912
+        self,
+        session: int,
+        epoch: int,
+    ) -> None:
         """Adjust the learnable parameters base of config and current step.
 
         Parameters
@@ -106,15 +111,22 @@ class FSCITTrainer:
 
                 print_trainable_parameters(self.model.encoder_q)
 
-            if epoch == self.args.pet_tuning_start_epoch:
-                # Fine-tune the PET layer
-                pass  # TODO handle PET tuning
-
         # handle trainable parameters for incremental sessions
-        else:
-            pass
-            # Tune params as defined in config # TODO handle what to tune in the inc
-            # TODO:FEAT: print all if something changes
+        elif self.args.incft:
+            if "pet" in self.args.incft_layers:
+                for name, param in self.model.encoder_q.named_parameters():
+                    if self.args.pet_cls.lower() in name:
+                        param.requires_grad = True
+            if "classifier" in self.args.incft_layers:
+                for param in self.model.encoder_q.classifier.parameters():
+                    param.requires_grad = True
+            for name, param in self.model.encoder_q.named_parameters():
+                print(
+                    "ecnoder_q @session {} @epoch {},".format(session, epoch),
+                    name,
+                    param.requires_grad,
+                )
+            print_trainable_parameters(self.model.encoder_q)
 
     def update_matrix(self, accuracies: Tuple, session: int) -> None:
         """Update the accuracy matrix.
@@ -175,7 +187,7 @@ class FSCITTrainer:
                     self.adjust_learnable_parameters(session, epoch)
 
                     # train and test
-                    train_one_epoch(
+                    base_train_one_epoch(
                         model=self.model,
                         trainloader=trainloader,
                         criterion=self.criterion,
@@ -225,7 +237,15 @@ class FSCITTrainer:
 
                     self.update_matrix((base_acc, inc_acc, all_acc), session)
 
+                # make a copy of the base session for dual consistency learning
+                self.base_model = deepcopy(self.model)
+
+                # By default, turn off the learnable parameters of the model
+                for param in self.model.parameters():
+                    param.requires_grad = False
+
             else:
+                self.adjust_learnable_parameters(session, 0)
                 print("Replacing inc. classifier weight with prototypes...")
                 replace_fc_with_prototypes(
                     prototype_loader,
@@ -233,6 +253,7 @@ class FSCITTrainer:
                     self.args,
                     self.device_id,
                 )
+
                 base_acc, inc_acc, all_acc = test(
                     model=self.model,
                     testloader=testloader,
