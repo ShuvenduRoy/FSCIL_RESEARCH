@@ -28,7 +28,7 @@ parameters:
     value: 2
   pet_cls:
     value: LoRA
-  inc_ft:
+  incft:
     value: True
   incft_layers:
     values: [classifier, pet, classifier+pet]
