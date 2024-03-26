@@ -9,6 +9,7 @@ def ablation_table_generator() -> None:
     results_dict_list = []
     results_name_list = []
 
+    # cap contrast only
     results_cap_contrast_only = load_results(
         "FSCIT_cap_contrast_only_3",
         search_key="hf_model_checkpoint",
@@ -17,6 +18,7 @@ def ablation_table_generator() -> None:
     results_dict_list.append(results_cap_contrast_only)
     results_name_list.append("\\cmark & \\xmark & \\xmark")
 
+    # contrast and calibration
     results_contrast_and_calibration = load_results(
         "FSCIT_contrast_and_calibration_3",
         search_key="hf_model_checkpoint",
@@ -25,6 +27,16 @@ def ablation_table_generator() -> None:
     results_dict_list.append(results_contrast_and_calibration)
     results_name_list.append("\\cmark & \\cmark & \\xmark")
 
+    # contrast, calibration, and incft
+    results_contrast_and_calibration = load_results(
+        "FSCIT_cap_incft_3",
+        search_key="hf_model_checkpoint",
+        result_keys=["all_last", "all"],
+    )
+    results_dict_list.append(results_contrast_and_calibration)
+    results_name_list.append("\\cmark & \\cmark & \\cmark")
+
+    # baseline
     results_prototype = load_results(
         "FSCIT__baseline",
         search_key="hf_model_checkpoint",
