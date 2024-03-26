@@ -401,7 +401,7 @@ def inc_train_one_epoch(
         ce_loss = F.cross_entropy(logits, labels)
         consistency_loss = F.mse_loss(logits, logits_base)
         loss = (
-            args.ce_loss_factor * ce_loss
+            args.ce_loss_factor_incft * ce_loss
             + args.moco_loss_factor * moco_loss
             + args.consistency_loss_factor * consistency_loss
         )

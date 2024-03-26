@@ -216,6 +216,7 @@ class FSCITTrainer:
 
                     self.update_matrix((base_acc, inc_acc, all_acc), session)
 
+                # --- END OF BASE SESSION ---
                 # load the best saved model for the base session
                 self.model.load_state_dict(self.best_model_dict)
 
@@ -245,6 +246,20 @@ class FSCITTrainer:
                 # By default, turn off the learnable parameters of the model
                 for param in self.model.parameters():
                     param.requires_grad = False
+
+                # reset the optimizer with lr = lr * 0.01
+                self.model.params_with_lr = [
+                    {
+                        "params": [
+                            p for n, p in self.model.encoder_q.named_parameters()
+                        ],
+                        "lr": self.args.lr_base * self.args.inc_ft_lr_factor,
+                    },
+                ]
+                self.optimizer, _ = get_optimizer_base(
+                    self.model,
+                    self.args,
+                )
 
             else:
                 self.adjust_learnable_parameters(session, 0)

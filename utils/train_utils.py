@@ -242,6 +242,12 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
         default=2,
         help="number of views for contrastive learning",
     )
+    parser.add_argument(
+        "--ce_loss_factor_incft",
+        type=float,
+        default=1.0,
+        help="coefficient of the cross-entropy loss for incremental fine-tuning",
+    )
 
     # model config
     parser.add_argument(
@@ -305,6 +311,12 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
         type=float,
         default=1.0,
         help="coefficient of the consistency loss; disabled by default",
+    )
+    parser.add_argument(
+        "--inc_ft_lr_factor",
+        type=float,
+        default=1.0,
+        help="Factor to scale the incremental fine-tuning learning rate",
     )
 
     # test configs
