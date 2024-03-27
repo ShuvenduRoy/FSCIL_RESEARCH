@@ -66,11 +66,18 @@ class MiniImagenetDataset:
         classes_at_current_session = get_session_classes(args, session)
 
         if train:  # few-shot training samples
-            sample_ids = get_few_shot_samples_indices_per_class(
-                "mini_imagenet",
-                classes_at_current_session,
-                args.shot,
-            )
+            if self.args.fsl_setup == "FSCIT":
+                sample_ids = get_few_shot_samples_indices_per_class(
+                    "mini_imagenet",
+                    classes_at_current_session,
+                    args.shot,
+                )
+            else:
+                sample_ids = [
+                    i
+                    for i, label in enumerate(self.labels)
+                    if label in classes_at_current_session
+                ]
         else:  # validation; all samples of the classes till curr session
             sample_ids = [
                 i

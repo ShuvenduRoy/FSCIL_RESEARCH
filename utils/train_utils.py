@@ -283,7 +283,9 @@ def get_command_line_parser() -> argparse.ArgumentParser:  # noqa: PLR0915
         type=str,
         default="FSCIT",
         choices=["FSCIT", "FSCIL"],
-        help="Few-shot learning setup, FSCIL comes with large base, while FSCIT is n-way k-shot base setting; Only 3 datasets support FSCIL that are reported by exising literaure: CIFAR-100, CUB-200, and miniImageNet.",
+        help="Few-shot learning setup, FSCIL comes with large base, while FSCIT"
+        " is n-way k-shot base setting; Only 3 datasets support FSCIL that are "
+        "reported by exising literaure: CIFAR-100, CUB-200, and miniImageNet.",
     )
 
     # incremental fine-tune configs
