@@ -96,6 +96,17 @@ def get_lora_args() -> argparse.Namespace:
     return args
 
 
+def get_cifar_fscit_args() -> argparse.Namespace:
+    """Get default arguments for the tests."""
+    args = get_default_args()
+    args.fsl_setup = "FSCIT"
+    args = get_dataset_configs(args)
+    args = override_training_configs(args)
+    sanity_check(args)
+
+    return args
+
+
 def get_10way_10shot_args() -> argparse.Namespace:
     """Get default arguments for the tests."""
     args = get_default_args()

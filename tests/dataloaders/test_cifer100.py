@@ -7,7 +7,7 @@ import pytest
 import torch
 
 from dataloaders.helpter import get_dataloader
-from tests.helper import get_default_args
+from tests.helper import get_cifar_fscit_args, get_default_args
 
 
 torch.manual_seed(42)
@@ -17,6 +17,7 @@ torch.manual_seed(42)
     "args",
     [
         (get_default_args()),
+        (get_cifar_fscit_args()),
     ],
 )
 def test_facil_encoder(args: Any) -> None:
@@ -24,12 +25,14 @@ def test_facil_encoder(args: Any) -> None:
     # Test base session data loader
     train_set, trainloader, testloader = get_dataloader(args, 0)
     train_set = train_set.dataset
-    assert len(train_set) == args.base_class * args.shot
-    assert len(trainloader) == np.ceil(
-        args.base_class * args.shot / args.batch_size_base,
-    )
-    assert len(testloader) == np.ceil(6000 / args.test_batch_size)
-
+    if args.fsl_setup == "FSCIL":
+        assert len(train_set) == 30000
+        assert len(testloader) == np.ceil(6000 / args.test_batch_size)
+    else:
+        assert len(train_set) == args.base_class * args.shot
+        assert len(trainloader) == np.ceil(
+            args.base_class * args.shot / args.batch_size_base,
+        )
     data = next(iter(trainloader))
     images, labels = data["image"], data["label"]
     assert images[0].shape == (
@@ -42,11 +45,14 @@ def test_facil_encoder(args: Any) -> None:
 
     train_set, trainloader, testloader = get_dataloader(args, 1)
     train_set = train_set.dataset
-    assert len(train_set) == 25
-    assert len(trainloader) == np.ceil(25 / args.batch_size_base)
-    assert len(testloader) == np.ceil(
-        100 * (args.base_class + args.shot) / args.test_batch_size,
-    )
+
+    if args.fsl_setup == "FSCIT":
+        assert len(trainloader) == np.ceil(50 / args.batch_size_base)
+        assert len(testloader.dataset) == 2000
+    else:
+        assert len(train_set) == 2500
+        assert len(testloader.dataset) == 6500
 
 
+test_facil_encoder(get_cifar_fscit_args())
 test_facil_encoder(get_default_args())
