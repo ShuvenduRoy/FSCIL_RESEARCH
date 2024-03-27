@@ -93,4 +93,4 @@ def extract_best_config(exp_name: str) -> None:
 
 
 if __name__ == "__main__":
-    extract_best_config("FSCIT_contrast_and_calibration_3")
+    extract_best_config("FSCIT_cap_incft_3")

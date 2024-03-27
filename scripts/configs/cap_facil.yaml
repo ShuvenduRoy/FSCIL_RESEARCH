@@ -1,0 +1,52 @@
+program: train.py
+method: grid
+project: FSCIT
+name: baseline
+metric:
+  goal: maximize
+  name: session_max_acc
+parameters:
+  exp_name:
+    value: cap_incfl
+  fsl_setup:
+    value: FSCIL
+  update_base_classifier_with_prototypes:
+    value: False
+  start_training_with_prototypes:
+    value: True
+  moco_loss_factor:
+    value: 1.0
+  num_seeds:
+    value: 3
+  shot:
+    value: 10
+  result_key:
+    value: cap_incft
+  adapt_blocks:
+    value: 12
+  num_views:
+    value: 2
+  pet_cls:
+    value: LoRA
+  incft:
+    value: True
+  incft_layers:
+    value: classifier+pet
+  inc_ft_lr_factor:
+    value: 1.0
+  ce_loss_factor_incft:
+    value: 1.0
+  lr_base:
+    value: 0.1
+  epochs_base:
+    values: [10, 25, 50]
+  encoder_ft_start_epoch:
+    values: [0, 10, 25]
+  encoder_lr_factor:
+    values: [1.0, 0.1, 0.01]
+  epochs_incremental:
+    values: [3, 5]
+  hf_model_checkpoint:
+    values: [google/vit-base-patch16-224-in21k]
+  dataset:
+    values: [cifar100, cub200, mini_imagenet]

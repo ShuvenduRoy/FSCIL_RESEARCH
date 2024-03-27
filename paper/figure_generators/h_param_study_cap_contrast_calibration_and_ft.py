@@ -207,7 +207,7 @@ def h_param_study_cap_contrast_calibration_and_ft() -> None:  # noqa: PLR0915, P
     axs[sub_plot].spines["top"].set_visible(False)
     axs[sub_plot].spines["right"].set_visible(False)
 
-    plt.savefig("paper/figures/h_param_study_cap_contrast_calibration_cap.pdf")
+    plt.savefig("paper/figures/h_param_study_cap_contrast_calibration_ft.pdf")
 
 
 if __name__ == "__main__":
