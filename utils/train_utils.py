@@ -91,7 +91,7 @@ def get_dataset_configs(args: argparse.Namespace) -> argparse.Namespace:
     args.num_classes = num_classes[args.dataset]
     args.sessions = ((args.num_classes - args.base_class) // args.way) + 1
     for key, value in (
-        dataset_specific_configs[args.fsl_setup].get(args.dataset, {}).items()
+        dataset_specific_configs[args.fsl_setup].get(args.dataset, {}).items()  # type: ignore
     ):
         setattr(args, key, value)
 
